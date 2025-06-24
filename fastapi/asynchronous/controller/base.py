@@ -1,10 +1,10 @@
 # app/controllers/base.py
-from typing import Any, ClassVar, Type
-from fastapi import Body, Depends, HTTPException, status,Request
-from fastapi.asynchronous.service.base import BaseService
-from fastapi.exceptions.api_exceptions import APIException
-from pydantic import BaseModel, ValidationError
+from typing import Any, ClassVar, Dict, List, Optional, Type
+from fastapi import Depends, Request
 
+from app.schemas.response import BasePaginationResponse, BaseResponse
+from ..service.base import BaseService
+from pydantic import BaseModel, TypeAdapter
 
 
 class BaseController:
@@ -19,7 +19,7 @@ class BaseController:
     """
 
     service: BaseService = Depends()
-    schema_out: ClassVar[Type[BaseModel]]
+    schema_class: ClassVar[Type[BaseModel]]
     action: ClassVar[Type[str]] = None
     request: Request
 
@@ -39,32 +39,107 @@ class BaseController:
         else:
             self.action = None
 
-    async def list(
-        self, search: str | None = None, page: int = 1, count: int = 25
-    ):
-        return await self._execute(self.service.list, search, page, count)
+    def get_schema_class(self):
+
+        assert self.schema_class is not None, (
+            "'%s' should either include a `schema_class` attribute, "
+            "or override the `get_serializer_class()` method."
+            % self.__class__.__name__
+        )
+
+        return self.schema_class
+
+    async def check_permissions(self):
+        """
+        Método para validar permisos basado en `self.action` y `self.request`.
+        Por defecto no hace nada (permite todo).
+        Debe ser sobreescrito en controladores hijos para lógica específica.
+        """
+        pass
+
+    async def list(self):
+        params = self._params()
+        items, total = await self.service.list(**params)
+
+        pagination = {
+            "page": params.get("page"),
+            "count": params.get("count"),
+            "total": total,
+        }
+        return self.format_response(data=items, pagination=pagination)
 
     async def retrieve(self, id: str):
-        return await self._execute(self.service.retrieve, id)
+        item = await self.service.retrieve(id)
+        return self.format_response(data=item)
 
     async def create(self, validated_data: Any):
-        # validated_data viene validado por FastAPI
-        result = await self._execute(self.service.create, validated_data)
-        if self.schema_out:
-            return self.schema_out.model_validate(result)
-        return result
+        result = await self.service.create(validated_data)
+        return self.format_response(result, message="Creado exitosamente")
 
     async def update(self, id: str, validated_data: Any):
-        result = await self._execute(self.service.update, id, validated_data)
-        if self.schema_out:
-            return self.schema_out.from_orm(result)
-        return result
+        result = await self.service.update(id, validated_data)
+        return self.format_response(result, message="Actualizado exitosamente")
 
     async def delete(self, id: str):
-        return await self._execute(self.service.delete, id)
+        await self.service.delete(id)
+        return self.format_response(None, message="Eliminado exitosamente")
 
-    async def _execute(self, func, *args):
-        try:
-            return await func(*args)
-        except APIException as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
+    def format_response(
+        self,
+        data: Any,
+        pagination: Optional[Dict[str, Any]] = None,
+        message: Optional[str] = None,
+        status: str = "success",
+    ) -> BaseModel:
+        """
+        Centraliza la creación de respuestas estándar.
+
+        - Si `pagination` es None, devuelve BaseResponse.
+        - Si `pagination` es dict, devuelve BasePaginationResponse.
+        """
+        schema = self.get_schema_class()
+
+        # Si es lista, parseamos con pydantic
+        if isinstance(data, list) and schema:
+            # data_parsed = TypeAdapter(List[schema])
+            adapter = TypeAdapter(List[schema])
+            data_parsed = adapter.validate_python(data)
+        elif schema and data is not None:
+            data_parsed = schema.model_validate(data)
+        else:
+            data_parsed = data
+
+        if pagination:
+            return BasePaginationResponse(
+                data=data_parsed,
+                pagination=pagination,
+                message=message or "Operación exitosa",
+                status=status,
+            )
+        else:
+            return BaseResponse(
+                data=data_parsed,
+                message=message or "Operación exitosa",
+                status=status,
+            )
+
+    def _params(self):
+        query_params = self.request.query_params
+
+        page = int(query_params.get("page", 1))
+        count = int(query_params.get("count", 10))
+        search = query_params.get("search")
+
+        # Extrae los filtros (todo menos paginación y búsqueda)
+        filters = {
+            k: v
+            for k, v in query_params.items()
+            if k not in ["page", "count", "search"]
+        }
+
+        return {
+            "page": page,
+            "count": count,
+            "search": search,
+            "filters": filters,
+        }

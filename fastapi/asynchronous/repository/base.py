@@ -16,19 +16,36 @@ class BaseRepository(ABC, Generic[ModelType]):
 
     model: Type[ModelType]  # Cada repositorio concreto define este atributo
 
-    def build_filter_query(
-        self, search: Optional[str], search_fields: List[str]
+    async def build_filter_query(
+        self,
+        search: Optional[str],
+        search_fields: List[str],
+        filters: dict = None,
     ) -> FindMany[ModelType]:
-        """
-        Construye un FindMany aplicando solo los filtros de búsqueda.
-        """
+        # Search sobre campos configurados
+        exprs = []
         if search and search_fields:
-            exprs = [
-                RegEx(getattr(self.model, field), f".*{search}.*", options="i")
-                for field in search_fields
-            ]
-            return self.model.find(Or(*exprs), fetch_links=True)
-        return self.model.find(fetch_links=True)
+            exprs.append(
+                Or(
+                    *[
+                        RegEx(
+                            getattr(self.model, field),
+                            f".*{search}.*",
+                            options="i",
+                        )
+                        for field in search_fields
+                    ]
+                )
+            )
+
+        # Filtros directos (exactos)
+        for k, v in filters.items():
+            if hasattr(self.model, k):
+                exprs.append(getattr(self.model, k) == v)
+
+        if exprs:
+            return self.model.find(*exprs)
+        return self.model.find()
 
     async def paginate(
         self, query: FindMany[ModelType], page: int, count: int
