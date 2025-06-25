@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from pymongo.errors import DuplicateKeyError
 from beanie.exceptions import DocumentNotFound
 
-from app.exception.api_exceptions import (
+from .api_exceptions import (
     APIException,
     DatabaseIntegrityException,
     ValidationException,
@@ -32,7 +32,9 @@ async def validation_exception_handler(
     raise ValidationException(data=exc.errors())
 
 
-async def duplicate_key_exception_handler(request: Request, exc: DuplicateKeyError):
+async def duplicate_key_exception_handler(
+    request: Request, exc: DuplicateKeyError
+):
     """
     Maneja errores de clave duplicada en MongoDB (índices únicos).
     """
