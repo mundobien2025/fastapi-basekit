@@ -100,11 +100,14 @@ class BaseController:
         schema = self.get_schema_class()
 
         # Si es lista, parseamos con pydantic
-        if isinstance(data, list) and schema:
-            # data_parsed = TypeAdapter(List[schema])
+        if isinstance(data, list):
+            data_dicts = [self.to_dict(item) for item in data]
             adapter = TypeAdapter(List[schema])
-            data_parsed = adapter.validate_python(data)
-        elif schema and data is not None:
+            data_parsed = adapter.validate_python(data_dicts)
+        elif isinstance(data, self.service.repository.model):
+            data_parsed = self.to_dict(data)
+            data_parsed = schema.model_validate(data_parsed)
+        elif isinstance(data, dict):
             data_parsed = schema.model_validate(data)
         else:
             data_parsed = data
@@ -143,3 +146,8 @@ class BaseController:
             "search": search,
             "filters": filters,
         }
+
+    def to_dict(self, obj):
+        if hasattr(obj, "model_dump"):
+            return obj.model_dump()
+        return obj
