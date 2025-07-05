@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Type, Union
 from beanie import DeleteRules, Document
 from beanie.odm.queries.find import FindMany
 from beanie.operators import Or, RegEx
-from motor.motor_asyncio import AsyncIOMotorClientSession
 
 
 class BaseRepository:
@@ -12,9 +11,6 @@ class BaseRepository:
     """
 
     model: Type[Document]  # Cada repositorio concreto define este atributo
-
-    def __init__(self, session: AsyncIOMotorClientSession):
-        self.session = session
 
     async def build_filter_query(
         self,
@@ -42,8 +38,8 @@ class BaseRepository:
                 exprs.append(getattr(self.model, k) == v)
 
         if exprs:
-            return self.model.find(*exprs, session=self.session)
-        return self.model.find(session=self.session)
+            return self.model.find(*exprs)
+        return self.model.find()
 
     async def paginate(
         self, query: FindMany[Document], page: int, count: int
@@ -56,7 +52,8 @@ class BaseRepository:
         self, obj_id: str, fetch_links: bool = False
     ) -> Optional[Document]:
         return await self.model.get(
-            obj_id, fetch_links=fetch_links, session=self.session
+            obj_id,
+            fetch_links=fetch_links,
         )
 
     async def get_by_field(
@@ -68,27 +65,30 @@ class BaseRepository:
             )
         filter_expr = getattr(self.model, field_name) == value
         return await self.model.find_one(
-            filter_expr, fetch_links=fetch_links, session=self.session
+            filter_expr,
+            fetch_links=fetch_links,
         )
 
     async def list_all(self, fetch_links: bool = False) -> List[Document]:
         return await self.model.find_all(
-            fetch_links=fetch_links, session=self.session
+            fetch_links=fetch_links,
         ).to_list()
 
     async def create(self, obj: Union[Document, Dict[str, Any]]) -> Document:
         if isinstance(obj, dict):
             obj = self.model(**obj)
-        await obj.insert(session=self.session)
+        await obj.insert()
         return obj
 
     async def update(self, obj: Document, data: Dict[str, Any]) -> Document:
         for key, value in data.items():
             setattr(obj, key, value)
-        await obj.save(session=self.session)
+        await obj.save()
         return obj
 
     async def delete(
         self, obj: Document, link_rule: DeleteRules = DeleteRules.DELETE_LINKS
     ) -> None:
-        await obj.delete(link_rule=link_rule, session=self.session)
+        await obj.delete(
+            link_rule=link_rule,
+        )
