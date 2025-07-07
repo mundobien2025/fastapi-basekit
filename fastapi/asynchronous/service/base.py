@@ -50,7 +50,10 @@ class BaseService:
         return await self.repository.paginate(query, page, count)
 
     async def create(self, payload: BaseModel) -> Any:
-        data = payload.model_dump()
+        if isinstance(payload, dict):
+            data = payload
+        else:
+            data = payload.model_dump()
         created = await self.repository.create(data)
         return created
 
