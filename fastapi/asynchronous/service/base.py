@@ -6,18 +6,34 @@ from pydantic import BaseModel
 
 
 from ..repository.base import BaseRepository
-from ...exceptions.api_exceptions import NotFoundException
+from ...exceptions.api_exceptions import (
+    NotFoundException,
+    DatabaseIntegrityException,
+)
 
 
 class BaseService:
     repository: BaseRepository
     search_fields: List[str] = []
+    duplicate_check_fields: List[str] = []
 
     def __init__(
         self, repository: BaseRepository, request: Optional[Request] = None
     ):
         self.repository = repository
         self.request = request
+
+    async def _check_duplicate(self, data: Dict[str, Any], fields: List[str]):
+        filters = {f: data[f] for f in fields if f in data}
+        if not filters:
+            return
+
+        existing = await self.repository.get_by_fields(filters)
+        if existing:
+            raise DatabaseIntegrityException(
+                message="Registro ya existe",
+                data=filters,
+            )
 
     def get_filters(
         self,
@@ -55,8 +71,17 @@ class BaseService:
         )
         return await self.repository.paginate(query, page, count)
 
-    async def create(self, payload: BaseModel) -> Any:
+    async def create(
+        self, payload: BaseModel, check_fields: Optional[List[str]] = None
+    ) -> Any:
         data = payload.model_dump()
+        fields = (
+            check_fields
+            if check_fields is not None
+            else self.duplicate_check_fields
+        )
+        if fields:
+            await self._check_duplicate(data, fields)
         created = await self.repository.create(data)
         return created
 

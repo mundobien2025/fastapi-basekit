@@ -69,6 +69,17 @@ class BaseRepository:
             fetch_links=fetch_links,
         )
 
+    async def get_by_fields(
+        self, filters: Dict[str, Any], fetch_links: bool = False
+    ) -> Optional[Document]:
+        exprs = []
+        for field_name, value in filters.items():
+            if hasattr(self.model, field_name):
+                exprs.append(getattr(self.model, field_name) == value)
+        if not exprs:
+            return None
+        return await self.model.find_one(*exprs, fetch_links=fetch_links)
+
     async def list_all(self, fetch_links: bool = False) -> List[Document]:
         return await self.model.find_all(
             fetch_links=fetch_links,
