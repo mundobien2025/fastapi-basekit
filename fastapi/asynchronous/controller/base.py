@@ -2,7 +2,8 @@
 from typing import Any, ClassVar, Dict, List, Optional, Type
 from fastapi import Depends, Request
 
-from app.schemas.response import BasePaginationResponse, BaseResponse
+from ....fastapi.schema.base import BasePaginationResponse, BaseResponse
+
 from ..service.base import BaseService
 from pydantic import BaseModel, TypeAdapter
 

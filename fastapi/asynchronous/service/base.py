@@ -1,17 +1,23 @@
 # app/services/base.py
 from typing import Any, Dict, List, Optional
 
+from fastapi import Request
+from pydantic import BaseModel
+
+
 from ..repository.base import BaseRepository
 from ...exceptions.api_exceptions import NotFoundException
-from pydantic import BaseModel
 
 
 class BaseService:
     repository: BaseRepository
     search_fields: List[str] = []
 
-    def __init__(self, repository: BaseRepository):
+    def __init__(
+        self, repository: BaseRepository, request: Optional[Request] = None
+    ):
         self.repository = repository
+        self.request = request
 
     def get_filters(
         self,
@@ -50,10 +56,7 @@ class BaseService:
         return await self.repository.paginate(query, page, count)
 
     async def create(self, payload: BaseModel) -> Any:
-        if isinstance(payload, dict):
-            data = payload
-        else:
-            data = payload.model_dump()
+        data = payload.model_dump()
         created = await self.repository.create(data)
         return created
 
