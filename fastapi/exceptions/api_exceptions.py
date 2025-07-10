@@ -28,6 +28,9 @@ class APIException(Exception):
         else:
             self.data = data
 
+    def __str__(self):
+        return f"{self.status_code}: {self.message} | {self.data}"
+
 
 # Excepción específica para errores de JWT
 class JWTAuthenticationException(APIException):

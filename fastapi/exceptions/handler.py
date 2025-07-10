@@ -7,13 +7,13 @@ from pydantic import ValidationError
 from pymongo.errors import DuplicateKeyError
 from beanie.exceptions import DocumentNotFound
 
+from ...fastapi.schema.base import BaseResponse
+
 from .api_exceptions import (
     APIException,
     DatabaseIntegrityException,
     ValidationException,
 )
-
-from app.schemas.response import BaseResponse
 
 
 async def api_exception_handler(request: Request, exc: APIException):
