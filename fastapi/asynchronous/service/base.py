@@ -9,9 +9,16 @@ from pydantic import BaseModel
 class BaseService:
     repository: BaseRepository
     search_fields: List[str] = []
+    relations_model: False
 
     def __init__(self, repository: BaseRepository):
         self.repository = repository
+
+    def get_relations_model(self):
+        """
+        Retorna el modelo de relaciones a aplicar en la consulta.
+        """
+        return self.relations_model
 
     def get_filters(
         self,
@@ -29,7 +36,8 @@ class BaseService:
         return filters
 
     async def retrieve(self, id: str) -> Any:  # Retorna ODM
-        obj = await self.repository.get_by_id(id, fetch_links=True)
+        relations = self.get_relations_model()
+        obj = await self.repository.get_by_id(id, fetch_links=relations)
         if not obj:
             raise NotFoundException(f"id={id} no encontrado")
         return obj
@@ -42,10 +50,12 @@ class BaseService:
         filters: Optional[Dict[str, Any]] = None,
     ):
         applied_filters = self.get_filters(filters)
+        relations = self.get_relations_model()
         query = await self.repository.build_filter_query(
             search=search,
             search_fields=self.search_fields,
             filters=applied_filters,
+            fetch_links=relations,
         )
         return await self.repository.paginate(query, page, count)
 
@@ -57,11 +67,12 @@ class BaseService:
         created = await self.repository.create(data)
         return created
 
-    async def update(self, id: str, payload: BaseModel) -> Any:
+    async def update(self, id: str, data: BaseModel) -> Any:
         obj = await self.repository.get_by_id(id, fetch_links=True)
         if not obj:
             raise NotFoundException(f"id={id} no encontrado")
-        data = payload.model_dump(exclude_unset=True)
+        if isinstance(data, BaseModel):
+            data = data.model_dump(exclude_unset=True)
         updated = await self.repository.update(obj, data)
         return updated
 

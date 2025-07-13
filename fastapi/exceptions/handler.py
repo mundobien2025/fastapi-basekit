@@ -88,7 +88,7 @@ async def value_exception_handler(
     response = BaseResponse(
         status="VALUE_ERROR",
         message="Ocurrió un error en uno de los campos",
-        data=error_details,
+        data=str(error_details),
     )
 
     return JSONResponse(

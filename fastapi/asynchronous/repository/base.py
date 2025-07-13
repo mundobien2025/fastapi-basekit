@@ -17,6 +17,7 @@ class BaseRepository:
         search: Optional[str],
         search_fields: List[str],
         filters: dict = None,
+        fetch_links: bool = False,
     ) -> FindMany[Document]:
         exprs = []
         if search and search_fields:
@@ -38,8 +39,8 @@ class BaseRepository:
                 exprs.append(getattr(self.model, k) == v)
 
         if exprs:
-            return self.model.find(*exprs)
-        return self.model.find()
+            return self.model.find(*exprs, fetch_links=fetch_links)
+        return self.model.find(fetch_links=fetch_links)
 
     async def paginate(
         self, query: FindMany[Document], page: int, count: int
@@ -57,7 +58,10 @@ class BaseRepository:
         )
 
     async def get_by_field(
-        self, field_name: str, value: Any, fetch_links: bool = False
+        self,
+        field_name: str,
+        value: Any,
+        fetch_links: bool = False,
     ) -> Optional[Document]:
         if not hasattr(self.model, field_name):
             raise AttributeError(
@@ -69,7 +73,9 @@ class BaseRepository:
             fetch_links=fetch_links,
         )
 
-    async def list_all(self, fetch_links: bool = False) -> List[Document]:
+    async def list_all(
+        self, fetch_links: bool = False
+    ) -> List[Document]:
         return await self.model.find_all(
             fetch_links=fetch_links,
         ).to_list()
