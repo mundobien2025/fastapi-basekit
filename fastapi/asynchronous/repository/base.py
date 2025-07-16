@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
-from beanie import DeleteRules, Document
+from beanie import Document
 from beanie.odm.queries.find import FindMany
 from beanie.operators import Or, RegEx
 
@@ -103,9 +103,5 @@ class BaseRepository:
         await obj.save()
         return obj
 
-    async def delete(
-        self, obj: Document, link_rule: DeleteRules = DeleteRules.DELETE_LINKS
-    ) -> None:
-        await obj.delete(
-            link_rule=link_rule,
-        )
+    async def delete(self, obj: Document) -> None:
+        await obj.delete()
