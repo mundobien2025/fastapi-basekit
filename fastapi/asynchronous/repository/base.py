@@ -1,22 +1,37 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
-from beanie import DeleteRules, Document
+from pydantic import BaseModel
+from beanie import Document
 from beanie.odm.queries.find import FindMany
 from beanie.operators import Or, RegEx
 
 
 class BaseRepository:
-    """
-    CRUD genérico + filtros y paginación para Beanie/MongoDB.
-    """
+    model: Type[Document]
 
-    model: Type[Document]  # Cada repositorio concreto define este atributo
+    def _get_query_kwargs(
+        self,
+        fetch_links: bool = False,
+        nesting_depths_per_field: Optional[Dict[str, int]] = None,
+        projection: Optional[Union[List[str], Type[BaseModel]]] = None,
+    ):
+        kwargs = {
+            "fetch_links": fetch_links,
+            "nesting_depths_per_field": (
+                nesting_depths_per_field if fetch_links else None
+            ),
+        }
+        # Project solo si hay projection
+        if projection is not None:
+            kwargs["projection"] = projection
+        return kwargs
 
     async def build_filter_query(
         self,
         search: Optional[str],
         search_fields: List[str],
         filters: dict = None,
+        **kwargs,
     ) -> FindMany[Document]:
         exprs = []
         if search and search_fields:
@@ -24,22 +39,19 @@ class BaseRepository:
                 Or(
                     *[
                         RegEx(
-                            getattr(self.model, field),
+                            getattr(self.model, f),
                             f".*{search}.*",
                             options="i",
                         )
-                        for field in search_fields
+                        for f in search_fields
                     ]
                 )
             )
-
         for k, v in (filters or {}).items():
             if hasattr(self.model, k):
                 exprs.append(getattr(self.model, k) == v)
-
-        if exprs:
-            return self.model.find(*exprs)
-        return self.model.find()
+        query = self.model.find(*exprs, **self._get_query_kwargs(**kwargs))
+        return query
 
     async def paginate(
         self, query: FindMany[Document], page: int, count: int
@@ -49,41 +61,52 @@ class BaseRepository:
         return items, total
 
     async def get_by_id(
-        self, obj_id: str, fetch_links: bool = False
+        self,
+        obj_id: str,
+        **kwargs,
     ) -> Optional[Document]:
-        return await self.model.get(
-            obj_id,
-            fetch_links=fetch_links,
+        query = self.model.find_one(
+            self.model.id == obj_id, **self._get_query_kwargs(**kwargs)
         )
+        return await query
 
     async def get_by_field(
-        self, field_name: str, value: Any, fetch_links: bool = False
+        self,
+        field_name: str,
+        value: Any,
+        **kwargs,
     ) -> Optional[Document]:
         if not hasattr(self.model, field_name):
             raise AttributeError(
                 f"{self.model.__name__} no tiene el campo '{field_name}'"
             )
-        filter_expr = getattr(self.model, field_name) == value
-        return await self.model.find_one(
-            filter_expr,
-            fetch_links=fetch_links,
+        query = self.model.find_one(
+            getattr(self.model, field_name) == value,
+            **self._get_query_kwargs(**kwargs),
         )
+        return await query
 
     async def get_by_fields(
-        self, filters: Dict[str, Any], fetch_links: bool = False
+        self,
+        filters: Dict[str, Any],
+        **kwargs,
     ) -> Optional[Document]:
-        exprs = []
-        for field_name, value in filters.items():
-            if hasattr(self.model, field_name):
-                exprs.append(getattr(self.model, field_name) == value)
+        exprs = [
+            getattr(self.model, f) == v
+            for f, v in filters.items()
+            if hasattr(self.model, f)
+        ]
         if not exprs:
             return None
-        return await self.model.find_one(*exprs, fetch_links=fetch_links)
+        query = self.model.find_one(*exprs, **self._get_query_kwargs(**kwargs))
+        return await query
 
-    async def list_all(self, fetch_links: bool = False) -> List[Document]:
-        return await self.model.find_all(
-            fetch_links=fetch_links,
-        ).to_list()
+    async def list_all(
+        self,
+        **kwargs,
+    ) -> List[Document]:
+        query = self.model.find_all(**self._get_query_kwargs(**kwargs))
+        return await query.to_list()
 
     async def create(self, obj: Union[Document, Dict[str, Any]]) -> Document:
         if isinstance(obj, dict):
@@ -97,9 +120,5 @@ class BaseRepository:
         await obj.save()
         return obj
 
-    async def delete(
-        self, obj: Document, link_rule: DeleteRules = DeleteRules.DELETE_LINKS
-    ) -> None:
-        await obj.delete(
-            link_rule=link_rule,
-        )
+    async def delete(self, obj: Document) -> None:
+        await obj.delete()
