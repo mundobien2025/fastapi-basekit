@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
+from bson import ObjectId
 from pydantic import BaseModel
 from beanie import Document
 from beanie.odm.queries.find import FindMany
@@ -62,11 +63,15 @@ class BaseRepository:
 
     async def get_by_id(
         self,
-        obj_id: str,
+        obj_id: ObjectId,
         **kwargs,
     ) -> Optional[Document]:
+
+        if not isinstance(obj_id, ObjectId):
+            obj_id = ObjectId(obj_id)
         query = self.model.find_one(
-            self.model.id == obj_id, **self._get_query_kwargs(**kwargs)
+            self.model.id == obj_id,
+            **self._get_query_kwargs(**kwargs),
         )
         return await query
 
