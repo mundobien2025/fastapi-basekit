@@ -16,7 +16,7 @@ class BaseService:
     repository: BaseRepository
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
-    relations_model: False
+    relations_model: False = None
 
     def __init__(
         self, repository: BaseRepository, request: Optional[Request] = None
