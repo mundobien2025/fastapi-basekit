@@ -23,6 +23,10 @@ class BaseService:
     ):
         self.repository = repository
         self.request = request
+        endpoint_func = (
+            self.request.scope.get("endpoint") if self.request else None
+        )
+        self.action = endpoint_func.__name__ if endpoint_func else None
 
     async def _check_duplicate(self, data: Dict[str, Any], fields: List[str]):
         filters = {f: data[f] for f in fields if f in data}
