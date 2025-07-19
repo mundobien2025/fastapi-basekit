@@ -1,5 +1,5 @@
 # app/services/base.py
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import Request
 from pydantic import BaseModel
@@ -16,7 +16,8 @@ class BaseService:
     repository: BaseRepository
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
-    relations_model: False = None
+    kwargs_query: Dict[str, Union[str, int]] = {}
+    action: str = ""
 
     def __init__(
         self, repository: BaseRepository, request: Optional[Request] = None
@@ -40,11 +41,11 @@ class BaseService:
                 data=filters,
             )
 
-    def get_relations_model(self):
+    def get_kwargs_query(self) -> Dict[str, Any]:
         """
-        Retorna el modelo de relaciones a aplicar en la consulta.
+        Construye y retorna un diccionario con los kwargs para la consulta.
         """
-        return self.relations_model
+        return self.kwargs_query
 
     def get_filters(
         self,
@@ -61,9 +62,9 @@ class BaseService:
 
         return filters
 
-    async def retrieve(self, id: str) -> Any:  # Retorna ODM
-        relations = self.get_relations_model()
-        obj = await self.repository.get_by_id(id, fetch_links=relations)
+    async def retrieve(self, id: str):
+        kwargs = self.get_kwargs_query()
+        obj = await self.repository.get_by_id(id, **kwargs)
         if not obj:
             raise NotFoundException(f"id={id} no encontrado")
         return obj
@@ -75,20 +76,23 @@ class BaseService:
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
     ):
+        kwargs = self.get_kwargs_query()
         applied_filters = self.get_filters(filters)
-        relations = self.get_relations_model()
         query = await self.repository.build_filter_query(
             search=search,
             search_fields=self.search_fields,
             filters=applied_filters,
-            fetch_links=relations,
+            **kwargs,
         )
         return await self.repository.paginate(query, page, count)
 
     async def create(
         self, payload: BaseModel, check_fields: Optional[List[str]] = None
     ) -> Any:
-        data = payload.model_dump()
+
+        data = (
+            payload.model_dump() if not isinstance(payload, dict) else payload
+        )
         fields = (
             check_fields
             if check_fields is not None
@@ -97,10 +101,16 @@ class BaseService:
         if fields:
             await self._check_duplicate(data, fields)
         created = await self.repository.create(data)
-        return created
+        kwargs = self.get_kwargs_query()
+        return (
+            await self.repository.get_by_id(created.id, **kwargs)
+            if kwargs
+            else created
+        )
 
     async def update(self, id: str, data: BaseModel) -> Any:
-        obj = await self.repository.get_by_id(id, fetch_links=True)
+        kwargs = self.get_kwargs_query()
+        obj = await self.repository.get_by_id(id, **kwargs)
         if not obj:
             raise NotFoundException(f"id={id} no encontrado")
         if isinstance(data, BaseModel):
@@ -109,7 +119,7 @@ class BaseService:
         return updated
 
     async def delete(self, id: str) -> str:
-        obj = await self.repository.get_by_id(id, fetch_links=True)
+        obj = await self.repository.get_by_id(id)
         if not obj:
             raise NotFoundException(f"id={id} no encontrado")
         await self.repository.delete(obj)
