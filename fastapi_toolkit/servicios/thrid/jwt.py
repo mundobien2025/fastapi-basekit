@@ -1,7 +1,7 @@
 import os
 import time
-from ...fastapi.exceptions.api_exceptions import JWTAuthenticationException
-from ...fastapi.schema.jwt import TokenSchema
+from ...exceptions.api_exceptions import JWTAuthenticationException
+from ...schema.jwt import TokenSchema
 from bson import ObjectId
 
 import jwt

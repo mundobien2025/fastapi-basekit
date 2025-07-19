@@ -3,7 +3,7 @@ from fastapi import Depends, Request
 from pydantic import BaseModel, TypeAdapter
 
 from ..service.base import BaseService
-from ....fastapi.schema.base import BasePaginationResponse, BaseResponse
+from ...schema.base import BasePaginationResponse, BaseResponse
 
 
 class BaseController:

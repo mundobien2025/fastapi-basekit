@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastapi-toolkit"
+version = "0.1.0"
+description = "Utilities and base classes for FastAPI async projects using Beanie ODM"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "Your Name", email = "you@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Framework :: FastAPI",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "fastapi>=0.95",
+    "pydantic>=2",
+    "beanie>=1.20",
+    "pymongo>=4",
+    "pyjwt>=2",
+    "supabase>=1",
+    "aiofiles>=0.7",
+]
+
+[project.urls]
+Homepage = "https://example.com"
