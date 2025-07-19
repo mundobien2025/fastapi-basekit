@@ -13,9 +13,9 @@ pip install fastapi-toolkit
 Import the base classes and extend them in your project:
 
 ```python
-from fastapi_toolkit.asynchronous.service import BaseService
-from fastapi_toolkit.asynchronous.repository import BaseRepository
-from fastapi_toolkit.asynchronous.controller import BaseController
+from fastapi_toolkit.aio.service import BaseService
+from fastapi_toolkit.aio.repository import BaseRepository
+from fastapi_toolkit.aio.controller import BaseController
 ```
 
 These classes are designed to work asynchronously with Beanie models and FastAPI dependency injection.
