@@ -19,6 +19,7 @@ pip install fastapi-restfull
 ## Quickstart
 
 ```python
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -44,6 +45,7 @@ class ItemRepository(BaseRepository):
 # Service
 class ItemService(BaseService):
     repository: ItemRepository
+    search_fields = ["name"]
     duplicate_check_fields = ["name"]
 
 # Controller
@@ -52,10 +54,11 @@ class ItemController(BaseController):
     schema_class = Item
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     client = AsyncIOMotorClient("mongodb://localhost:27017")
     await init_beanie(database=client.db, document_models=[Item])
+    yield
 
 app.add_exception_handler(Exception, api_exception_handler)
 app.add_exception_handler(ValueError, validation_exception_handler)
@@ -81,7 +84,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from slowapi import _rate_limit_exceeded_handler
 
-import sentry_sdk
 
 from app.api.v1.routers import api_router
 
@@ -99,12 +101,6 @@ from app.base.fastapi_restfull.exceptions import (
 )
 
 settings = get_settings()
-
-if settings.SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=settings.SENTRY_DSN,
-        send_default_pii=True,
-    )
 
 
 app = FastAPI(
