@@ -9,7 +9,7 @@ description = "Utilities and base classes for FastAPI async projects using Beani
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-  {name = "Your Name", email = "you@example.com"}
+  {name = "Jerson Moreno", email = "jerson.ml820@hotmail.com"}
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -20,14 +20,13 @@ classifiers = [
 ]
 
 dependencies = [
-    "fastapi>=0.95",
-    "pydantic>=2",
-    "beanie>=1.20",
-    "pymongo>=4",
-    "pyjwt>=2",
-    "supabase>=1",
-    "aiofiles>=0.7",
+    "fastapi>=0.115.0",
+    "beanie>=1.29.0",
+    "pydantic>=2.10.6",
+    "pyjwt>=2.10.1",
+    "supabase>=2.13.0",
+    "aiofiles>=24.1.0",
 ]
 
 [project.urls]
-Homepage = "https://example.com"
+Homepage = "https://github.com/mundobien2025/fastapi-toolkit.git"
