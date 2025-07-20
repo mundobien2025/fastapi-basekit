@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from pymongo.errors import DuplicateKeyError
 from beanie.exceptions import DocumentNotFound
 
-from ...fastapi.schema.base import BaseResponse
+from ..schema.base import BaseResponse
 
 from .api_exceptions import (
     APIException,

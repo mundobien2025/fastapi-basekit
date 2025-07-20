@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastapi-restfull"
+version = "0.1.0"
+description = "Utilities and base classes for FastAPI async projects using Beanie ODM"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  {name = "Jerson Moreno", email = "jerson.ml820@hotmail.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Framework :: FastAPI",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "beanie>=1.29.0",
+    "pydantic>=2.10.6",
+    "pyjwt>=2.10.1",
+    "supabase>=2.13.0",
+    "aiofiles>=24.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mundobien2025/fastapi-restfull.git"
