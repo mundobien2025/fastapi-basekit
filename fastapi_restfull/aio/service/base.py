@@ -1,9 +1,7 @@
-# app/services/base.py
 from typing import Any, Dict, List, Optional, Union
 
 from fastapi import Request
 from pydantic import BaseModel
-
 
 from ..repository.base import BaseRepository
 from ...exceptions.api_exceptions import (
@@ -42,24 +40,13 @@ class BaseService:
             )
 
     def get_kwargs_query(self) -> Dict[str, Any]:
-        """
-        Construye y retorna un diccionario con los kwargs para la consulta.
-        """
         return self.kwargs_query
 
     def get_filters(
         self,
         filters: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """
-        Construye y retorna un diccionario con los filtros a aplicar.
-
-        - Puede ser sobreescrito en servicios hijos para lógica específica.
-        - Permite validar, limpiar o transformar filtros.
-        """
         filters = filters or {}
-        # Aquí puedes agregar lógica común o genérica para todos servicios
-
         return filters
 
     async def retrieve(self, id: str):
@@ -78,7 +65,7 @@ class BaseService:
     ):
         kwargs = self.get_kwargs_query()
         applied_filters = self.get_filters(filters)
-        query = await self.repository.build_filter_query(
+        query = self.repository.build_filter_query(
             search=search,
             search_fields=self.search_fields,
             filters=applied_filters,
@@ -89,7 +76,6 @@ class BaseService:
     async def create(
         self, payload: BaseModel, check_fields: Optional[List[str]] = None
     ) -> Any:
-
         data = (
             payload.model_dump() if not isinstance(payload, dict) else payload
         )
