@@ -21,7 +21,7 @@ classifiers = [
 
 dependencies = [
     "fastapi>=0.115.0",
-    "beanie>=1.29.0",
+    "beanie>=2.0.0",
     "pydantic>=2.10.6",
     "pyjwt>=2.10.1",
     "supabase>=2.13.0",

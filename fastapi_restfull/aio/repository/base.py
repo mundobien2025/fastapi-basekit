@@ -22,12 +22,11 @@ class BaseRepository:
                 nesting_depths_per_field if fetch_links else None
             ),
         }
-        # Project solo si hay projection
         if projection is not None:
             kwargs["projection"] = projection
         return kwargs
 
-    async def build_filter_query(
+    def build_filter_query(
         self,
         search: Optional[str],
         search_fields: List[str],
@@ -35,6 +34,7 @@ class BaseRepository:
         **kwargs,
     ) -> FindMany[Document]:
         exprs = []
+
         if search and search_fields:
             exprs.append(
                 Or(
@@ -48,9 +48,11 @@ class BaseRepository:
                     ]
                 )
             )
+
         for k, v in (filters or {}).items():
             if hasattr(self.model, k):
                 exprs.append(getattr(self.model, k) == v)
+
         query = self.model.find(*exprs, **self._get_query_kwargs(**kwargs))
         return query
 
@@ -63,17 +65,15 @@ class BaseRepository:
 
     async def get_by_id(
         self,
-        obj_id: ObjectId,
+        obj_id: Union[str, ObjectId],
         **kwargs,
     ) -> Optional[Document]:
-
         if not isinstance(obj_id, ObjectId):
             obj_id = ObjectId(obj_id)
-        query = self.model.find_one(
+        return await self.model.find_one(
             self.model.id == obj_id,
             **self._get_query_kwargs(**kwargs),
         )
-        return await query
 
     async def get_by_field(
         self,
@@ -85,11 +85,10 @@ class BaseRepository:
             raise AttributeError(
                 f"{self.model.__name__} no tiene el campo '{field_name}'"
             )
-        query = self.model.find_one(
+        return await self.model.find_one(
             getattr(self.model, field_name) == value,
             **self._get_query_kwargs(**kwargs),
         )
-        return await query
 
     async def get_by_fields(
         self,
@@ -103,8 +102,9 @@ class BaseRepository:
         ]
         if not exprs:
             return None
-        query = self.model.find_one(*exprs, **self._get_query_kwargs(**kwargs))
-        return await query
+        return await self.model.find_one(
+            *exprs, **self._get_query_kwargs(**kwargs)
+        )
 
     async def list_all(
         self,
