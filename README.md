@@ -22,7 +22,7 @@ pip install fastapi-restfull
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from beanie import Document, init_beanie
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import AsyncMongoClient
 
 from fastapi_restfull.aio.repository.base import BaseRepository
 from fastapi_restfull.aio.service.base import BaseService
@@ -56,7 +56,7 @@ class ItemController(BaseController):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    client = AsyncMongoClient("mongodb://localhost:27017")
     await init_beanie(database=client.db, document_models=[Item])
     yield
 
