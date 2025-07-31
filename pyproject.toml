@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapi-restfull"
-version = "0.1.1"
+version = "0.1.2"
 description = "Utilities and base classes for FastAPI async projects using Beanie ODM"
 readme = "README.md"
 requires-python = ">=3.11"
