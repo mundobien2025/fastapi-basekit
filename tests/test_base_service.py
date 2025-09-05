@@ -1,5 +1,5 @@
 import pytest
-from fastapi_basekit.aio.service.base import BaseService
+from fastapi_basekit.aio.beanie.service.base import BaseService
 from fastapi_basekit.exceptions.api_exceptions import (
     NotFoundException,
     DatabaseIntegrityException,

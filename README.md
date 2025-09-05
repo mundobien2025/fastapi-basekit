@@ -9,6 +9,7 @@ FastAPI BaseKit provides asynchronous utilities and base classes to accelerate b
 - **Exception handlers** and custom exceptions for common errors.
 - **Third-party services** like JWT token management and file uploads to Supabase.
 - Built to work **fully asynchronously**, making horizontal scalability easier.
+ - Support for Beanie ODM and SQLAlchemy (AsyncSession) base patterns.
 
 ## Installation
 
@@ -24,8 +25,8 @@ from fastapi import Depends, FastAPI
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from fastapi_basekit.aio.repository.base import BaseRepository
-from fastapi_basekit.aio.service.base import BaseService
+from fastapi_basekit.aio.beanie.repository.base import BaseRepository
+from fastapi_basekit.aio.beanie.service.base import BaseService
 from fastapi_basekit.aio.controller.base import BaseController
 from fastapi_basekit.exceptions.handler import (
     api_exception_handler,
@@ -202,7 +203,7 @@ class UserController(BaseController):
 
 ```python
 from fastapi import Request
-from app.base.fastapi_basekit.aio.service import BaseService
+from app.base.fastapi_basekit.aio.beanie.service import BaseService
 from app.repositories.user.user import UserRepository
 
 
@@ -235,7 +236,7 @@ def get_user_service(request: Request) -> UserService:
 ```
 
 ```python
-from app.base.fastapi_basekit.aio.repository import BaseRepository
+from app.base.fastapi_basekit.aio.beanie.repository import BaseRepository
 from app.models.user import User
 
 
@@ -251,6 +252,41 @@ The package includes utilities for common integrations:
 - **SupabaseService**: upload and delete files in Supabase Storage.
 
 You can import them from `fastapi_basekit.servicios` and use them like any other FastAPI dependency.
+
+## SQLAlchemy (Async) Usage
+
+```python
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository as SARepository
+from fastapi_basekit.aio.sqlalchemy.service.base import BaseService as SAService
+from fastapi_basekit.aio.sqlalchemy.controller import BaseController  # same generic controller
+
+
+# Example SQLAlchemy model (simplified)
+class UserORM:  # replace with your declarative model
+    id: str
+    name: str
+
+
+class UserRepository(SARepository):
+    model = UserORM
+
+
+class UserService(SAService):
+    repository: UserRepository
+
+
+def get_db() -> AsyncSession:  # your session dependency
+    ...
+
+
+class UserController(BaseController):
+    service: Annotated[UserService, Depends()]
+    # Provide a Pydantic schema via `schema_class` or override `get_schema_class`
+```
 
 ## Tests
 

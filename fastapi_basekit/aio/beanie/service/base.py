@@ -1,18 +1,19 @@
-# app/services/base.py
 from typing import Any, Dict, List, Optional, Union
 
 from fastapi import Request
 from pydantic import BaseModel
 
 
-from ..repository.base import BaseRepository
-from ...exceptions.api_exceptions import (
+from ...beanie.repository.base import BaseRepository
+from ....exceptions.api_exceptions import (
     NotFoundException,
     DatabaseIntegrityException,
 )
 
 
 class BaseService:
+    """Servicio base específico para Beanie ODM (async)."""
+
     repository: BaseRepository
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
@@ -58,8 +59,6 @@ class BaseService:
         - Permite validar, limpiar o transformar filtros.
         """
         filters = filters or {}
-        # Aquí puedes agregar lógica común o genérica para todos servicios
-
         return filters
 
     async def retrieve(self, id: str):
