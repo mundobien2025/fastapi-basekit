@@ -1,8 +1,8 @@
+import os
 import uuid
 import aiofiles
-from fastapi import UploadFile, HTTPException, Depends
+from fastapi import UploadFile, HTTPException
 from supabase import create_client, Client
-from app.config.settings import get_settings
 
 
 class SupabaseService:
@@ -69,7 +69,9 @@ class SupabaseService:
             )
 
 
-def get_supabase_service(settings=Depends(get_settings)) -> SupabaseService:
+def get_supabase_service() -> SupabaseService:
     return SupabaseService(
-        settings.SUPABASE_URL, settings.SUPABASE_KEY, settings.SUPABASE_BUCKET
+        os.getenv("SUPABASE_URL"),
+        os.getenv("SUPABASE_KEY"),
+        os.getenv("SUPABASE_BUCKET"),
     )

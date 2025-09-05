@@ -1,5 +1,5 @@
 import pytest
-from fastapi_restfull.schema.base import BaseResponse, BasePaginationResponse
+from fastapi_basekit.schema.base import BaseResponse, BasePaginationResponse
 
 pydantic = pytest.importorskip("pydantic")
 
