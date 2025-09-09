@@ -1,9 +1,10 @@
-name: Publish to PyPI
+name: Publish to (Test)PyPI
 
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
+  workflow_dispatch: {}
 
 permissions:
   id-token: write
@@ -12,6 +13,8 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    # Solo si definiste environments en los publishers:
+    environment: ${{ contains(github.ref_name, '-rc') && 'testpypi' || 'pypi' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,14 +23,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install build tool
         run: |
           python -m pip install --upgrade pip
           pip install build
 
-      - name: Build package
+      - name: Build artifacts
         run: python -m build
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
+      - name: Publish (OIDC)
+        uses: pypa/gh-action-pypi-publish@v1.12.2
+        with:
+          repository-url: ${{ contains(github.ref_name, '-rc') && 'https://test.pypi.org/legacy/' || '' }}
