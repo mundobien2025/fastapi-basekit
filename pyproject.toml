@@ -28,5 +28,8 @@ dependencies = [
 
 ]
 
+[tool.setuptools]
+packages = { find = { include = ["fastapi_basekit*"] } }
+
 [project.urls]
 Homepage = "https://github.com/mundobien2025/fastapi-basekit.git"
