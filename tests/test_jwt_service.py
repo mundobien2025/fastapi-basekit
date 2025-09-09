@@ -4,7 +4,7 @@ import pytest
 jwt = pytest.importorskip("jwt")
 pydantic = pytest.importorskip("pydantic")
 
-from fastapi_restfull.servicios.thrid.jwt import JWTService
+from fastapi_basekit.servicios.thrid.jwt import JWTService
 
 
 def test_create_and_decode_token():

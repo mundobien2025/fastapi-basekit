@@ -3,8 +3,8 @@ requires = ["setuptools>=67", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fastapi-restfull"
-version = "0.1.2"
+name = "fastapi-basekit"
+version = "0.1.0"
 description = "Utilities and base classes for FastAPI async projects using Beanie ODM"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -20,13 +20,13 @@ classifiers = [
 ]
 
 dependencies = [
-    "fastapi>=0.115.0",
-    "beanie>=2.0.0",
-    "pydantic>=2.10.6",
-    "pyjwt>=2.10.1",
-    "supabase>=2.13.0",
-    "aiofiles>=24.1.0",
+    "fastapi==0.116.1",
+    "SQLAlchemy[asyncio]==2.0.43",
+    "psycopg2==2.9.10",
+    "pydantic==2.11.7",
+    "fastapi-restful[all]==0.6.0",
+
 ]
 
 [project.urls]
-Homepage = "https://github.com/mundobien2025/fastapi-restfull.git"
+Homepage = "https://github.com/mundobien2025/fastapi-basekit.git"

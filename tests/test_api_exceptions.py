@@ -1,5 +1,5 @@
 import pytest
-from fastapi_restfull.exceptions.api_exceptions import APIException
+from fastapi_basekit.exceptions.api_exceptions import APIException
 
 fastapi = pytest.importorskip("fastapi")
 

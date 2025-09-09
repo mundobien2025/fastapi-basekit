@@ -1,6 +1,6 @@
-# FastAPI RestFull
+# FastAPI BaseKit
 
-FastAPI RestFull provides asynchronous utilities and base classes to accelerate building APIs with **FastAPI** and the **Beanie** ODM on MongoDB. It helps create repositories, services and controllers that share a common architecture while following SOLID principles and strong typing with Pydantic.
+FastAPI BaseKit provides asynchronous utilities and base classes to accelerate building APIs with **FastAPI** and the **Beanie** ODM on MongoDB. It helps create repositories, services and controllers that share a common architecture while following SOLID principles and strong typing with Pydantic.
 
 ## Key Features
 
@@ -9,11 +9,12 @@ FastAPI RestFull provides asynchronous utilities and base classes to accelerate 
 - **Exception handlers** and custom exceptions for common errors.
 - **Third-party services** like JWT token management and file uploads to Supabase.
 - Built to work **fully asynchronously**, making horizontal scalability easier.
+ - Support for Beanie ODM and SQLAlchemy (AsyncSession) base patterns.
 
 ## Installation
 
 ```bash
-pip install fastapi-restfull
+pip install fastapi-basekit
 ```
 
 ## Quickstart
@@ -24,10 +25,10 @@ from fastapi import Depends, FastAPI
 from beanie import Document, init_beanie
 from pymongo import AsyncMongoClient
 
-from fastapi_restfull.aio.repository.base import BaseRepository
-from fastapi_restfull.aio.service.base import BaseService
-from fastapi_restfull.aio.controller.base import BaseController
-from fastapi_restfull.exceptions.handler import (
+from fastapi_basekit.aio.beanie.repository.base import BaseRepository
+from fastapi_basekit.aio.beanie.service.base import BaseService
+from fastapi_basekit.aio.controller.base import BaseController
+from fastapi_basekit.exceptions.handler import (
     api_exception_handler,
     validation_exception_handler,
 )
@@ -87,12 +88,12 @@ from slowapi import _rate_limit_exceeded_handler
 
 from app.api.v1.routers import api_router
 
-from app.base.fastapi_restfull.exceptions import APIException
+from app.base.fastapi_basekit.exceptions import APIException
 from app.config.database import lifespan
 from app.config.limit import limiter
 from app.config.settings import get_settings
 
-from app.base.fastapi_restfull.exceptions import (
+from app.base.fastapi_basekit.exceptions import (
     api_exception_handler,
     duplicate_key_exception_handler,
     global_exception_handler,
@@ -147,8 +148,8 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query, status
 from fastapi_restful.cbv import cbv
 
-from app.base.fastapi_restfull.aio.controller import BaseController
-from app.base.fastapi_restfull.schema.base import BaseResponse
+from app.base.fastapi_basekit.aio.controller import BaseController
+from app.base.fastapi_basekit.schema.base import BaseResponse
 from app.models.user import User
 from app.schemas.user.user import (
     UserDResponseSchema,
@@ -202,7 +203,7 @@ class UserController(BaseController):
 
 ```python
 from fastapi import Request
-from app.base.fastapi_restfull.aio.service import BaseService
+from app.base.fastapi_basekit.aio.beanie.service import BaseService
 from app.repositories.user.user import UserRepository
 
 
@@ -235,7 +236,7 @@ def get_user_service(request: Request) -> UserService:
 ```
 
 ```python
-from app.base.fastapi_restfull.aio.repository import BaseRepository
+from app.base.fastapi_basekit.aio.beanie.repository import BaseRepository
 from app.models.user import User
 
 
@@ -250,7 +251,42 @@ The package includes utilities for common integrations:
 - **JWTService**: create, validate and refresh JWT tokens.
 - **SupabaseService**: upload and delete files in Supabase Storage.
 
-You can import them from `fastapi_restfull.servicios` and use them like any other FastAPI dependency.
+You can import them from `fastapi_basekit.servicios` and use them like any other FastAPI dependency.
+
+## SQLAlchemy (Async) Usage
+
+```python
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository as SARepository
+from fastapi_basekit.aio.sqlalchemy.service.base import BaseService as SAService
+from fastapi_basekit.aio.sqlalchemy.controller import BaseController  # same generic controller
+
+
+# Example SQLAlchemy model (simplified)
+class UserORM:  # replace with your declarative model
+    id: str
+    name: str
+
+
+class UserRepository(SARepository):
+    model = UserORM
+
+
+class UserService(SAService):
+    repository: UserRepository
+
+
+def get_db() -> AsyncSession:  # your session dependency
+    ...
+
+
+class UserController(BaseController):
+    service: Annotated[UserService, Depends()]
+    # Provide a Pydantic schema via `schema_class` or override `get_schema_class`
+```
 
 ## Tests
 

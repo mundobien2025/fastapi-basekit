@@ -2,9 +2,8 @@ from typing import Any, ClassVar, Dict, List, Optional, Type
 from fastapi import Depends, Request
 from pydantic import BaseModel, TypeAdapter
 
-from fastapi_restfull.aio.permissions.base import BasePermission
+from ..permissions.base import BasePermission
 
-from ..service.base import BaseService
 from ...schema.base import BasePaginationResponse, BaseResponse
 from ...exceptions.api_exceptions import PermissionException
 
@@ -12,7 +11,7 @@ from ...exceptions.api_exceptions import PermissionException
 class BaseController:
     """Montar rutas CRUD genericas y captura errores de negocio."""
 
-    service: BaseService = Depends()
+    service = Depends()
     schema_class: ClassVar[Type[BaseModel]]
     action: ClassVar[Optional[str]] = None
     request: Request
