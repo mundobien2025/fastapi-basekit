@@ -43,21 +43,12 @@ class BaseService:
             )
 
     def get_kwargs_query(self) -> Dict[str, Any]:
-        """
-        Construye y retorna un diccionario con los kwargs para la consulta.
-        """
         return self.kwargs_query
 
     def get_filters(
         self,
         filters: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """
-        Construye y retorna un diccionario con los filtros a aplicar.
-
-        - Puede ser sobreescrito en servicios hijos para lógica específica.
-        - Permite validar, limpiar o transformar filtros.
-        """
         filters = filters or {}
         return filters
 
@@ -77,7 +68,7 @@ class BaseService:
     ):
         kwargs = self.get_kwargs_query()
         applied_filters = self.get_filters(filters)
-        query = await self.repository.build_filter_query(
+        query = self.repository.build_filter_query(
             search=search,
             search_fields=self.search_fields,
             filters=applied_filters,
@@ -88,7 +79,6 @@ class BaseService:
     async def create(
         self, payload: BaseModel, check_fields: Optional[List[str]] = None
     ) -> Any:
-
         data = (
             payload.model_dump() if not isinstance(payload, dict) else payload
         )

@@ -2,14 +2,16 @@ from typing import Any, ClassVar, Dict, List, Optional, Type
 from fastapi import Depends, Request
 from pydantic import BaseModel, TypeAdapter
 
-from ..service.base import BaseService
+from ..permissions.base import BasePermission
+
 from ...schema.base import BasePaginationResponse, BaseResponse
+from ...exceptions.api_exceptions import PermissionException
 
 
 class BaseController:
     """Montar rutas CRUD genericas y captura errores de negocio."""
 
-    service: BaseService = Depends()
+    service = Depends()
     schema_class: ClassVar[Type[BaseModel]]
     action: ClassVar[Optional[str]] = None
     request: Request
@@ -28,8 +30,16 @@ class BaseController:
         )
         return self.schema_class
 
-    async def check_permissions(self) -> None:
-        """Override en clases hijas para validar permisos."""
+    async def check_permissions_class(self):
+        permissions = self.check_permissions()
+        if permissions:
+            for permission in permissions:
+                obj = permission()
+                check = await obj.has_permission(self.request)
+                if not check:
+                    raise PermissionException(obj.message_exception)
+
+    def check_permissions(self) -> List[Type[BasePermission]]:
         pass
 
     async def list(self):
@@ -71,7 +81,9 @@ class BaseController:
             data_dicts = [self.to_dict(item) for item in data]
             adapter = TypeAdapter(List[schema])
             data_parsed = adapter.validate_python(data_dicts)
-        elif isinstance(data, self.service.repository.model):
+        elif self.service.repository and isinstance(
+            data, self.service.repository.model
+        ):
             data_parsed = self.to_dict(data)
             data_parsed = schema.model_validate(data_parsed)
         elif isinstance(data, dict):
