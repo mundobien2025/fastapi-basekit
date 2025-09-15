@@ -18,6 +18,7 @@ class BaseService:
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
     action: str | None = None
+    kwargs_query: Dict[str, Any] = {}
 
     def __init__(
         self,
@@ -38,9 +39,27 @@ class BaseService:
         antes de consultar."""
         return filters or {}
 
+    def get_kwargs_query(self) -> Dict[str, Any]:
+        """Sobrescribe para retornar kwargs de consulta para el repositorio.
+
+        Ejemplo de uso en un servicio:
+
+            def get_kwargs_query(self):
+                if self.action in ["retrieve", "list"]:
+                    return {"joins": ["role"]}
+                return super().get_kwargs_query()
+
+        """
+        return self.kwargs_query or {}
+
     async def retrieve(
         self, db: AsyncSession, id: str, joins: Optional[List[str]] = None
     ) -> Any:
+        # Permite que el servicio defina joins u otros kwargs por acción
+        kwargs = self.get_kwargs_query()
+        if joins is None:
+            joins = kwargs.get("joins")
+
         obj = await self.repository.get_with_joins(db, id, joins=joins)
         if not obj:
             obj = await self.repository.get(db, id)
@@ -58,7 +77,13 @@ class BaseService:
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
     ) -> tuple[List[Any], int]:
+        # Aplica filtros y kwargs de consulta definidos por el servicio
         applied = self.get_filters(filters)
+        kwargs = self.get_kwargs_query()
+        if joins is None:
+            joins = kwargs.get("joins")
+        if order_by is None:
+            order_by = kwargs.get("order_by")
         return await self.repository.list_paginated(
             db,
             page=page,

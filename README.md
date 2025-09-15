@@ -1,29 +1,37 @@
 # FastAPI BaseKit
 
-FastAPI BaseKit provides asynchronous utilities and base classes to accelerate building APIs with **FastAPI** and the **Beanie** ODM on MongoDB. It helps create repositories, services and controllers that share a common architecture while following SOLID principles and strong typing with Pydantic.
+FastAPI BaseKit provides asynchronous utilities and base classes to accelerate building APIs with **FastAPI** using either **Beanie (MongoDB)** or **SQLAlchemy (AsyncSession)**. It offers a consistent architecture for repositories, services, and controllers with solid typing via Pydantic.
 
 ## Key Features
 
 - **Generic classes** for repositories (`BaseRepository`), services (`BaseService`) and controllers (`BaseController`) ready to extend.
 - **Unified response schemas** (`BaseResponse` and `BasePaginationResponse`).
 - **Exception handlers** and custom exceptions for common errors.
-- **Third-party services** like JWT token management and file uploads to Supabase.
+- **Third-party services** like JWT token management
 - Built to work **fully asynchronously**, making horizontal scalability easier.
- - Support for Beanie ODM and SQLAlchemy (AsyncSession) base patterns.
+ - Support for Beanie ODM and SQLAlchemy (AsyncSession) via optional extras.
+ - Pluggable query kwargs per action through `get_kwargs_query()` in services.
 
 ## Installation
 
-```bash
-pip install fastapi-basekit
-```
+Core install keeps the package lightweight; choose your ORM with extras.
 
-## Quickstart
+- Base (no ORM libs):
+  - pip install fastapi-basekit
+- Beanie stack:
+  - pip install "fastapi-basekit[beanie]"
+- SQLAlchemy stack:
+  - pip install "fastapi-basekit[sqlalchemy]"
+- Everything:
+  - pip install "fastapi-basekit[all]"
+
+## Beanie Quickstart
 
 ```python
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from beanie import Document, init_beanie
-from pymongo import AsyncMongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from fastapi_basekit.aio.beanie.repository.base import BaseRepository
 from fastapi_basekit.aio.beanie.service.base import BaseService
@@ -57,8 +65,8 @@ class ItemController(BaseController):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    client = AsyncMongoClient("mongodb://localhost:27017")
-    await init_beanie(database=client.db, document_models=[Item])
+    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    await init_beanie(database=client.mydb, document_models=[Item])
     yield
 
 app.add_exception_handler(Exception, api_exception_handler)
@@ -70,7 +78,7 @@ app.add_api_route("/items/{id}", controller.retrieve, methods=["GET"])
 app.add_api_route("/items", controller.create, methods=["POST"])
 ```
 
-This snippet shows how to inherit the base classes and expose a basic CRUD in FastAPI.
+This snippet shows how to inherit the base classes and expose a basic CRUD in FastAPI using Beanie.
 
 ## Advanced Example
 
@@ -88,12 +96,12 @@ from slowapi import _rate_limit_exceeded_handler
 
 from app.api.v1.routers import api_router
 
-from app.base.fastapi_basekit.exceptions import APIException
+from fastapi_basekit.exceptions import APIException
 from app.config.database import lifespan
 from app.config.limit import limiter
 from app.config.settings import get_settings
 
-from app.base.fastapi_basekit.exceptions import (
+from fastapi_basekit.exceptions import (
     api_exception_handler,
     duplicate_key_exception_handler,
     global_exception_handler,
@@ -148,8 +156,8 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query, status
 from fastapi_restful.cbv import cbv
 
-from app.base.fastapi_basekit.aio.controller import BaseController
-from app.base.fastapi_basekit.schema.base import BaseResponse
+from fastapi_basekit.aio.controller.base import BaseController
+from fastapi_basekit.schema.base import BaseResponse
 from app.models.user import User
 from app.schemas.user.user import (
     UserDResponseSchema,
@@ -203,7 +211,7 @@ class UserController(BaseController):
 
 ```python
 from fastapi import Request
-from app.base.fastapi_basekit.aio.beanie.service import BaseService
+from fastapi_basekit.aio.beanie.service.base import BaseService
 from app.repositories.user.user import UserRepository
 
 
@@ -236,7 +244,7 @@ def get_user_service(request: Request) -> UserService:
 ```
 
 ```python
-from app.base.fastapi_basekit.aio.beanie.repository import BaseRepository
+from fastapi_basekit.aio.beanie.repository.base import BaseRepository
 from app.models.user import User
 
 
@@ -249,7 +257,6 @@ class UserRepository(BaseRepository):
 The package includes utilities for common integrations:
 
 - **JWTService**: create, validate and refresh JWT tokens.
-- **SupabaseService**: upload and delete files in Supabase Storage.
 
 You can import them from `fastapi_basekit.servicios` and use them like any other FastAPI dependency.
 
@@ -262,7 +269,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository as SARepository
 from fastapi_basekit.aio.sqlalchemy.service.base import BaseService as SAService
-from fastapi_basekit.aio.sqlalchemy.controller import BaseController  # same generic controller
+from fastapi_basekit.aio.sqlalchemy.controller.base import SQLAlchemyBaseController
 
 
 # Example SQLAlchemy model (simplified)
@@ -283,10 +290,29 @@ def get_db() -> AsyncSession:  # your session dependency
     ...
 
 
-class UserController(BaseController):
+class UserController(SQLAlchemyBaseController):
     service: Annotated[UserService, Depends()]
     # Provide a Pydantic schema via `schema_class` or override `get_schema_class`
+
+    # SQLAlchemyBaseController methods accept `db: AsyncSession` dependency
+
 ```
+
+### SQLAlchemy: Customizing joins/order per action
+
+```python
+from fastapi_basekit.aio.sqlalchemy.service.base import BaseService as SAService
+
+
+class UserService(SAService):
+    def get_kwargs_query(self) -> dict:
+        # Automatically include joins when listing/retrieving
+        if self.action in ["retrieve", "list"]:
+            return {"joins": ["role"], "order_by": None}
+        return super().get_kwargs_query()
+```
+
+The controller’s `list`/`retrieve` will use these kwargs automatically unless explicitly overridden by parameters.
 
 ## Tests
 
