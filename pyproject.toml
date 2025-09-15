@@ -4,43 +4,40 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapi-basekit"
-version = "0.1.5rc1"
+version = "0.1.0"   # 👈 release estable (irá a PyPI)
 description = "Utilities and base classes for FastAPI async projects (Beanie or SQLAlchemy)"
 readme = "README.md"
 requires-python = ">=3.11"
+
 authors = [
   {name = "Jerson Moreno", email = "jerson.ml820@hotmail.com"}
 ]
+
 license = {text = "MIT"}
+
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Framework :: FastAPI",
-    "Operating System :: OS Independent",
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3",
+  "Framework :: FastAPI",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
 ]
 
 dependencies = [
-    "fastapi==0.116.1",
-    "pydantic==2.11.7",
-    "fastapi-restful[all]==0.6.0",
-
+  "fastapi==0.116.1",
+  "pydantic==2.11.7",
+  "fastapi-restful[all]==0.6.0",
 ]
 
 [tool.setuptools]
 packages = { find = { include = ["fastapi_basekit*"] } }
 
 [project.optional-dependencies]
-# Instalar con: pip install "fastapi-basekit[beanie]"
-beanie = [
-  "beanie",
-]
-# Instalar con: pip install "fastapi-basekit[sqlalchemy]"
+beanie = ["beanie"]
 sqlalchemy = [
   "SQLAlchemy[asyncio]==2.0.43",
   "psycopg2==2.9.10",
 ]
-
-# Instalar con: pip install "fastapi-basekit[all]"
 all = [
   "beanie",
   "SQLAlchemy[asyncio]==2.0.43",
@@ -48,4 +45,6 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mundobien2025/fastapi-basekit.git"
+Homepage = "https://github.com/mundobien2025/fastapi-basekit"
+Repository = "https://github.com/mundobien2025/fastapi-basekit"
+Issues = "https://github.com/mundobien2025/fastapi-basekit/issues"
