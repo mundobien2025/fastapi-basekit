@@ -264,7 +264,7 @@ You can import them from `fastapi_basekit.servicios` and use them like any other
 
 ```python
 from typing import Annotated
-from fastapi import Depends
+from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository as SARepository
@@ -286,15 +286,22 @@ class UserService(SAService):
     repository: UserRepository
 
 
-def get_db() -> AsyncSession:  # your session dependency
+async def get_db() -> AsyncSession:  # your session dependency
     ...
 
 
-class UserController(SQLAlchemyBaseController):
-    service: Annotated[UserService, Depends()]
-    # Provide a Pydantic schema via `schema_class` or override `get_schema_class`
+def get_user_service(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> UserService:
+    repository = UserRepository(db)
+    return UserService(repository=repository, request=request)
 
-    # SQLAlchemyBaseController methods accept `db: AsyncSession` dependency
+
+class UserController(SQLAlchemyBaseController):
+    service: Annotated[UserService, Depends(get_user_service)]
+    # Provide a Pydantic schema via `schema_class` or override `get_schema_class`
+    # The controller consumes the service that already holds the session
 
 ```
 
