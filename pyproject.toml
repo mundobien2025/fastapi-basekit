@@ -9,14 +9,11 @@ description = "Utilities and base classes for FastAPI async projects (Beanie or 
 readme = "README.md"
 requires-python = ">=3.11"
 
-
 authors = [
   {name = "Jerson Moreno", email = "jerson.ml820@hotmail.com"}
 ]
 
-
 license = {text = "MIT"}
-
 
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -30,16 +27,12 @@ dependencies = [
   "fastapi==0.116.1",
   "pydantic==2.11.7",
   "fastapi-restful[all]==0.6.0",
-  "fastapi==0.116.1",
-  "pydantic==2.11.7",
-  "fastapi-restful[all]==0.6.0",
 ]
 
 [tool.setuptools]
 packages = { find = { include = ["fastapi_basekit*"] } }
 
 [project.optional-dependencies]
-beanie = ["beanie"]
 beanie = ["beanie"]
 sqlalchemy = [
   "SQLAlchemy[asyncio]==2.0.43",
@@ -52,9 +45,6 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mundobien2025/fastapi-basekit"
-Repository = "https://github.com/mundobien2025/fastapi-basekit"
-Issues = "https://github.com/mundobien2025/fastapi-basekit/issues"
 Homepage = "https://github.com/mundobien2025/fastapi-basekit"
 Repository = "https://github.com/mundobien2025/fastapi-basekit"
 Issues = "https://github.com/mundobien2025/fastapi-basekit/issues"
