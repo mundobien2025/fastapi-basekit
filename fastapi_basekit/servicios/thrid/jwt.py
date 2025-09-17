@@ -1,11 +1,17 @@
 import os
 import time
-from ...exceptions.api_exceptions import JWTAuthenticationException
-from ...schema.jwt import TokenSchema
-from bson import ObjectId
+from uuid import UUID
 
 import jwt
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
+
+try:
+    from bson import ObjectId  # type: ignore
+except ImportError:  # pragma: no cover - bson is opcional
+    ObjectId = None  # type: ignore
+
+from ...exceptions.api_exceptions import JWTAuthenticationException
+from ...schema.jwt import TokenSchema
 
 
 class JWTService:
@@ -24,7 +30,9 @@ class JWTService:
         if extra_data is not None:
 
             def convert_to_serializable(obj):
-                if isinstance(obj, ObjectId):
+                if ObjectId is not None and isinstance(obj, ObjectId):
+                    return str(obj)
+                if isinstance(obj, UUID):
                     return str(obj)
                 return obj
 
