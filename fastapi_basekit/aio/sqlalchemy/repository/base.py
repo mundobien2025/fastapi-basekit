@@ -18,6 +18,14 @@ class BaseRepository:
 
     model: Type[Any]
 
+    def __init__(self, db: AsyncSession):
+        """Inicializa el repositorio con la sesión a reutilizar."""
+        self._session = db
+
+    @property
+    def session(self) -> AsyncSession:
+        return self._session
+
     def _get_field(self, field_name: str):
         """Valida y retorna el atributo (columna) del modelo."""
         if not self.model:
@@ -47,8 +55,9 @@ class BaseRepository:
         """Construye condiciones a partir del diccionario de filtros."""
         return [self._get_field(fn) == value for fn, value in filters.items()]
 
-    async def create(self, db: AsyncSession, obj_in: Any | Dict) -> Any:
+    async def create(self, obj_in: Any | Dict) -> Any:
         """Crea un nuevo registro en la base de datos."""
+        db = self.session
         if isinstance(obj_in, dict):
             obj_in = self.model(**obj_in)
         db.add(obj_in)
@@ -57,24 +66,25 @@ class BaseRepository:
         return obj_in
 
     async def get(
-        self, db: AsyncSession, record_id: Union[str, UUID]
+        self, record_id: Union[str, UUID]
     ) -> Optional[Any]:
         """Obtiene un registro por su ID."""
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
-        return await db.get(self.model, record_id)
+        return await self.session.get(self.model, record_id)
 
     async def get_by_field(
-        self, db: AsyncSession, field_name: str, value: Any
+        self, field_name: str, value: Any
     ) -> Optional[Any]:
         """Obtiene un registro por un campo específico."""
         field = self._get_field(field_name)
-        result = await db.execute(select(self.model).where(field == value))
+        result = await self.session.execute(
+            select(self.model).where(field == value)
+        )
         return result.scalars().first()
 
     async def get_with_joins(
         self,
-        db: AsyncSession,
         record_id: Union[str, UUID],
         joins: Optional[List[str]] = None,
     ) -> Optional[Any]:
@@ -83,12 +93,11 @@ class BaseRepository:
             raise ValueError("El modelo no está definido en el repositorio")
         query = select(self.model).where(self.model.id == record_id)
         query = self._apply_joins(query, joins)
-        result = await db.execute(query)
+        result = await self.session.execute(query)
         return result.scalars().first()
 
     async def get_by_field_with_joins(
         self,
-        db: AsyncSession,
         field_name: str,
         value: Any,
         joins: Optional[List[str]] = None,
@@ -98,11 +107,11 @@ class BaseRepository:
         field = self._get_field(field_name)
         query = select(self.model).where(field == value)
         query = self._apply_joins(query, joins)
-        result = await db.execute(query)
+        result = await self.session.execute(query)
         return result.scalars().first()
 
     async def get_by_filters(
-        self, db: AsyncSession, filters: Dict[str, Any], use_or: bool = False
+        self, filters: Dict[str, Any], use_or: bool = False
     ) -> Sequence[Any]:
         """Obtiene registros que coinciden con los filtros especificados."""
         if not self.model:
@@ -110,12 +119,11 @@ class BaseRepository:
         conditions = self._build_conditions(filters)
         combined = or_(*conditions) if use_or else and_(*conditions)
         query = select(self.model).where(combined)
-        result = await db.execute(query)
+        result = await self.session.execute(query)
         return result.scalars().all()
 
     async def get_by_filters_with_joins(
         self,
-        db: AsyncSession,
         filters: Dict[str, Any],
         use_or: bool = False,
         joins: Optional[List[str]] = None,
@@ -126,12 +134,11 @@ class BaseRepository:
         combined = or_(*conditions) if use_or else and_(*conditions)
         query = select(self.model).where(combined)
         query = self._apply_joins(query, joins)
-        result = await db.execute(query)
+        result = await self.session.execute(query)
         return result.scalars().first() if one else result.scalars().all()
 
     async def list_paginated(
         self,
-        db: AsyncSession,
         page: int = 1,
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
@@ -159,6 +166,8 @@ class BaseRepository:
         base_query = self._apply_joins(base_query, joins)
 
         # Count total
+        db = self.session
+
         count_query = select(func.count()).select_from(base_query.subquery())
         total = (await db.execute(count_query)).scalar_one()
 
@@ -171,13 +180,13 @@ class BaseRepository:
 
     async def update(
         self,
-        db: AsyncSession,
         record_id: Union[str, UUID],
         update_data: Dict[str, Any],
     ) -> Any:
         """Actualiza un registro por ID con los campos provistos."""
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
+        db = self.session
         record = await db.get(self.model, record_id)
         if not record:
             raise NotFoundException(
@@ -192,7 +201,6 @@ class BaseRepository:
 
     async def delete(
         self,
-        db: AsyncSession,
         record_id: Union[str, UUID],
         model: Optional[Type[Any]] = None,
     ) -> bool:
@@ -200,6 +208,7 @@ class BaseRepository:
         model = model or self.model
         if not model:
             raise ValueError("El modelo no está definido en el repositorio")
+        db = self.session
         record = await db.get(model, record_id)
         if not record:
             raise NotFoundException(message=f"{model.__name__} no encontrado")

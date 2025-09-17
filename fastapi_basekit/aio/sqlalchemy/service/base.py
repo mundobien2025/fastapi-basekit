@@ -2,8 +2,6 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import Request
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from ..repository.base import BaseRepository
 from ....exceptions.api_exceptions import (
     NotFoundException,
@@ -53,23 +51,22 @@ class BaseService:
         return self.kwargs_query or {}
 
     async def retrieve(
-        self, db: AsyncSession, id: str, joins: Optional[List[str]] = None
+        self, id: str, joins: Optional[List[str]] = None
     ) -> Any:
         # Permite que el servicio defina joins u otros kwargs por acción
         kwargs = self.get_kwargs_query()
         if joins is None:
             joins = kwargs.get("joins")
 
-        obj = await self.repository.get_with_joins(db, id, joins=joins)
+        obj = await self.repository.get_with_joins(id, joins=joins)
         if not obj:
-            obj = await self.repository.get(db, id)
+            obj = await self.repository.get(id)
         if not obj:
             raise NotFoundException(f"id={id} no encontrado")
         return obj
 
     async def list(
         self,
-        db: AsyncSession,
         page: int = 1,
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
@@ -85,7 +82,6 @@ class BaseService:
         if order_by is None:
             order_by = kwargs.get("order_by")
         return await self.repository.list_paginated(
-            db,
             page=page,
             count=count,
             filters=applied,
@@ -96,7 +92,6 @@ class BaseService:
 
     async def create(
         self,
-        db: AsyncSession,
         payload: BaseModel | Dict[str, Any],
         check_fields: Optional[List[str]] = None,
     ) -> Any:
@@ -111,24 +106,24 @@ class BaseService:
         if fields:
             filters = {f: data[f] for f in fields if f in data}
             if filters:
-                existing = await self.repository.get_by_filters(db, filters)
+                existing = await self.repository.get_by_filters(filters)
                 if existing:
                     raise DatabaseIntegrityException(
                         message="Registro ya existe", data=filters
                     )
-        created = await self.repository.create(db, data)
+        created = await self.repository.create(data)
         return created
 
     async def update(
-        self, db: AsyncSession, id: str, data: BaseModel | Dict[str, Any]
+        self, id: str, data: BaseModel | Dict[str, Any]
     ) -> Any:
         update_data = (
             data.model_dump(exclude_unset=True)
             if isinstance(data, BaseModel)
             else data
         )
-        updated = await self.repository.update(db, id, update_data)
+        updated = await self.repository.update(id, update_data)
         return updated
 
-    async def delete(self, db: AsyncSession, id: str) -> bool:
-        return await self.repository.delete(db, id)
+    async def delete(self, id: str) -> bool:
+        return await self.repository.delete(id)

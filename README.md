@@ -1,327 +1,302 @@
 # FastAPI BaseKit
 
-FastAPI BaseKit provides asynchronous utilities and base classes to accelerate building APIs with **FastAPI** using either **Beanie (MongoDB)** or **SQLAlchemy (AsyncSession)**. It offers a consistent architecture for repositories, services, and controllers with solid typing via Pydantic.
+Utilidades asíncronas y clases base para construir APIs con **FastAPI** usando **Beanie (MongoDB)** o **SQLAlchemy (AsyncSession)**. Provee una arquitectura consistente de **repositorios**, **servicios** y **controladores**, con tipado estricto vía **Pydantic**.
 
-## Key Features
+## Características
 
-- **Generic classes** for repositories (`BaseRepository`), services (`BaseService`) and controllers (`BaseController`) ready to extend.
-- **Unified response schemas** (`BaseResponse` and `BasePaginationResponse`).
-- **Exception handlers** and custom exceptions for common errors.
-- **Third-party services** like JWT token management
-- Built to work **fully asynchronously**, making horizontal scalability easier.
- - Support for Beanie ODM and SQLAlchemy (AsyncSession) via optional extras.
- - Pluggable query kwargs per action through `get_kwargs_query()` in services.
+* **Clases genéricas listas para heredar**:
 
-## Installation
+  * Repositorio: `BaseRepository`
+  * Servicio: `BaseService`
+  * Controlador: `BaseController` (Beanie) y `SQLAlchemyBaseController` (SQLA)
+* **Esquemas de respuesta unificados**: `BaseResponse`, `BasePaginationResponse`.
+* **Manejo de errores** con excepciones y handlers listos.
+* **Servicios comunes** (ej. JWT).
+* **Totalmente asíncrono**, facilita escalado horizontal.
+* **Soporta Beanie y/o SQLAlchemy** mediante *extras* opcionales.
+* **Consultas pluggables** por acción con `get_kwargs_query()` en servicios.
 
-Core install keeps the package lightweight; choose your ORM with extras.
+## Instalación
 
-- Base (no ORM libs):
-  - pip install fastapi-basekit
-- Beanie stack:
-  - pip install "fastapi-basekit[beanie]"
-- SQLAlchemy stack:
-  - pip install "fastapi-basekit[sqlalchemy]"
-- Everything:
-  - pip install "fastapi-basekit[all]"
+El núcleo es liviano; elige tu stack:
 
-## Beanie Quickstart
+```bash
+# Base (sin ORM)
+pip install fastapi-basekit
+
+# Beanie
+pip install "fastapi-basekit[beanie]"
+
+# SQLAlchemy (async)
+pip install "fastapi-basekit[sqlalchemy]"
+
+# Todo
+pip install "fastapi-basekit[all]"
+```
+
+---
+
+## Ejemplo 1: Beanie (MongoDB) — CRUD mínimo en 4 pasos
+
+> Crea un CRUD funcional sobre un `Item` con paginación y búsqueda.
 
 ```python
+# app.py
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI
+from typing import Annotated,Optional
+
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi import Depends, FastAPI, Query, APIRouter
+from fastapi_restful.cbv import cbv
 
 from fastapi_basekit.aio.beanie.repository.base import BaseRepository
 from fastapi_basekit.aio.beanie.service.base import BaseService
 from fastapi_basekit.aio.controller.base import BaseController
+from fastapi_basekit.schema.base import BaseResponse, BasePaginationResponse
 from fastapi_basekit.exceptions.handler import (
     api_exception_handler,
     validation_exception_handler,
 )
 
-app = FastAPI()
-
-# Beanie model
+# 1) Modelo Beanie
 class Item(Document):
     name: str
+    description: str | None = None
 
-# Repository
+# 2) Repositorio
 class ItemRepository(BaseRepository):
     model = Item
 
-# Service
+# 3) Servicio (reglas de negocio)
 class ItemService(BaseService):
     repository: ItemRepository
-    search_fields = ["name"]
-    duplicate_check_fields = ["name"]
 
-# Controller
+    def __init__(self, repository: ItemRepository | None = None):
+        super().__init__(repository or ItemRepository())
+        self.search_fields = ["name", "description"]
+        self.duplicate_check_fields = ["name"]  # opcional
+
+    def get_kwargs_query(self) -> dict:
+        # Personaliza por acción: list / retrieve / create / update / delete
+        if self.action == "retrieve":
+            return {"fetch_links": False}
+        return super().get_kwargs_query()
+
+
+# 3) Schemas
+
+class ItemResponseSchema(BaseSchema):
+    name: str
+    description: Optional[str] = None
+
+class ItemPResponseSchema(BasePaginationResponse[ItemResponseSchema]):
+    pass    
+
+# 4) Controlador (entra/sale HTTP)
+
+item_router = APIRouter(tags=["core"])
+
+@cbv(item_router)
 class ItemController(BaseController):
-    service: ItemService = Depends()
-    schema_class = Item
+    service: ItemService = Depends(ItemService)
+    schema_class = Item  # para serializar/validar IO
 
+    @item_router.get("/", response_model=ItemPResponseSchema)
+    async def list(  # override para añadir paginación/búsqueda
+        self,
+        page: int = Query(1, ge=1, description="Número de página"),
+        count: int = Query(10, ge=1, description="Cantidad de elementos"),
+        search: str | None = Query(None, description="Término de búsqueda"),
+    ) :
+        return await super().list()
 
+# FastAPI + Lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     client = AsyncIOMotorClient("mongodb://localhost:27017")
-    await init_beanie(database=client.mydb, document_models=[Item])
+    await init_beanie(database=client.basekit_demo, document_models=[Item])
     yield
 
+app = FastAPI(title="BaseKit Beanie Demo", lifespan=lifespan)
+
+# Handlers de error recomendados
 app.add_exception_handler(Exception, api_exception_handler)
 app.add_exception_handler(ValueError, validation_exception_handler)
 
-controller = ItemController()
-app.add_api_route("/items", controller.list, methods=["GET"])
-app.add_api_route("/items/{id}", controller.retrieve, methods=["GET"])
-app.add_api_route("/items", controller.create, methods=["POST"])
-```
+# Rutas
+app.include_router(item_router, prefix="/api/v1")
 
-This snippet shows how to inherit the base classes and expose a basic CRUD in FastAPI using Beanie.
 
-## Advanced Example
+**Qué te da este ejemplo**
 
-Below is a more complete example that configures middlewares, custom error handlers and a user CRUD separated into repository, service and controller.
+* CRUD completo con **paginación** (`page`, `limit`) y **búsqueda** (`search`) sin reescribir lógica.
+* Posibilidad de **personalizar las consultas** por acción desde el servicio (`get_kwargs_query`).
+* Respuestas uniformes con `BaseResponse`/`BasePaginationResponse`.
+
+---
+
+## Ejemplo 2: SQLAlchemy (Async) — CRUD mínimo con sesión por request
+
+> Patrón recomendado: middleware que inyecta `AsyncSession` en la request.
 
 ```python
-from pymongo.errors import DuplicateKeyError
+# app_sqlalchemy.py
+from contextlib import asynccontextmanager
+from typing import Annotated, AsyncGenerator
 
-from fastapi import FastAPI, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Depends, FastAPI, Query, Request
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from slowapi import _rate_limit_exceeded_handler
+from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository
+from fastapi_basekit.aio.sqlalchemy.service.base import BaseService
+from fastapi_basekit.aio.sqlalchemy.controller.base import SQLAlchemyBaseController
+from fastapi_basekit.schema.base import BaseResponse, BasePaginationResponse
+from fastapi_basekit.exceptions.handler import global_exception_handler, validation_exception_handler
 
+# 0) Base declarativa y modelo
+class Base(DeclarativeBase): pass
 
-from app.api.v1.routers import api_router
+class ItemORM(Base):
+    __tablename__ = "items"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str]
+    description: Mapped[str | None]
 
-from fastapi_basekit.exceptions import APIException
-from app.config.database import lifespan
-from app.config.limit import limiter
-from app.config.settings import get_settings
+# 1) Motor y sessionmaker
+DATABASE_URL = "postgresql+asyncpg://user:pass@localhost:5432/basekit"
+engine = create_async_engine(DATABASE_URL, pool_pre_ping=True)
+SessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
-from fastapi_basekit.exceptions import (
+# 2) Middleware de sesión por request
+class DatabaseSessionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        async with SessionLocal() as session:
+            request.state.db_session = session
+            try:
+                response = await call_next(request)
+                await session.commit()
+                return response
+            except Exception:
+                await session.rollback()
+                raise
+
+def get_db_session(request: Request) -> AsyncSession:
+    if not hasattr(request.state, "db_session"):
+        raise RuntimeError("DatabaseSessionMiddleware no está configurado")
+    return request.state.db_session
+
+# 3) Repositorio
+class ItemSQLARepository(BaseRepository):
+    model = ItemORM
+
+# 4) Servicio
+class ItemSQLAService(BaseService):
+    repository: ItemSQLARepository
+
+    def __init__(self, repository: ItemSQLARepository, request: Request):
+        super().__init__(repository=repository, request=request)
+        self.search_fields = ["name", "description"]
+
+    def get_kwargs_query(self) -> dict:
+        # Por ejemplo, joins sólo en retrieve
+        if self.action == "retrieve":
+            return {"joins": []}
+        return super().get_kwargs_query()
+
+def get_item_service(request: Request) -> ItemSQLAService:
+    db = get_db_session(request)
+    repo = ItemSQLARepository(db)
+    return ItemSQLAService(repository=repo, request=request)
+
+# 5) Controlador + rutas
+router = APIRouter()
+
+class ItemsController(SQLAlchemyBaseController):
+    service: Annotated[ItemSQLAService, Depends(get_item_service)]
+    schema_class = ItemORM  # para tipado de respuesta
+
+    @router.get("/items", response_model=BasePaginationResponse[ItemORM])
+    async def list_items(
+        self,
+        page: Annotated[int, Query(1, ge=1)],
+        limit: Annotated[int, Query(10, ge=1, le=100)],
+        search: Annotated[str | None, Query(None)] = None,
+    ):
+        return await self.list(page=page, count=limit, search=search)
+
+    @router.get("/items/{id}", response_model=BaseResponse[ItemORM])
+    async def retrieve_item(self, id: int):
+        return await self.retrieve(id)
+
+    @router.post("/items", response_model=BaseResponse[ItemORM])
+    async def create_item(self, payload: dict):
+        return await self.create(payload)
+
+    @router.patch("/items/{id}", response_model=BaseResponse[ItemORM])
+    async def update_item(self, id: int, payload: dict):
+        return await self.update(id, payload)
+
+    @router.delete("/items/{id}")
+    async def delete_item(self, id: int):
+        return await self.delete(id)
+
+app = FastAPI(title="BaseKit SQLAlchemy Demo")
+app.add_middleware(DatabaseSessionMiddleware)
+app.add_exception_handler(Exception, global_exception_handler)
+app.add_exception_handler(ValueError, validation_exception_handler)
+app.include_router(router, prefix="")
+```
+
+**Notas rápidas**
+
+* El **repositorio** recibe la sesión `AsyncSession` en el constructor.
+* El **servicio** centraliza reglas (ej. campos de búsqueda, duplicados, `get_kwargs_query`).
+* El **controlador** sólo adapta IO HTTP y reusa los métodos base.
+
+---
+
+## Convenciones clave
+
+* **Acciones**: `list`, `retrieve`, `create`, `update`, `delete`.
+  En `BaseService` puedes leer `self.action` para decidir comportamiento por acción.
+* **Búsqueda**: define `self.search_fields` en el servicio.
+* **Chequeo de duplicados**: usa `self.duplicate_check_fields`.
+* **Consultas por acción**: sobreescribe `get_kwargs_query()` en el servicio.
+* **Respuestas**: usa `BaseResponse[T]` y `BasePaginationResponse[T]` para uniformidad.
+
+## Errores y handlers
+
+Incluye los handlers recomendados para respuestas limpias:
+
+```python
+from fastapi_basekit.exceptions.handler import (
     api_exception_handler,
-    duplicate_key_exception_handler,
+    duplicate_key_exception_handler,  # útil en Beanie/Mongo
     global_exception_handler,
     validation_exception_handler,
     value_exception_handler,
 )
-
-settings = get_settings()
-
-
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    lifespan=lifespan,
-    redirect_slashes=True,
-)
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=[
-        "*"
-    ],  # allow all methods
-    allow_headers=["*"],  # allow all headers
-)
-
-app.state.limiter = limiter
-
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-# Register custom handlers
-app.add_exception_handler(
-    status.HTTP_429_TOO_MANY_REQUESTS, _rate_limit_exceeded_handler
-)
-app.add_exception_handler(APIException, api_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_exception_handler)
-app.add_exception_handler(ValueError, value_exception_handler)
-app.add_exception_handler(Exception, global_exception_handler)
-app.add_exception_handler(DuplicateKeyError, duplicate_key_exception_handler)
-
-
-# Import and assign the custom_openapi function
-from app.config.openapi import custom_openapi  # noqa
-
-app.openapi = custom_openapi
 ```
 
-```python
-from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Query, status
-from fastapi_restful.cbv import cbv
+## Servicios adicionales
 
-from fastapi_basekit.aio.controller.base import BaseController
-from fastapi_basekit.schema.base import BaseResponse
-from app.models.user import User
-from app.schemas.user.user import (
-    UserDResponseSchema,
-    UserPResponseSchema,
-    UserResponseSchema,
-    UserURequestSchema,
-)
-from app.services.dependency.current_user import get_dependency_service
-from app.services.system.user.user_service import UserService, get_user_service
-
-router = APIRouter()
-
-
-@cbv(router)
-class UserController(BaseController):
-    service: UserService = Depends(get_user_service)
-    user: User = Depends(get_dependency_service)
-
-    def get_schema_class(self):
-        if self.action == "retrieve":
-            return UserDResponseSchema
-        else:
-            return UserResponseSchema
-
-    @router.get("/", response_model=UserPResponseSchema)
-    async def list(
-        self,
-        page: int = Query(1, ge=1, description="Page number"),
-        limit: int = Query(10, ge=1, description="Items per page"),
-        search: str | None = Query(None, description="Search term"),
-    ):
-        """List users with pagination and optional search."""
-        return await super().list(page=page, count=limit, search=search)
-
-    @router.get("/{id}", response_model=BaseResponse[UserDResponseSchema])
-    async def retrieve(self, id: PydanticObjectId):
-        return await super().retrieve(id)
-
-    @router.patch("/{id}", response_model=BaseResponse[UserResponseSchema])
-    async def update(
-        self,
-        id: PydanticObjectId,
-        data: UserURequestSchema = Body(...),
-    ):
-        return await super().update(id, data)
-
-    @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-    async def delete(self, id: PydanticObjectId):
-        return await super().delete(id)
-```
-
-```python
-from fastapi import Request
-from fastapi_basekit.aio.beanie.service.base import BaseService
-from app.repositories.user.user import UserRepository
-
-
-class UserService(BaseService):
-    repository: UserRepository
-
-    def __init__(
-        self, repository: UserRepository = None, request: Request = None
-    ):
-        super().__init__(repository, request)
-        self.search_fields = ["name", "email"]
-
-    def get_kwargs_query(self):
-        """
-        Return the query arguments for the repository.
-        Allows customizing queries in child services.
-        """
-        if self.action == "retrieve":
-            return {
-                "fetch_links": True,
-                "nesting_depths_per_field": {"role": 1, "company": 1},
-            }
-        return super().get_kwargs_query()
-
-
-def get_user_service(request: Request) -> UserService:
-    repo = UserRepository()
-    service = UserService(request=request, repository=repo)
-    return service
-```
-
-```python
-from fastapi_basekit.aio.beanie.repository.base import BaseRepository
-from app.models.user import User
-
-
-class UserRepository(BaseRepository):
-    model: User = User
-```
-
-## Additional Services
-
-The package includes utilities for common integrations:
-
-- **JWTService**: create, validate and refresh JWT tokens.
-
-You can import them from `fastapi_basekit.servicios` and use them like any other FastAPI dependency.
-
-## SQLAlchemy (Async) Usage
-
-```python
-from typing import Annotated
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository as SARepository
-from fastapi_basekit.aio.sqlalchemy.service.base import BaseService as SAService
-from fastapi_basekit.aio.sqlalchemy.controller.base import SQLAlchemyBaseController
-
-
-# Example SQLAlchemy model (simplified)
-class UserORM:  # replace with your declarative model
-    id: str
-    name: str
-
-
-class UserRepository(SARepository):
-    model = UserORM
-
-
-class UserService(SAService):
-    repository: UserRepository
-
-
-def get_db() -> AsyncSession:  # your session dependency
-    ...
-
-
-class UserController(SQLAlchemyBaseController):
-    service: Annotated[UserService, Depends()]
-    # Provide a Pydantic schema via `schema_class` or override `get_schema_class`
-
-    # SQLAlchemyBaseController methods accept `db: AsyncSession` dependency
-
-```
-
-### SQLAlchemy: Customizing joins/order per action
-
-```python
-from fastapi_basekit.aio.sqlalchemy.service.base import BaseService as SAService
-
-
-class UserService(SAService):
-    def get_kwargs_query(self) -> dict:
-        # Automatically include joins when listing/retrieving
-        if self.action in ["retrieve", "list"]:
-            return {"joins": ["role"], "order_by": None}
-        return super().get_kwargs_query()
-```
-
-The controller’s `list`/`retrieve` will use these kwargs automatically unless explicitly overridden by parameters.
+* **JWTService**: creación/validación/refresh de JWT (importa desde `fastapi_basekit.servicios`).
 
 ## Tests
 
-The project contains tests that validate the main functionality. Install the dependencies defined in `pyproject.toml` and run:
+Instala dependencias y ejecuta:
 
 ```bash
 pytest
 ```
 
-## License
+---
+
+## Licencia
 
 MIT
+
