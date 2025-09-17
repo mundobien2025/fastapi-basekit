@@ -1,1 +1,3 @@
-from .thrid.jwt import JWTService  # noqa
+from .thrid.jwt import JWTService
+
+__all__ = ["JWTService"]
