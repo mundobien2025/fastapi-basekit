@@ -55,6 +55,28 @@ class BaseRepository:
         """Construye condiciones a partir del diccionario de filtros."""
         return [self._get_field(fn) == value for fn, value in filters.items()]
 
+    def _build_search_condition(
+        self, search: Optional[str], search_fields: Optional[List[str]]
+    ) -> Optional[Any]:
+        """Construye una condición OR para búsqueda textual en múltiples campos
+
+        Usa ilike (insensible a mayúsculas) si hay término y campos válidos.
+        Ignora campos inexistentes silenciosamente.
+        """
+        if not search or not search_fields:
+            return None
+        exprs: List[Any] = []
+        for field_name in search_fields:
+            try:
+                field = self._get_field(field_name)
+            except AttributeError:
+                # Si el campo no existe en el modelo, lo omitimos
+                continue
+            exprs.append(field.ilike(f"%{search}%"))
+        if not exprs:
+            return None
+        return or_(*exprs)
+
     async def create(self, obj_in: Any | Dict) -> Any:
         """Crea un nuevo registro en la base de datos."""
         db = self.session
@@ -65,17 +87,13 @@ class BaseRepository:
         await db.refresh(obj_in)
         return obj_in
 
-    async def get(
-        self, record_id: Union[str, UUID]
-    ) -> Optional[Any]:
+    async def get(self, record_id: Union[str, UUID]) -> Optional[Any]:
         """Obtiene un registro por su ID."""
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
         return await self.session.get(self.model, record_id)
 
-    async def get_by_field(
-        self, field_name: str, value: Any
-    ) -> Optional[Any]:
+    async def get_by_field(self, field_name: str, value: Any) -> Optional[Any]:
         """Obtiene un registro por un campo específico."""
         field = self._get_field(field_name)
         result = await self.session.execute(
@@ -145,6 +163,8 @@ class BaseRepository:
         use_or: bool = False,
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
+        search: Optional[str] = None,
+        search_fields: Optional[List[str]] = None,
     ) -> tuple[List[Any], int]:
         """
         Lista registros con paginación y filtros, con soporte de joins.
@@ -152,15 +172,24 @@ class BaseRepository:
         """
         filters = filters or {}
         conditions = self._build_conditions(filters)
-        combined = (
+        combined_filters = (
             or_(*conditions)
             if (use_or and conditions)
             else and_(*conditions) if conditions else None
         )
+        # Búsqueda por texto en múltiples campos
+        search_condition = self._build_search_condition(search, search_fields)
 
         base_query = select(self.model)
-        if combined is not None:
-            base_query = base_query.where(combined)
+        # Combina filtros y búsqueda si ambos existen
+        if combined_filters is not None and search_condition is not None:
+            base_query = base_query.where(
+                and_(combined_filters, search_condition)
+            )
+        elif combined_filters is not None:
+            base_query = base_query.where(combined_filters)
+        elif search_condition is not None:
+            base_query = base_query.where(search_condition)
         if order_by is not None:
             base_query = base_query.order_by(order_by)
         base_query = self._apply_joins(base_query, joins)
