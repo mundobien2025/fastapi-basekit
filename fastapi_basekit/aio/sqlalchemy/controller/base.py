@@ -26,9 +26,7 @@ class SQLAlchemyBaseController(BaseController):
     ):
         params = self._params()
         service_params = {
-            "page": params.get("page"),
-            "count": params.get("count"),
-            "filters": params.get("filters"),
+            **params,
             "use_or": use_or,
             "joins": joins,
             "order_by": order_by,

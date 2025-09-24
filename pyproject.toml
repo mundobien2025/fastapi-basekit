@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapi-basekit"
-version = "0.1.7rc1"
+version = "0.1.8rc1"
 description = "Utilities and base classes for FastAPI async projects (Beanie or SQLAlchemy)"
 readme = "README.md"
 requires-python = ">=3.11"
