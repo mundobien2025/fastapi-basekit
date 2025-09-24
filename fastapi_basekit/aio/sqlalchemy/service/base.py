@@ -67,6 +67,7 @@ class BaseService:
 
     async def list(
         self,
+        search: Optional[str] = None,
         page: int = 1,
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
@@ -88,6 +89,8 @@ class BaseService:
             use_or=use_or,
             joins=joins,
             order_by=order_by,
+            search=search,
+            search_fields=self.search_fields,
         )
 
     async def create(
