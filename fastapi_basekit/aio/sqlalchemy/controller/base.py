@@ -32,10 +32,13 @@ class SQLAlchemyBaseController(BaseController):
             "order_by": order_by,
         }
         items, total = await self.service.list(**service_params)
+        count = params.get("count") or 0
+        total_pages = (total + count - 1) // count if count > 0 else 0
         pagination = {
             "page": params.get("page"),
-            "count": params.get("count"),
+            "count": count,
             "total": total,
+            "total_pages": total_pages,
         }
         return self.format_response(data=items, pagination=pagination)
 
