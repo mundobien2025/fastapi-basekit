@@ -1,0 +1,132 @@
+site_name: FastAPI BaseKit
+site_description: Toolkit base para desarrollo rápido de APIs con FastAPI
+site_url: https://tu-usuario.github.io/fastapi-basekit
+repo_url: https://github.com/tu-usuario/fastapi-basekit
+repo_name: fastapi-basekit
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: es
+  palette:
+    # Modo claro
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+    # Modo oscuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+  
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search:
+      lang: es
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - def_list
+  - tables
+
+nav:
+  - Inicio: index.md
+  - Primeros Pasos:
+    - Instalación: getting-started/installation.md
+    - Configuración: getting-started/configuration.md
+    - Primer CRUD: getting-started/first-crud.md
+  
+  - Guía de Usuario:
+    - Controllers: user-guide/controllers.md
+    - Services: user-guide/services.md
+    - Repositories: user-guide/repositories.md
+    - Paginación: user-guide/pagination.md
+    - Filtrado: user-guide/filtering.md
+    - Ordenamiento: user-guide/ordering.md
+    - Búsqueda: user-guide/search.md
+    - Validación: user-guide/validation.md
+  
+  - Avanzado:
+    - Permisos Personalizados: advanced/permissions.md
+    - Soft Deletes: advanced/soft-deletes.md
+    - Logging: advanced/logging.md
+    - Configuración Global: advanced/configuration.md
+    - Performance: advanced/performance.md
+  
+  - Referencia API:
+    - BaseController: api-reference/base-controller.md
+    - SQLAlchemyBaseController: api-reference/sqlalchemy-controller.md
+    - BaseService: api-reference/base-service.md
+    - BaseRepository: api-reference/base-repository.md
+    - Schemas: api-reference/schemas.md
+    - Excepciones: api-reference/exceptions.md
+  
+  - Ejemplos:
+    - CRUD Básico: examples/basic-crud.md
+    - Filtros Complejos: examples/complex-filters.md
+    - Relaciones: examples/relationships.md
+    - Autenticación: examples/authentication.md
+  
+  - Contribuir:
+    - Guía de Contribución: contributing.md
+    - Desarrollo: development.md
+  
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tu-usuario
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/tu-usuario
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/tu-usuario
+  
+  version:
+    provider: mike
+

@@ -1,4 +1,5 @@
-from typing import Any, ClassVar, Dict, List, Optional, Type
+import inspect
+from typing import Any, ClassVar, Dict, List, Optional, Type, Set
 from fastapi import Depends, Request
 from pydantic import BaseModel, TypeAdapter
 
@@ -15,6 +16,11 @@ class BaseController:
     schema_class: ClassVar[Type[BaseModel]]
     action: ClassVar[Optional[str]] = None
     request: Request
+    _params_excluded_fields: ClassVar[Set[str]] = {
+        "self", "page", "count", "search",
+        "__class__", "args", "kwargs", "id",
+        "payload", "data", "validated_data",
+    }
 
     def __init__(self) -> None:
         endpoint_func = (
@@ -46,9 +52,11 @@ class BaseController:
         params = self._params()
         items, total = await self.service.list(**params)
         count = params.get("count") or 0
+        page = params.get("page") or 1
+
         total_pages = (total + count - 1) // count if count > 0 else 0
         pagination = {
-            "page": params.get("page"),
+            "page": page,
             "count": count,
             "total": total,
             "total_pages": total_pages,
@@ -109,6 +117,47 @@ class BaseController:
             )
 
     def _params(self) -> Dict[str, Any]:
+        """
+        Extrae parámetros automáticamente usando introspección.
+
+        Primero intenta obtener parámetros validados por FastAPI desde
+        el frame del método llamador (con tipos ya convertidos).
+        Si falla, usa el método legacy de request.query_params.
+        """
+        # Intentar usar introspección para obtener valores validados
+        frame = inspect.currentframe()
+        if frame and frame.f_back:
+            caller_locals = frame.f_back.f_locals
+
+            # Extraer page, count, search de los parámetros validados
+            page = caller_locals.get("page")
+            count = caller_locals.get("count")
+            search = caller_locals.get("search")
+
+            # Si encontramos al menos page o count, usamos introspección
+            if page is not None or count is not None:
+                # Variables estándar a excluir de los filtros
+                
+                excluded = self._params_excluded_fields
+                # Construir filtros con todos los demás parámetros
+                # que no empiecen con _ y no sean None
+                filters = {
+                    k: v
+                    for k, v in caller_locals.items()
+                    if k not in excluded
+                    and not k.startswith("_")
+                    and v is not None
+                    and not callable(v)
+                }
+
+                return {
+                    "page": page if page is not None else 1,
+                    "count": count if count is not None else 10,
+                    "search": search,
+                    "filters": filters,
+                }
+
+        # Fallback: Método legacy usando request.query_params
         query_params = self.request.query_params if self.request else {}
 
         page = int(query_params.get("page", 1))
