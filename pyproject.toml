@@ -24,9 +24,9 @@ classifiers = [
 ]
 
 dependencies = [
-  "fastapi==0.116.1",
-  "pydantic==2.11.7",
-  "fastapi-restful[all]==0.6.0",
+  "fastapi>=0.116.1,<0.117",
+  "pydantic>=2.11.7,<3",
+  "fastapi-restful[all]>=0.6.0,<0.7",
 ]
 
 [tool.setuptools]
@@ -35,13 +35,13 @@ packages = { find = { include = ["fastapi_basekit*"] } }
 [project.optional-dependencies]
 beanie = ["beanie"]
 sqlalchemy = [
-  "SQLAlchemy[asyncio]==2.0.43",
-  "psycopg2==2.9.10",
+  "SQLAlchemy[asyncio]>=2.0.43,<3",
+  "psycopg2>=2.9.10,<3",
 ]
 all = [
   "beanie",
-  "SQLAlchemy[asyncio]==2.0.43",
-  "psycopg2==2.9.10",
+  "SQLAlchemy[asyncio]>=2.0.43,<3",
+  "psycopg2>=2.9.10,<3",
 ]
 
 [project.urls]
