@@ -17,14 +17,24 @@ class BaseController:
     action: ClassVar[Optional[str]] = None
     request: Request
     _params_excluded_fields: ClassVar[Set[str]] = {
-        "self", "page", "count", "search",
-        "__class__", "args", "kwargs", "id",
-        "payload", "data", "validated_data",
+        "self",
+        "page",
+        "count",
+        "search",
+        "__class__",
+        "args",
+        "kwargs",
+        "id",
+        "payload",
+        "data",
+        "validated_data",
     }
 
     def __init__(self) -> None:
         endpoint_func = (
-            self.request.scope.get("endpoint") if self.request else None
+            self.request.scope.get("endpoint")
+            if hasattr(self, "request") and self.request
+            else None
         )
         self.action = endpoint_func.__name__ if endpoint_func else None
 
@@ -84,7 +94,7 @@ class BaseController:
         data: Any,
         pagination: Optional[Dict[str, Any]] = None,
         message: Optional[str] = None,
-        status: str = "success",
+        response_status: str = "success",
     ) -> BaseModel:
         schema = self.get_schema_class()
 
@@ -107,68 +117,83 @@ class BaseController:
                 data=data_parsed,
                 pagination=pagination,
                 message=message or "Operación exitosa",
-                status=status,
+                status=response_status,
             )
         else:
             return BaseResponse(
                 data=data_parsed,
                 message=message or "Operación exitosa",
-                status=status,
+                status=response_status,
             )
 
-    def _params(self) -> Dict[str, Any]:
+    def _params(self, skip_frames: int = 1) -> Dict[str, Any]:
         """
         Extrae parámetros automáticamente usando introspección.
 
-        Primero intenta obtener parámetros validados por FastAPI desde
-        el frame del método llamador (con tipos ya convertidos).
-        Si falla, usa el método legacy de request.query_params.
+        Usa query_params como fuente de verdad para determinar QUÉ parámetros
+        existen, y luego intenta obtener sus VALORES validados desde el frame
+        del método llamador (con tipos ya convertidos por FastAPI).
+
+        Args:
+            skip_frames: Número de frames a saltar (1 por defecto para
+                llamadas directas, 2 para controllers heredados)
         """
-        # Intentar usar introspección para obtener valores validados
-        frame = inspect.currentframe()
-        if frame and frame.f_back:
-            caller_locals = frame.f_back.f_locals
-
-            # Extraer page, count, search de los parámetros validados
-            page = caller_locals.get("page")
-            count = caller_locals.get("count")
-            search = caller_locals.get("search")
-
-            # Si encontramos al menos page o count, usamos introspección
-            if page is not None or count is not None:
-                # Variables estándar a excluir de los filtros
-                
-                excluded = self._params_excluded_fields
-                # Construir filtros con todos los demás parámetros
-                # que no empiecen con _ y no sean None
-                filters = {
-                    k: v
-                    for k, v in caller_locals.items()
-                    if k not in excluded
-                    and not k.startswith("_")
-                    and v is not None
-                    and not callable(v)
-                }
-
-                return {
-                    "page": page if page is not None else 1,
-                    "count": count if count is not None else 10,
-                    "search": search,
-                    "filters": filters,
-                }
-
-        # Fallback: Método legacy usando request.query_params
+        # Obtener query_params como fuente de verdad
         query_params = self.request.query_params if self.request else {}
 
-        page = int(query_params.get("page", 1))
-        count = int(query_params.get("count", 10))
-        search = query_params.get("search")
+        # Parámetros especiales de paginación y búsqueda
+        standard_params = {"page", "count", "search"}
 
-        filters = {
-            k: v
-            for k, v in query_params.items()
-            if k not in ["page", "count", "search"]
-        }
+        # Valores por defecto
+        page = 1
+        count = 10
+        search = None
+        filters = {}
+
+        # Intentar obtener valores validados del frame local
+        frame = inspect.currentframe()
+        caller_locals = {}
+
+        if frame:
+            # Navegar hacia atrás en la pila según skip_frames
+            caller_frame = frame
+            for _ in range(skip_frames):
+                if caller_frame and caller_frame.f_back:
+                    caller_frame = caller_frame.f_back
+                else:
+                    break
+
+            if caller_frame:
+                caller_locals = caller_frame.f_locals
+
+        # Procesar cada parámetro de query_params
+        for param_name, param_value in query_params.items():
+            # Intentar obtener valor validado del frame local
+            validated_value = caller_locals.get(param_name)
+
+            # Si no existe en locals, usar el valor del query_param
+            final_value = (
+                validated_value if validated_value is not None else param_value
+            )
+
+            # Clasificar el parámetro
+            if param_name == "page":
+                page = (
+                    int(final_value)
+                    if not isinstance(final_value, int)
+                    else final_value
+                )
+            elif param_name == "count":
+                count = (
+                    int(final_value)
+                    if not isinstance(final_value, int)
+                    else final_value
+                )
+            elif param_name == "search":
+                search = final_value
+            elif param_name not in standard_params:
+                # Es un filtro
+                filters[param_name] = final_value
 
         return {
             "page": page,

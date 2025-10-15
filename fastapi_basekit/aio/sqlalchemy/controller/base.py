@@ -1,21 +1,37 @@
-from typing import Any, ClassVar, List, Optional, Type
-
+from typing import Any, ClassVar, List, Optional, Set
 from fastapi import Depends
-from pydantic import BaseModel
-from ...controller.base import BaseController
+
+from ....aio.controller.base import BaseController
 from ..service.base import BaseService
 
 
 class SQLAlchemyBaseController(BaseController):
     """BaseController para SQLAlchemy (AsyncSession).
 
-    Espera que el servicio ya esté construido con un repositorio que tenga
-    la sesión asignada, de modo que aquí solo se construyan los kwargs
-    adicionales (joins, order_by, use_or).
+    Controlador base específico para proyectos que usan SQLAlchemy con
+    async/await. Incluye soporte para joins, ordenamiento personalizado
+    y operadores OR en filtros, características específicas de SQL.
     """
 
     service: BaseService = Depends()
-    schema_class: ClassVar[Type[BaseModel]]
+
+    # Campos adicionales a excluir específicos de SQLAlchemy
+    _params_excluded_fields: ClassVar[Set[str]] = {
+        "self",
+        "page",
+        "count",
+        "search",
+        "use_or",
+        "joins",
+        "order_by",
+        "__class__",
+        "args",
+        "kwargs",
+        "id",
+        "payload",
+        "data",
+        "validated_data",
+    }
 
     async def list(
         self,
@@ -24,7 +40,15 @@ class SQLAlchemyBaseController(BaseController):
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
     ):
-        params = self._params()
+        """
+        Lista registros con paginación usando SQLAlchemy.
+
+        Args:
+            use_or: Si True, usa OR en lugar de AND para los filtros
+            joins: Lista de relaciones a hacer JOIN eager loading
+            order_by: Expresión de ordenamiento (ej: User.created_at.desc())
+        """
+        params = self._params(skip_frames=2)
         service_params = {
             **params,
             "use_or": use_or,
@@ -42,9 +66,14 @@ class SQLAlchemyBaseController(BaseController):
         }
         return self.format_response(data=items, pagination=pagination)
 
-    async def retrieve(
-        self, id: str, *, joins: Optional[List[str]] = None
-    ):
+    async def retrieve(self, id: str, *, joins: Optional[List[str]] = None):
+        """
+        Obtiene un registro por ID.
+
+        Args:
+            id: ID del registro
+            joins: Lista de relaciones a hacer JOIN eager loading
+        """
         item = await self.service.retrieve(id, joins=joins)
         return self.format_response(data=item)
 
@@ -54,13 +83,23 @@ class SQLAlchemyBaseController(BaseController):
         *,
         check_fields: Optional[List[str]] = None,
     ):
+        """
+        Crea un nuevo registro.
+
+        Args:
+            validated_data: Datos validados para crear
+            check_fields: Campos a verificar por duplicados antes de crear
+        """
         result = await self.service.create(validated_data, check_fields)
         return self.format_response(result, message="Creado exitosamente")
 
-    async def update(self, id: str, validated_data: Any):
-        result = await self.service.update(id, validated_data)
-        return self.format_response(result, message="Actualizado exitosamente")
-
-    async def delete(self, id: str):
-        await self.service.delete(id)
-        return self.format_response(None, message="Eliminado exitosamente")
+    def to_dict(self, obj: Any):
+        """Convierte un modelo SQLAlchemy a dict."""
+        if hasattr(obj, "model_dump"):
+            return obj.model_dump()
+        # Para modelos SQLAlchemy que usan __dict__
+        if hasattr(obj, "__dict__"):
+            return {
+                k: v for k, v in obj.__dict__.items() if not k.startswith("_")
+            }
+        return obj

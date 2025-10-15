@@ -48,6 +48,9 @@ class FakeRepository:
         ]
 
     async def paginate(self, query, page, count):
+        # Si query es una coroutine, esperarla primero
+        if hasattr(query, "__await__"):
+            query = await query
         total = len(query)
         start = count * (page - 1)
         return query[start : start + count], total  # noqa
