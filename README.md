@@ -24,13 +24,15 @@
 - 🎯 **CRUD Automático**: Controllers base con operaciones CRUD listas para usar
 - 🔍 **Búsqueda Inteligente**: Búsqueda multi-campo con filtros dinámicos
 - 📊 **Paginación Avanzada**: Paginación automática con `has_next`, `has_prev`
-- 🔗 **Relaciones Optimizadas**: Joins dinámicos para evitar queries N+1
+- 🔗 **Relaciones Optimizadas**: Joins dinámicos para evitar queries N+1 (SQLAlchemy)
 - 🎨 **Type-Safe**: Type hints completos para mejor DX
 - 🧪 **Testeable**: Diseño que facilita testing
-- 🗃️ **Multi-DB**: Soporte para SQLAlchemy (Postgres, MySQL, etc.) y MongoDB
+- 🗃️ **Multi-DB**: Controllers separados para SQLAlchemy y Beanie (MongoDB)
 - 🔒 **Permisos**: Sistema de permisos basado en clases
 - ⚡ **Performance**: Queries optimizados y lazy loading
 - 📝 **Validación**: Validación automática con Pydantic
+
+> 🆕 **v0.1.16+**: Controllers base ahora están completamente separados por ORM/ODM. Ver [CONTROLLERS_GUIDE.md](./CONTROLLERS_GUIDE.md) para detalles.
 
 ---
 
@@ -40,15 +42,43 @@
 # Instalación básica
 pip install fastapi-basekit
 
-# Con soporte SQLAlchemy
+# Con soporte SQLAlchemy (PostgreSQL, MySQL, etc.)
 pip install fastapi-basekit[sqlalchemy]
 
-# Con soporte MongoDB
-pip install fastapi-basekit[mongodb]
+# Con soporte Beanie (MongoDB)
+pip install fastapi-basekit[beanie]
 
 # Con todo
 pip install fastapi-basekit[all]
 ```
+
+---
+
+## 🎯 Controllers Separados por ORM/ODM
+
+A partir de la **v0.1.16**, los controllers están completamente separados:
+
+### 🐘 SQLAlchemy (PostgreSQL, MySQL, etc.)
+
+```python
+from fastapi_basekit.aio.sqlalchemy import SQLAlchemyBaseController
+
+class UserController(SQLAlchemyBaseController):
+    # Soporte para JOINs, ORDER BY, operador OR
+    pass
+```
+
+### 🍃 Beanie (MongoDB)
+
+```python
+from fastapi_basekit.aio.beanie import BeanieBaseController
+
+class UserController(BeanieBaseController):
+    # Optimizado para documentos MongoDB
+    pass
+```
+
+📖 **Guía completa**: Ver [CONTROLLERS_GUIDE.md](./CONTROLLERS_GUIDE.md) para ejemplos detallados y diferencias.
 
 ---
 
@@ -468,7 +498,6 @@ black fastapi_basekit
 flake8 fastapi_basekit
 mypy fastapi_basekit
 ```
-
 
 ## 📄 Licencia
 

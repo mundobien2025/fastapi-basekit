@@ -1,0 +1,17 @@
+# Dependencias de desarrollo y testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+
+# SQLAlchemy dependencies
+aiosqlite>=0.19.0
+sqlalchemy[asyncio]>=2.0.43
+
+# Beanie (MongoDB) dependencies
+beanie>=1.24.0
+motor>=3.3.0
+mongomock-motor>=0.0.21
+
+# Common
+email-validator>=2.1.0
+
