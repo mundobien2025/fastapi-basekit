@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Type, Union
+from typing import get_args, get_origin
 
-from bson import ObjectId
+from bson import ObjectId, Link
 from pydantic import BaseModel
 from beanie import Document
 from beanie.odm.queries.find import FindMany
@@ -33,6 +34,7 @@ class BaseRepository:
         filters: dict = None,
         **kwargs,
     ) -> FindMany[Document]:
+        """Versión personalizada que soporta campos Link."""
         exprs = []
 
         if search and search_fields:
@@ -49,9 +51,46 @@ class BaseRepository:
                 )
             )
 
+        # Obtener campos del modelo
+        model_fields = (
+            self.model.model_fields
+            if hasattr(self.model, "model_fields")
+            else {}
+        )
+
+        def _is_link_field(field_name: str) -> bool:
+            """Verifica si un campo es de tipo Link."""
+            field_info = model_fields.get(field_name)
+            if not field_info:
+                return False
+
+            field_type = field_info.annotation
+            origin = get_origin(field_type)
+
+            # Caso directo: Link[Model]
+            if origin is Link:
+                return True
+
+            # Caso Optional[Link[Model]] = Union[Link[Model], None]
+            # O cualquier Union que contenga Link
+            if origin is not None:
+                args = get_args(field_type)
+                for arg in args:
+                    # Verificar si el argumento es Link
+                    arg_origin = get_origin(arg)
+                    if arg_origin is Link:
+                        return True
+
+            return False
+
         for k, v in (filters or {}).items():
             if hasattr(self.model, k):
-                exprs.append(getattr(self.model, k) == v)
+                field_attr = getattr(self.model, k)
+
+                if _is_link_field(k):
+                    exprs.append(field_attr.id == v)
+                else:
+                    exprs.append(field_attr == v)
 
         query = self.model.find(*exprs, **self._get_query_kwargs(**kwargs))
         return query
