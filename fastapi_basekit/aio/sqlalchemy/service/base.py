@@ -1,7 +1,8 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import Request
 from pydantic import BaseModel
+from sqlalchemy import Select, select
 from ..repository.base import BaseRepository
 from ....exceptions.api_exceptions import (
     NotFoundException,
@@ -50,6 +51,28 @@ class BaseService:
         """
         return self.kwargs_query or {}
 
+    def build_queryset(self) -> Select[Tuple[Any]]:
+        """Construye el queryset base para las consultas de listado.
+
+        Este método puede ser sobrescrito por el usuario para personalizar
+        el queryset base (agregar joins, agregaciones, etc.) sin necesidad
+        de reescribir el método list().
+
+        Ejemplo de uso:
+            def build_queryset(self):
+                from sqlalchemy import func, select
+                from .models import User, Referral
+
+                return select(
+                    User,
+                    func.count(Referral.id).label('referidos_count')
+                ).outerjoin(Referral, User.id == Referral.user_id).group_by(User.id)
+
+        Returns:
+            Select: Query base de SQLAlchemy
+        """
+        return select(self.repository.model)
+
     async def retrieve(
         self, id: str, joins: Optional[List[str]] = None
     ) -> Any:
@@ -75,6 +98,9 @@ class BaseService:
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
     ) -> tuple[List[Any], int]:
+        # Construye el queryset base personalizado
+        base_query = self.build_queryset()
+
         # Aplica filtros y kwargs de consulta definidos por el servicio
         applied = self.get_filters(filters)
         kwargs = self.get_kwargs_query()
@@ -83,6 +109,7 @@ class BaseService:
         if order_by is None:
             order_by = kwargs.get("order_by")
         return await self.repository.list_paginated(
+            base_query=base_query,
             page=page,
             count=count,
             filters=applied,
@@ -117,9 +144,7 @@ class BaseService:
         created = await self.repository.create(data)
         return created
 
-    async def update(
-        self, id: str, data: BaseModel | Dict[str, Any]
-    ) -> Any:
+    async def update(self, id: str, data: BaseModel | Dict[str, Any]) -> Any:
         update_data = (
             data.model_dump(exclude_unset=True)
             if isinstance(data, BaseModel)

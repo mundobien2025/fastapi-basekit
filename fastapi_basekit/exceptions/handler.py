@@ -4,8 +4,22 @@ from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from pymongo.errors import DuplicateKeyError
-from beanie.exceptions import DocumentNotFound
+
+try:  # pragma: no cover - dependencia opcional
+    from pymongo.errors import DuplicateKeyError  # type: ignore
+except ImportError:  # pragma: no cover
+    class DuplicateKeyError(Exception):  # type: ignore[no-redef]
+        """Fallback cuando pymongo no está instalado."""
+
+        ...
+
+try:  # pragma: no cover - dependencia opcional
+    from beanie.exceptions import DocumentNotFound  # type: ignore
+except ImportError:  # pragma: no cover
+    class DocumentNotFound(Exception):  # type: ignore[no-redef]
+        """Fallback cuando beanie no está instalado."""
+
+        ...
 
 from ..schema.base import BaseResponse
 

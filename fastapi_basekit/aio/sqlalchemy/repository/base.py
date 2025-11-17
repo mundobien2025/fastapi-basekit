@@ -165,9 +165,14 @@ class BaseRepository:
         order_by: Optional[Any] = None,
         search: Optional[str] = None,
         search_fields: Optional[List[str]] = None,
+        base_query: Optional[Select[Tuple[Any]]] = None,
     ) -> tuple[List[Any], int]:
         """
         Lista registros con paginación y filtros, con soporte de joins.
+
+        Args:
+            base_query: Query base personalizado. Si no se proporciona,
+                       se usa select(self.model) por defecto.
         Retorna (items, total)
         """
         filters = filters or {}
@@ -180,7 +185,9 @@ class BaseRepository:
         # Búsqueda por texto en múltiples campos
         search_condition = self._build_search_condition(search, search_fields)
 
-        base_query = select(self.model)
+        # Usa el query base proporcionado o crea uno por defecto
+        if base_query is None:
+            base_query = select(self.model)
         # Combina filtros y búsqueda si ambos existen
         if combined_filters is not None and search_condition is not None:
             base_query = base_query.where(
