@@ -12,8 +12,7 @@
 
 [Documentación](https://github.com/mundobien2025/fastapi-basekit) •
 [Ejemplos](./examples) •
-[Changelog](./CHANGELOG.md) •
-[Contribuir](./CONTRIBUTING.md)
+[Changelog](./CHANGELOG.md)
 
 </div>
 
@@ -23,7 +22,7 @@
 
 - 🎯 **CRUD Automático**: Controllers base con operaciones CRUD listas para usar
 - 🔍 **Búsqueda Inteligente**: Búsqueda multi-campo con filtros dinámicos
-- 📊 **Paginación Avanzada**: Paginación automática con `has_next`, `has_prev`
+- 📊 **Paginación Avanzada**: Paginación automática con metadata completa
 - 🔗 **Relaciones Optimizadas**: Joins dinámicos para evitar queries N+1 (SQLAlchemy)
 - 🎨 **Type-Safe**: Type hints completos para mejor DX
 - 🧪 **Testeable**: Diseño que facilita testing
@@ -31,8 +30,7 @@
 - 🔒 **Permisos**: Sistema de permisos basado en clases
 - ⚡ **Performance**: Queries optimizados y lazy loading
 - 📝 **Validación**: Validación automática con Pydantic
-
-> 🆕 **v0.1.16+**: Controllers base ahora están completamente separados por ORM/ODM. Ver [CONTROLLERS_GUIDE.md](./CONTROLLERS_GUIDE.md) para detalles.
+- 🔧 **Queryset Personalizable**: Personaliza queries sin reescribir métodos
 
 ---
 
@@ -54,70 +52,60 @@ pip install fastapi-basekit[all]
 
 ---
 
-## 🎯 Controllers Separados por ORM/ODM
-
-A partir de la **v0.1.16**, los controllers están completamente separados:
-
-### 🐘 SQLAlchemy (PostgreSQL, MySQL, etc.)
-
-```python
-from fastapi_basekit.aio.sqlalchemy import SQLAlchemyBaseController
-
-class UserController(SQLAlchemyBaseController):
-    # Soporte para JOINs, ORDER BY, operador OR
-    pass
-```
-
-### 🍃 Beanie (MongoDB)
-
-```python
-from fastapi_basekit.aio.beanie import BeanieBaseController
-
-class UserController(BeanieBaseController):
-    # Optimizado para documentos MongoDB
-    pass
-```
-
-📖 **Guía completa**: Ver [CONTROLLERS_GUIDE.md](./CONTROLLERS_GUIDE.md) para ejemplos detallados y diferencias.
-
----
-
 ## 🚀 Inicio Rápido
 
-### 1. Modelo (SQLAlchemy)
+### Ejemplo Simple: CRUD Básico
+
+#### 1. Modelo (SQLAlchemy)
 
 ```python
 # models/user.py
-from sqlalchemy import Column, String, Boolean
-from database import Base
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import declarative_base
+from datetime import datetime
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True)
-    name = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    is_active = Column(Boolean, default=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False, index=True)
+    age = Column(Integer, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
 ```
 
-### 2. Schema (Pydantic)
+#### 2. Schema (Pydantic)
 
 ```python
 # schemas/user.py
 from pydantic import BaseModel, EmailStr
+from typing import Optional
+from datetime import datetime
 
 class UserSchema(BaseModel):
-    id: str
+    id: int
     name: str
     email: EmailStr
+    age: Optional[int] = None
     is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
 
 class UserCreateSchema(BaseModel):
     name: str
     email: EmailStr
+    age: Optional[int] = None
+    is_active: bool = True
 ```
 
-### 3. Repository
+#### 3. Repository
 
 ```python
 # repositories/user.py
@@ -128,74 +116,326 @@ class UserRepository(BaseRepository):
     model = User
 ```
 
-### 4. Service
+#### 4. Service
 
 ```python
 # services/user.py
 from fastapi_basekit.aio.sqlalchemy.service.base import BaseService
 
 class UserService(BaseService):
+    # Campos por los que se puede buscar
     search_fields = ["name", "email"]
+
+    # Campos que deben ser únicos al crear
     duplicate_check_fields = ["email"]
 ```
 
-### 5. Controller
+#### 5. Controller
 
 ```python
 # controllers/user.py
-from fastapi import APIRouter, Query, Depends
+from typing import Optional
+from fastapi import APIRouter, Query, Depends, Request
 from fastapi_basekit.aio.sqlalchemy.controller.base import SQLAlchemyBaseController
-from schemas.user import UserSchema, UserCreateSchema
+from schemas.user import UserSchema, UserCreateSchema, UserUpdateSchema
 from services.user import UserService
+from repositories.user import UserRepository
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+def get_user_service(request: Request) -> UserService:
+    repository = UserRepository(db=request.state.db)
+    return UserService(repository=repository, request=request)
 
 @router.get("/")
 class ListUsers(SQLAlchemyBaseController):
     schema_class = UserSchema
-    service = Depends(UserService)
+    service: UserService = Depends(get_user_service)
 
     async def __call__(
         self,
         page: int = Query(1, ge=1),
         count: int = Query(10, ge=1, le=100),
-        search: str = Query(None),
-        is_active: bool = Query(None),
-        order_by: str = Query(None),
+        search: Optional[str] = Query(None),
+        is_active: Optional[bool] = Query(None),
     ):
         return await self.list()
 
 @router.get("/{id}")
 class GetUser(SQLAlchemyBaseController):
     schema_class = UserSchema
-    service = Depends(UserService)
+    service: UserService = Depends(get_user_service)
 
-    async def __call__(self, id: str):
-        return await self.retrieve(id)
+    async def __call__(self, id: int):
+        return await self.retrieve(str(id))
 
-@router.post("/")
+@router.post("/", status_code=201)
 class CreateUser(SQLAlchemyBaseController):
     schema_class = UserSchema
-    service = Depends(UserService)
+    service: UserService = Depends(get_user_service)
+
+    async def __call__(self, data: UserCreateSchema):
+        return await self.create(data)
+
+@router.put("/{id}")
+class UpdateUser(SQLAlchemyBaseController):
+    schema_class = UserSchema
+    service: UserService = Depends(get_user_service)
+
+    async def __call__(self, id: int, data: UserUpdateSchema):
+        return await self.update(str(id), data)
+
+@router.delete("/{id}")
+class DeleteUser(SQLAlchemyBaseController):
+    schema_class = UserSchema
+    service: UserService = Depends(get_user_service)
+
+    async def __call__(self, id: int):
+        return await self.delete(str(id))
+```
+
+#### 6. ¡Listo! 🎉
+
+Ya tienes un CRUD completo con:
+
+- ✅ Paginación automática
+- ✅ Búsqueda por nombre o email
+- ✅ Filtrado por `is_active`
+- ✅ Validación de duplicados
+- ✅ Type hints completos
+
+---
+
+## 📚 Ejemplos Avanzados
+
+### Ejemplo 1: Queryset Personalizado con Agregaciones
+
+**Caso de uso**: Listar usuarios con COUNT de referidos y SUM de órdenes sin reescribir `list()`.
+
+```python
+# services/user.py
+from sqlalchemy import Select, func, select
+from sqlalchemy.orm import aliased
+from fastapi_basekit.aio.sqlalchemy.service.base import BaseService
+from models.user import User, Referral, Order
+
+class UserService(BaseService):
+    search_fields = ["name", "email"]
+    duplicate_check_fields = ["email"]
+
+    def build_queryset(self) -> Select:
+        """
+        Personaliza el queryset base para incluir agregaciones.
+        Este método se ejecuta ANTES de aplicar filtros.
+        """
+        referral_alias = aliased(Referral)
+        order_alias = aliased(Order)
+
+        query = (
+            select(
+                User,
+                func.count(func.distinct(referral_alias.id)).label("referidos_count"),
+                func.count(func.distinct(order_alias.id)).label("total_orders"),
+                func.coalesce(func.sum(order_alias.total), 0).label("total_spent"),
+            )
+            .outerjoin(referral_alias, User.id == referral_alias.user_id)
+            .outerjoin(order_alias, User.id == order_alias.user_id)
+            .group_by(User.id)
+        )
+        return query
+```
+
+**Schema con agregaciones**:
+
+```python
+# schemas/user.py
+class UserWithStatsSchema(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    created_at: datetime
+    referidos_count: int
+    total_orders: Optional[int] = None
+    total_spent: Optional[int] = None  # En centavos
+
+    class Config:
+        from_attributes = True
+```
+
+**Controller** (sin cambios en `list()`):
+
+```python
+@router.get("/")
+class ListUsersWithStats(SQLAlchemyBaseController):
+    schema_class = UserWithStatsSchema
+    service: UserService = Depends(get_user_service)
+
+    async def __call__(
+        self,
+        page: int = Query(1, ge=1),
+        count: int = Query(10, ge=1, le=100),
+        search: Optional[str] = Query(None),
+    ):
+        # El queryset personalizado se aplica automáticamente
+        return await self.list(search=search)
+```
+
+**Resultado**:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Juan Pérez",
+      "email": "juan@example.com",
+      "created_at": "2024-01-01T00:00:00",
+      "referidos_count": 5,
+      "total_orders": 12,
+      "total_spent": 150000
+    }
+  ],
+  "pagination": { ... }
+}
+```
+
+### Ejemplo 2: Joins Dinámicos con Relaciones
+
+**Caso de uso**: Cargar relaciones automáticamente para evitar queries N+1.
+
+```python
+# services/user.py
+class UserService(BaseService):
+    search_fields = ["name", "email"]
+    duplicate_check_fields = ["email"]
+
+    def get_kwargs_query(self) -> dict:
+        """
+        Define joins según la acción.
+        En 'list' y 'retrieve' carga automáticamente las relaciones.
+        """
+        if self.action in ["list", "retrieve"]:
+            return {"joins": ["role", "roles"]}
+        return {}
+```
+
+**Modelo con relaciones**:
+
+```python
+# models/user.py
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    email = Column(String(100), unique=True)
+    role_id = Column(Integer, ForeignKey("roles.id"))
+
+    # Relación uno a muchos
+    role = relationship("Role", foreign_keys=[role_id])
+
+    # Relación muchos a muchos
+    roles = relationship("Role", secondary=user_roles, back_populates="users")
+```
+
+**Controller**:
+
+```python
+@router.get("/")
+class ListUsers(SQLAlchemyBaseController):
+    schema_class = UserSchema  # Incluye role y roles
+    service: UserService = Depends(get_user_service)
+
+    async def __call__(self, ...):
+        # Los joins se aplican automáticamente desde get_kwargs_query()
+        return await self.list()
+```
+
+### Ejemplo 3: Sistema de Permisos
+
+**Caso de uso**: Control de acceso basado en roles y propiedad.
+
+```python
+# permissions/user.py
+from fastapi_basekit.aio.permissions.base import BasePermission
+
+class IsAdmin(BasePermission):
+    message_exception = "Solo administradores pueden realizar esta acción"
+
+    async def has_permission(self, request: Request) -> bool:
+        user = getattr(request.state, "user", None)
+        return getattr(user, "is_admin", False) if user else False
+
+class IsOwnerOrAdmin(BasePermission):
+    message_exception = "Solo el propietario o un administrador puede realizar esta acción"
+
+    async def has_permission(self, request: Request) -> bool:
+        user = getattr(request.state, "user", None)
+        if not user:
+            return False
+
+        resource_id = request.path_params.get("id")
+        if getattr(user, "is_admin", False):
+            return True
+
+        return str(user.id) == str(resource_id)
+```
+
+**Controller con permisos**:
+
+```python
+@router.get("/{id}")
+class GetUser(SQLAlchemyBaseController):
+    schema_class = UserSchema
+    service: UserService = Depends(get_user_service)
+
+    def check_permissions(self) -> List[Type[BasePermission]]:
+        return [IsOwnerOrAdmin]
+
+    async def __call__(self, id: int):
+        return await self.retrieve(str(id))
+
+@router.post("/", status_code=201)
+class CreateUser(SQLAlchemyBaseController):
+    schema_class = UserSchema
+    service: UserService = Depends(get_user_service)
+
+    def check_permissions(self) -> List[Type[BasePermission]]:
+        return [IsAdmin]  # Solo admins pueden crear
 
     async def __call__(self, data: UserCreateSchema):
         return await self.create(data)
 ```
 
-### 6. ¡Listo! 🎉
+### Ejemplo 4: Filtros Personalizados
 
-Ya tienes un CRUD completo con:
+**Caso de uso**: Transformar filtros antes de aplicarlos.
 
-✅ Paginación automática  
-✅ Búsqueda por nombre o email  
-✅ Filtrado por `is_active`  
-✅ Ordenamiento configurable  
-✅ Validación de duplicados  
-✅ Type hints completos
+```python
+# services/user.py
+class UserService(BaseService):
+    search_fields = ["name", "email"]
+    duplicate_check_fields = ["email"]
+
+    def get_filters(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Transforma filtros antes de aplicarlos.
+        Ejemplo: convertir age_min en filtro de edad.
+        """
+        applied = filters or {}
+
+        # Si viene age_min, lo convertimos en filtro de edad
+        if "age_min" in applied:
+            age_min = applied.pop("age_min")
+            # Aquí podrías agregar lógica adicional
+            # Por ejemplo, aplicar filtro de edad mínima
+
+        return applied
+```
 
 ---
 
-## 📚 Ejemplos de Uso
+## 📖 Uso de la API
 
 ### Listar con Filtros y Paginación
 
@@ -209,56 +449,30 @@ GET /users?search=john
 # Filtrar activos
 GET /users?is_active=true
 
-# Ordenar por nombre
-GET /users?order_by=name&order_direction=asc
-
 # Combinar filtros
-GET /users?search=john&is_active=true&order_by=created_at&order_direction=desc
+GET /users?search=john&is_active=true&page=1&count=10
 ```
 
-**Respuesta:**
+**Respuesta**:
 
 ```json
 {
   "data": [
     {
-      "id": "123",
+      "id": 1,
       "name": "John Doe",
       "email": "john@example.com",
-      "is_active": true
+      "age": 30,
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": null
     }
   ],
   "pagination": {
     "page": 1,
     "count": 10,
     "total": 100,
-    "pages": 10,
-    "total_pages": 10,
-    "has_next": true,
-    "has_prev": false,
-    "next_page": 2,
-    "prev_page": null
-  },
-  "message": "Operación exitosa",
-  "status": "success"
-}
-```
-
-### Obtener un Usuario
-
-```bash
-GET /users/123
-```
-
-**Respuesta:**
-
-```json
-{
-  "data": {
-    "id": "123",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "is_active": true
+    "total_pages": 10
   },
   "message": "Operación exitosa",
   "status": "success"
@@ -273,19 +487,24 @@ Content-Type: application/json
 
 {
   "name": "Jane Doe",
-  "email": "jane@example.com"
+  "email": "jane@example.com",
+  "age": 25,
+  "is_active": true
 }
 ```
 
-**Respuesta:**
+**Respuesta**:
 
 ```json
 {
   "data": {
-    "id": "124",
+    "id": 2,
     "name": "Jane Doe",
     "email": "jane@example.com",
-    "is_active": true
+    "age": 25,
+    "is_active": true,
+    "created_at": "2024-01-02T00:00:00",
+    "updated_at": null
   },
   "message": "Creado exitosamente",
   "status": "success"
@@ -296,150 +515,132 @@ Content-Type: application/json
 
 ## 🎯 Características Avanzadas
 
-### Relaciones y Joins
+### build_queryset(): Personalización de Queries
+
+El método `build_queryset()` permite personalizar el query base **antes** de aplicar filtros, búsqueda y paginación. Esto es útil para:
+
+- Agregar JOINs complejos
+- Incluir agregaciones (COUNT, SUM, AVG)
+- Aplicar GROUP BY
+- Seleccionar campos calculados
+- Optimizar queries específicas
+
+**Ventajas**:
+
+- ✅ No necesitas reescribir `list()`
+- ✅ Los filtros se aplican automáticamente sobre tu query personalizado
+- ✅ Mantiene toda la funcionalidad de paginación y búsqueda
+
+### get_kwargs_query(): Configuración Dinámica
+
+Permite definir configuración de queries según la acción:
 
 ```python
-# models/user.py
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(String, primary_key=True)
-    name = Column(String)
-    role_id = Column(String, ForeignKey("roles.id"))
-
-    # Relación
-    role = relationship("Role", back_populates="users")
-
-# controller
-@router.get("/")
-async def list_users(
-    self,
-    include_role: bool = Query(False),
-):
-    # Si include_role=true, carga la relación automáticamente
-    if include_role:
-        self.service.kwargs_query = {"joins": ["role"]}
-    return await self.list()
+def get_kwargs_query(self) -> dict:
+    if self.action == "list":
+        return {"joins": ["role", "profile"]}
+    elif self.action == "retrieve":
+        return {"joins": ["role", "profile", "orders"]}
+    return {}
 ```
 
-### Permisos Personalizados
+### get_filters(): Transformación de Filtros
+
+Transforma o valida filtros antes de aplicarlos:
 
 ```python
-from fastapi_basekit.aio.permissions.base import BasePermission
+def get_filters(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    applied = filters or {}
 
-class IsAdmin(BasePermission):
-    message_exception = "Solo administradores pueden acceder"
+    # Validar o transformar filtros
+    if "date_from" in applied:
+        # Convertir formato de fecha, etc.
+        pass
 
-    async def has_permission(self, request: Request) -> bool:
-        user = request.state.user
-        return user.is_admin
-
-class UserController(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service = Depends(UserService)
-
-    def check_permissions(self) -> List[Type[BasePermission]]:
-        if self.action in ["create", "delete"]:
-            return [IsAdmin]
-        return []
+    return applied
 ```
 
-### Soft Deletes
+---
 
-```python
-# models/user.py
-class User(Base):
-    __tablename__ = "users"
+## 📁 Estructura de Ejemplos
 
-    id = Column(String, primary_key=True)
-    name = Column(String)
-    deleted_at = Column(DateTime, nullable=True)
+El proyecto incluye ejemplos completos en la carpeta `examples/`:
 
-# repository
-class UserRepository(BaseRepository):
-    model = User
-    enable_soft_delete = True
-
-# controller
-@router.delete("/{id}")
-async def delete_user(self, id: str, hard: bool = False):
-    """
-    Soft delete por defecto.
-    hard=true para eliminación física.
-    """
-    await self.service.delete(id, hard_delete=hard)
-    return self.format_response(None, message="Usuario eliminado")
 ```
-
-### Validación de Duplicados
-
-```python
-class UserService(BaseService):
-    # Validar que email sea único antes de crear
-    duplicate_check_fields = ["email"]
-
-# Intento de crear usuario con email duplicado
-# → DatabaseIntegrityException: "Registro ya existe"
+examples/
+├── simple_crud/          # CRUD básico
+│   ├── models.py
+│   ├── schemas.py
+│   ├── repository.py
+│   ├── service.py
+│   └── controller.py
+│
+├── advanced_queryset/    # Queryset personalizado con agregaciones
+│   ├── models.py
+│   ├── schemas.py
+│   ├── repository.py
+│   ├── service.py        # build_queryset() con COUNT y SUM
+│   └── controller.py
+│
+├── with_relations/       # Relaciones y joins dinámicos
+│   ├── models.py
+│   ├── schemas.py
+│   ├── repository.py
+│   ├── service.py        # get_kwargs_query() con joins
+│   └── controller.py
+│
+└── with_permissions/     # Sistema de permisos
+    ├── models.py
+    ├── schemas.py
+    ├── repository.py
+    ├── service.py
+    ├── permissions.py    # Permisos personalizados
+    └── controller.py
 ```
 
 ---
 
 ## 🔧 Configuración
 
-```python
-# main.py
-from fastapi import FastAPI
-from fastapi_basekit import configure
-
-# Configurar el toolkit globalmente
-configure(
-    default_page_size=25,
-    max_page_size=200,
-    log_level="INFO",
-    strict_filter_validation=True,
-)
-
-app = FastAPI(title="Mi API")
-```
-
-Variables de entorno:
+### Variables de Entorno
 
 ```bash
 # .env
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
 FASTAPI_BASEKIT_DEFAULT_PAGE_SIZE=25
 FASTAPI_BASEKIT_MAX_PAGE_SIZE=200
-FASTAPI_BASEKIT_LOG_LEVEL=DEBUG
-FASTAPI_BASEKIT_STRICT_FILTER_VALIDATION=true
 ```
 
----
+### Setup de Base de Datos
 
-## 📊 Arquitectura
+```python
+# database.py
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
+engine = create_async_engine("postgresql+asyncpg://user:pass@localhost/dbname")
+async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+async def get_db():
+    async with async_session_maker() as session:
+        yield session
 ```
-┌─────────────┐
-│   Client    │
-└─────┬───────┘
-      │ HTTP Request
-      ▼
-┌─────────────────┐
-│   Controller    │  ← Validación, permisos, formato de respuesta
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│    Service      │  ← Lógica de negocio, validaciones
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Repository    │  ← Acceso a datos, queries
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│    Database     │
-└─────────────────┘
+
+### Middleware para DB
+
+```python
+# main.py
+from fastapi import FastAPI, Request
+from database import get_db
+
+app = FastAPI()
+
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    async for session in get_db():
+        request.state.db = session
+        response = await call_next(request)
+        await session.commit()
+        return response
 ```
 
 ---
@@ -465,10 +666,39 @@ def test_create_user(client: TestClient):
         "email": "test@example.com"
     }
     response = client.post("/users", json=user_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["data"]["name"] == "Test User"
-    assert data["message"] == "Creado exitosamente"
+```
+
+---
+
+## 📊 Arquitectura
+
+```
+┌─────────────┐
+│   Client    │
+└─────┬───────┘
+      │ HTTP Request
+      ▼
+┌─────────────────┐
+│   Controller    │  ← Validación, permisos, formato de respuesta
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│    Service      │  ← Lógica de negocio, build_queryset(), get_filters()
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   Repository    │  ← Acceso a datos, queries optimizados
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│    Database     │
+└─────────────────┘
 ```
 
 ---
@@ -484,11 +714,8 @@ def test_create_user(client: TestClient):
 git clone https://github.com/mundobien2025/fastapi-basekit.git
 cd fastapi-basekit
 
-# Instalar con Poetry
-poetry install
-
-# Activar entorno virtual
-poetry shell
+# Instalar dependencias
+pip install -e ".[dev]"
 
 # Ejecutar tests
 pytest
@@ -498,6 +725,8 @@ black fastapi_basekit
 flake8 fastapi_basekit
 mypy fastapi_basekit
 ```
+
+---
 
 ## 📄 Licencia
 
