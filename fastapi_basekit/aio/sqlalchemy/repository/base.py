@@ -211,7 +211,42 @@ class BaseRepository:
         offset = count * (page - 1)
         page_query = base_query.offset(offset).limit(count)
         result = await db.execute(page_query)
-        items = list(result.scalars().all())
+        rows = result.unique().all()
+
+        # Procesar filas para soportar "Result Hydration"
+        items = []
+        for row in rows:
+            # Si la fila tiene un solo elemento, tratarlo como escalar normal
+            if len(row) == 1:
+                items.append(row[0])
+            else:
+                # Fila compleja: tomar el primer elemento como entidad
+                entity = row[0]
+
+                # Obtener las claves de las columnas del resultado
+                # La primera columna es la entidad, las demás son
+                # anotaciones/etiquetas
+                column_keys = list(row._mapping.keys())
+
+                # Inyectar dinámicamente los valores extra en la entidad
+                # principal. Empezar desde el índice 1 (el índice 0 es la
+                # entidad principal)
+                for i in range(1, len(row)):
+                    # Obtener el nombre de la columna (puede ser una etiqueta
+                    # o nombre de columna)
+                    if i < len(column_keys):
+                        key = column_keys[i]
+                    else:
+                        # Si no hay nombre de columna, usar un nombre genérico
+                        key = f"_extra_{i}"
+
+                    value = row[i]
+
+                    # Inyectar el valor como atributo dinámico en la entidad
+                    setattr(entity, key, value)
+
+                items.append(entity)
+
         return items, int(total)
 
     async def update(
