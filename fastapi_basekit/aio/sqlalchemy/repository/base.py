@@ -7,7 +7,6 @@ from sqlalchemy.orm import Relationship, joinedload, selectinload
 
 from ....exceptions.api_exceptions import NotFoundException
 
-
 class BaseRepository:
     """
     Repositorio base para SQLAlchemy Async.
@@ -550,9 +549,9 @@ class BaseRepository:
         result = await self.session.execute(query)
         return result.scalars().first() if one else result.scalars().all()
 
-    async def apply_list_filters(
+    def apply_list_filters(
         self,
-        base_query: Optional[Select[Tuple[Any]]] = None,
+        queryset: Select[Tuple[Any]],
         filters: Optional[Dict[str, Any]] = None,
         use_or: bool = False,
         joins: Optional[List[str]] = None,
@@ -562,20 +561,15 @@ class BaseRepository:
     ) -> Select[Tuple[Any]]:
         """Aplica filtros estándar, búsqueda y ordenamiento al query."""
         filters = filters or {}
-
-        # 1. Inicializar query base
-        if base_query is None:
-            base_query = select(self.model)
-
-        # 2. RESOLUCIÓN UNIVERSAL DE FILTROS (JOINs de filtrado y atributos)
+        
+        # 1. RESOLUCIÓN UNIVERSAL DE FILTROS (JOINs de filtrado y atributos)
         resolved_filters, joins_to_apply = self._resolve_attribute(filters)
 
-        # 3. Aplicar JOINs de filtrado
+        # 2. Aplicar JOINs de filtrado
         for relation_name, relation_attr in joins_to_apply.items():
-            base_query = base_query.join(relation_attr)
+            queryset = queryset.join(relation_attr)
 
-        # 4. Construir las condiciones WHERE a partir de los atributos
-        # resueltos
+        # 3. Construir las condiciones WHERE
         conditions = self._build_conditions(resolved_filters=resolved_filters)
         combined_filters = (
             or_(*conditions)
@@ -583,52 +577,43 @@ class BaseRepository:
             else and_(*conditions) if conditions else None
         )
 
-        # 5. Aplicar búsqueda textual (search)
+        # 4. Aplicar búsqueda textual (search)
         search_condition = self._build_search_condition(search, search_fields)
 
-        # 6. Combina todos los filtros (combined_filters, search_condition)
+        # 5. Combina todos los filtros
         if combined_filters is not None and search_condition is not None:
-            base_query = base_query.where(
+            queryset = queryset.where(
                 and_(combined_filters, search_condition)
             )
         elif combined_filters is not None:
-            base_query = base_query.where(combined_filters)
+            queryset = queryset.where(combined_filters)
         elif search_condition is not None:
-            base_query = base_query.where(search_condition)
+            queryset = queryset.where(search_condition)
 
-        # 7. Resolver y aplicar orden con joins automáticos
+        # 6. Resolver y aplicar orden
         order_expression, order_joins = self._resolve_order_by(
             order_by=order_by,
         )
 
-        # Aplicar JOINs de ordenamiento
         for relation_name, relation_attr in order_joins.items():
-            base_query = base_query.join(relation_attr)
+            queryset = queryset.join(relation_attr)
 
-        # Aplicar expresión de ordenamiento
         if order_expression is not None:
-            base_query = base_query.order_by(order_expression)
+            queryset = queryset.order_by(order_expression)
 
-        # Aplicar joins de carga
-        base_query = self._apply_joins(base_query, joins)
+        queryset = self._apply_joins(queryset, joins)
 
-        return base_query
+        return queryset
 
-    async def build_list_queryset(
+    def build_list_queryset(
         self,
-        base_query: Optional[Select[Tuple[Any]]] = None,
         **kwargs: Any,
     ) -> Select[Tuple[Any]]:
         """
-        Construye el query para listado personalizado.
-        Este método es para que las subclases lo sobrescriban y agreguen
-        joins o lógica específica antes de aplicar los filtros estándar.
+        Construye el query inicial para listado.
+        Debe retornar un objeto Select.
         """
-        # 1. Inicializar query base
-        if base_query is None:
-            base_query = select(self.model)
-
-        return base_query
+        return select(self.model)
 
     async def list_paginated(
         self,
@@ -641,55 +626,36 @@ class BaseRepository:
         search: Optional[str] = None,
         search_fields: Optional[List[str]] = None,
         base_query: Optional[Select[Tuple[Any]]] = None,
+        **kwargs: Any,
     ) -> tuple[List[Any], int]:
-        """
-        Lista registros con paginación, filtros universales y soporte de joins.
-
-        Soporta filtrado avanzado con relaciones usando sintaxis '__'.
-        Por ejemplo:
-        - Filtro simple: {"status": "active"}
-        - Filtro con relación: {"user_roles__role__code": "Impulsado"}
-        - Múltiples valores: {"status": ["active", "pending"]}
-
-        Args:
-            base_query: Query base personalizado. Si no se proporciona,
-                       se usa select(self.model) por defecto.
-            filters: Diccionario de filtros que puede incluir rutas con '__'
-            use_or: Si True, combina filtros con OR en lugar de AND
-            joins: Lista de relaciones para carga eager
-                   (joinedload/selectinload)
-            order_by: Expresión de ordenamiento
-            search: Término de búsqueda textual
-            search_fields: Campos donde buscar el término de búsqueda
-            page: Número de página (1-indexed)
-            count: Cantidad de items por página
-
-        Returns:
-            Tuple con (items, total)
-        """
         
-        # 1. Construir el query base personalizado (subclases)
-        queryset = await self.build_list_queryset(
-            base_query=base_query,
+        # 1. Construir query personalizado
+        kwargs = {
+            "filters": filters,
+            "use_or": use_or,
+            "joins": joins,
+            "order_by": order_by,
+            "search": search,
+            "search_fields": search_fields,
+        }
+
+        try:
+             # Try with arguments (Modern subclasses)
+             queryset = self.build_list_queryset(**kwargs)
+        except TypeError:
+             # Fallback to no arguments (Legacy subclasses)
+             queryset = self.build_list_queryset()
+
+        # 2. Aplicar filtros estándar
+        queryset = self.apply_list_filters(
+            queryset=queryset,
             filters=filters,
             use_or=use_or,
             joins=joins,
             order_by=order_by,
             search=search,
             search_fields=search_fields,
-        )
-
-        # 2. Aplicar filtros estándar, búsqueda y ordenamiento
-        queryset = await self.apply_list_filters(
-            base_query=queryset,
-            filters=filters,
-            use_or=use_or,
-            joins=joins,
-            order_by=order_by,
-            search=search,
-            search_fields=search_fields,
-        )
-
+        ) 
         # Count total
         db = self.session
 
