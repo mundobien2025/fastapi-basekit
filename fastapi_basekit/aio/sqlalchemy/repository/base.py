@@ -151,6 +151,146 @@ class BaseRepository:
 
         return resolved_filters, joins_to_apply
 
+    def _resolve_order_by(
+        self,
+        order_by: Optional[Any] = None,
+        special_fields: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Optional[Any], Dict[str, Any]]:
+        """
+        Resuelve ordenamiento y relaciones para JOINs.
+
+        Método general que resuelve rutas de relaciones usando
+        sintaxis '__' y soporta prefijo '-' para orden descendente.
+        Similar a _resolve_attribute pero adaptado para order_by.
+
+        Soporta ordenamiento avanzado con relaciones usando sintaxis
+        de doble guion bajo (__). Por ejemplo:
+        - Orden simple: "created_at" → ORDER BY model.created_at ASC
+        - Orden descendente: "-created_at" → ORDER BY model.created_at DESC
+        - Orden con relación: "user__full_name" →
+          JOIN users + ORDER BY users.full_name ASC
+        - Orden descendente con relación: "-user__email" →
+          JOIN users + ORDER BY users.email DESC
+        - Campos especiales (aliases): "borrower_name" →
+          ORDER BY Users.full_name ASC (si está en special_fields)
+
+        Args:
+            order_by: Campo por el cual ordenar. Puede incluir:
+                     - Campos del modelo: "created_at", "status", etc.
+                     - Prefijo '-' para descendente: "-created_at", "-status"
+                     - Rutas de relaciones: "user__full_name",
+                       "user__role__name"
+                     - Combinaciones: "-user__email"
+                     - Campos especiales: "borrower_name" (si está en
+                       special_fields)
+                     - También puede ser una expresión SQLAlchemy
+            default_order_by: Campo por defecto si order_by es None o
+                             no válido.
+                             Por defecto: "created_at"
+            special_fields: Diccionario opcional que mapea nombres de campos
+                          especiales (aliases en el query) a atributos
+                          SQLAlchemy. Ejemplo:
+                          {"borrower_name": Users.full_name,
+                           "borrower_email": Users.email}
+                          Estos campos ya están disponibles en el query sin
+                          necesidad de JOIN adicional.
+
+        Returns:
+            Tuple con:
+            - order_expression: Expresión SQLAlchemy para order_by
+              (None si no se pudo resolver, o el mismo order_by si ya
+              es una expresión SQLAlchemy)
+            - joins_to_apply: Dict con las relaciones que necesitan JOINs
+              (nombre_relacion: atributo_relacion)
+
+        Note:
+            Si el campo no se puede resolver (campo/relación inexistente),
+            retorna (None, {}). Los métodos que usan este resultado deben
+            manejar este caso aplicando un ordenamiento por defecto.
+            Si order_by ya es una expresión SQLAlchemy (no string), la retorna
+            sin modificar.
+        """
+        # Si order_by ya es una expresión SQLAlchemy (no string), retornarla
+        # directamente sin procesar
+        if order_by is not None and not isinstance(order_by, str):
+            return order_by, {}
+
+        if not order_by:
+             # Si no hay order_by, no ordenamos (o el caller debería haber pasado un default)
+             return None, {}
+
+        joins_to_apply: Dict[str, Any] = {}
+
+        # Detectar si tiene prefijo '-' para invertir el orden
+        has_minus_prefix = order_by.startswith("-")
+        field_path = order_by.lstrip("-")
+
+        # 1. Verificar primero si es un campo especial (alias en el query)
+        # Estos campos ya están disponibles sin necesidad de JOIN
+        if special_fields and field_path in special_fields:
+            attr = special_fields[field_path]
+            # Determinar dirección del ordenamiento
+            should_descend = has_minus_prefix
+            order_expression = attr.desc() if should_descend else attr.asc()
+            return order_expression, {}
+
+        # 2. Si no es un campo especial, procesar como campo normal o relación
+        # Dividir la ruta en partes (puede ser simple o con relaciones)
+        parts = field_path.split("__")
+
+        # Inicialización: empezar con el modelo base
+        current_model = self.model
+        attr = getattr(current_model, parts[0], None)
+
+        if attr is None:
+            # Campo base no existe, retornar None
+            return None, {}
+
+        # 3. Recorrer la cadena de relaciones intermedias
+        for part in parts[1:]:
+            # Chequear si el atributo actual es una relación ORM
+            if hasattr(attr.property, "entity") and isinstance(
+                attr.property, Relationship
+            ):
+                # Es una relación: Añadir al diccionario de JOINs si no está ya
+                relation_name = attr.key  # Nombre del atributo en el modelo
+                joins_to_apply[relation_name] = attr
+
+                # Mover al modelo relacionado y obtener el siguiente atributo
+                current_model = attr.property.mapper.class_
+                attr = getattr(current_model, part, None)
+
+                if attr is None:
+                    # El siguiente campo no existe
+                    return None, {}
+            else:
+                # No es una relación (parte final del path), romper el bucle
+                break
+
+        # 4. Verificar que el atributo final es válido para ordenar
+        # Solo queremos columnas, no relaciones
+        if attr is None:
+            return None, {}
+
+        # Verificar que no sea una relación (solo queremos columnas)
+        is_relationship = isinstance(attr.property, Relationship)
+        # Verificar que sea una columna o atributo válido
+        is_column = hasattr(attr.property, "columns") or hasattr(
+            attr, "comparator"
+        )
+
+        if is_relationship or not is_column:
+            # No es una columna válida para ordenar
+            return None, {}
+
+        # 5. Determinar la dirección del ordenamiento
+        should_descend = has_minus_prefix
+
+        # 6. Crear la expresión de ordenamiento
+        order_expression = attr.desc() if should_descend else attr.asc()
+
+        return order_expression, joins_to_apply
+
     def _build_conditions(
         self,
         filters: Optional[Dict[str, Any]] = None,
@@ -410,6 +550,86 @@ class BaseRepository:
         result = await self.session.execute(query)
         return result.scalars().first() if one else result.scalars().all()
 
+    async def apply_list_filters(
+        self,
+        base_query: Optional[Select[Tuple[Any]]] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        use_or: bool = False,
+        joins: Optional[List[str]] = None,
+        order_by: Optional[Any] = None,
+        search: Optional[str] = None,
+        search_fields: Optional[List[str]] = None,
+    ) -> Select[Tuple[Any]]:
+        """Aplica filtros estándar, búsqueda y ordenamiento al query."""
+        filters = filters or {}
+
+        # 1. Inicializar query base
+        if base_query is None:
+            base_query = select(self.model)
+
+        # 2. RESOLUCIÓN UNIVERSAL DE FILTROS (JOINs de filtrado y atributos)
+        resolved_filters, joins_to_apply = self._resolve_attribute(filters)
+
+        # 3. Aplicar JOINs de filtrado
+        for relation_name, relation_attr in joins_to_apply.items():
+            base_query = base_query.join(relation_attr)
+
+        # 4. Construir las condiciones WHERE a partir de los atributos
+        # resueltos
+        conditions = self._build_conditions(resolved_filters=resolved_filters)
+        combined_filters = (
+            or_(*conditions)
+            if (use_or and conditions)
+            else and_(*conditions) if conditions else None
+        )
+
+        # 5. Aplicar búsqueda textual (search)
+        search_condition = self._build_search_condition(search, search_fields)
+
+        # 6. Combina todos los filtros (combined_filters, search_condition)
+        if combined_filters is not None and search_condition is not None:
+            base_query = base_query.where(
+                and_(combined_filters, search_condition)
+            )
+        elif combined_filters is not None:
+            base_query = base_query.where(combined_filters)
+        elif search_condition is not None:
+            base_query = base_query.where(search_condition)
+
+        # 7. Resolver y aplicar orden con joins automáticos
+        order_expression, order_joins = self._resolve_order_by(
+            order_by=order_by,
+        )
+
+        # Aplicar JOINs de ordenamiento
+        for relation_name, relation_attr in order_joins.items():
+            base_query = base_query.join(relation_attr)
+
+        # Aplicar expresión de ordenamiento
+        if order_expression is not None:
+            base_query = base_query.order_by(order_expression)
+
+        # Aplicar joins de carga
+        base_query = self._apply_joins(base_query, joins)
+
+        return base_query
+
+    async def build_list_queryset(
+        self,
+        base_query: Optional[Select[Tuple[Any]]] = None,
+        **kwargs: Any,
+    ) -> Select[Tuple[Any]]:
+        """
+        Construye el query para listado personalizado.
+        Este método es para que las subclases lo sobrescriban y agreguen
+        joins o lógica específica antes de aplicar los filtros estándar.
+        """
+        # 1. Inicializar query base
+        if base_query is None:
+            base_query = select(self.model)
+
+        return base_query
+
     async def list_paginated(
         self,
         page: int = 1,
@@ -447,56 +667,39 @@ class BaseRepository:
         Returns:
             Tuple con (items, total)
         """
-        filters = filters or {}
-
-        # 1. Inicializar query base
-        if base_query is None:
-            base_query = select(self.model)
-
-        # 2. RESOLUCIÓN UNIVERSAL DE FILTROS (JOINs de filtrado y atributos)
-        resolved_filters, joins_to_apply = self._resolve_attribute(filters)
-
-        # 3. Aplicar JOINs de filtrado
-        for relation_name, relation_attr in joins_to_apply.items():
-            base_query = base_query.join(relation_attr)
-
-        # 4. Construir las condiciones WHERE a partir de los atributos
-        # resueltos
-        conditions = self._build_conditions(resolved_filters=resolved_filters)
-        combined_filters = (
-            or_(*conditions)
-            if (use_or and conditions)
-            else and_(*conditions) if conditions else None
+        
+        # 1. Construir el query base personalizado (subclases)
+        queryset = await self.build_list_queryset(
+            base_query=base_query,
+            filters=filters,
+            use_or=use_or,
+            joins=joins,
+            order_by=order_by,
+            search=search,
+            search_fields=search_fields,
         )
 
-        # 5. Aplicar búsqueda textual (search)
-        search_condition = self._build_search_condition(search, search_fields)
-
-        # 6. Combina todos los filtros (combined_filters, search_condition)
-        if combined_filters is not None and search_condition is not None:
-            base_query = base_query.where(
-                and_(combined_filters, search_condition)
-            )
-        elif combined_filters is not None:
-            base_query = base_query.where(combined_filters)
-        elif search_condition is not None:
-            base_query = base_query.where(search_condition)
-
-        # 7. Aplicar orden y joins de carga
-        if order_by is not None:
-            base_query = base_query.order_by(order_by)
-
-        base_query = self._apply_joins(base_query, joins)
+        # 2. Aplicar filtros estándar, búsqueda y ordenamiento
+        queryset = await self.apply_list_filters(
+            base_query=queryset,
+            filters=filters,
+            use_or=use_or,
+            joins=joins,
+            order_by=order_by,
+            search=search,
+            search_fields=search_fields,
+        )
 
         # Count total
         db = self.session
 
-        count_query = select(func.count()).select_from(base_query.subquery())
+        # Para contar, hacemos un subquery para asegurar que contamos filas únicas
+        count_query = select(func.count()).select_from(queryset.subquery())
         total = (await db.execute(count_query)).scalar_one()
 
         # Page items
         offset = count * (page - 1)
-        page_query = base_query.offset(offset).limit(count)
+        page_query = queryset.offset(offset).limit(count)
         result = await db.execute(page_query)
         rows = result.unique().all()
 
@@ -510,26 +713,15 @@ class BaseRepository:
                 # Fila compleja: tomar el primer elemento como entidad
                 entity = row[0]
 
-                # Obtener las claves de las columnas del resultado
-                # La primera columna es la entidad, las demás son
-                # anotaciones/etiquetas
                 column_keys = list(row._mapping.keys())
 
-                # Inyectar dinámicamente los valores extra en la entidad
-                # principal. Empezar desde el índice 1 (el índice 0 es la
-                # entidad principal)
                 for i in range(1, len(row)):
-                    # Obtener el nombre de la columna (puede ser una etiqueta
-                    # o nombre de columna)
                     if i < len(column_keys):
                         key = column_keys[i]
                     else:
-                        # Si no hay nombre de columna, usar un nombre genérico
                         key = f"_extra_{i}"
 
                     value = row[i]
-
-                    # Inyectar el valor como atributo dinámico en la entidad
                     setattr(entity, key, value)
 
                 items.append(entity)

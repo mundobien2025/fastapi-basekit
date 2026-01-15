@@ -9,13 +9,13 @@ from ....exceptions.api_exceptions import (
     DatabaseIntegrityException,
 )
 
-
 class BaseService:
     """Servicio base para SQLAlchemy AsyncSession."""
 
     repository: BaseRepository
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
+    order_by: Optional[str] = None
     action: str | None = None
     kwargs_query: Dict[str, Any] = {}
 
@@ -107,7 +107,8 @@ class BaseService:
         if joins is None:
             joins = kwargs.get("joins")
         if order_by is None:
-            order_by = kwargs.get("order_by")
+            order_by = kwargs.get("order_by", self.order_by)
+
         return await self.repository.list_paginated(
             base_query=base_query,
             page=page,
