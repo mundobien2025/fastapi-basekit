@@ -19,6 +19,7 @@ class BaseService:
     duplicate_check_fields: List[str] = []
     kwargs_query: Dict[str, Union[str, int]] = {}
     action: str = ""
+    order_by: Optional[List[tuple]] = None
 
     def __init__(
         self, repository: BaseRepository, request: Optional[Request] = None
@@ -45,6 +46,15 @@ class BaseService:
     def get_kwargs_query(self) -> Dict[str, Any]:
         return self.kwargs_query
 
+    def get_order(self) -> Optional[List[tuple]]:
+        """Override this method to define custom ordering.
+        
+        Returns:
+            List of tuples with (field_name, direction) where direction is 1 for ascending or -1 for descending.
+            Example: [("created_at", -1)] for newest first
+        """
+        return self.order_by
+
     def get_filters(
         self,
         filters: Optional[Dict[str, Any]] = None,
@@ -65,16 +75,55 @@ class BaseService:
         page: int = 1,
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
+        order_by: Optional[str] = None,  # NEW: Dynamic ordering (e.g., "-created_at" or "tool__name")
     ):
         kwargs = self.get_kwargs_query()
         applied_filters = self.get_filters(filters)
-        query = self.repository.build_filter_query(
-            search=search,
-            search_fields=self.search_fields,
-            filters=applied_filters,
-            **kwargs,
-        )
-        return await self.repository.paginate(query, page, count)
+        
+        # Determine which ordering to use
+        if order_by:
+            # Dynamic ordering from parameter (takes precedence)
+            order_str = order_by
+        else:
+            # Fall back to service-level ordering
+            default_order = self.get_order()
+            if default_order:
+                # Convert list of tuples to string format
+                # e.g., [("created_at", -1)] -> "-created_at"
+                field, direction = default_order[0]
+                order_str = f"{'-' if direction == -1 else ''}{field}"
+            else:
+                order_str = None
+        
+        # Check if we need aggregation (nested field with __ or .)
+        if order_str and ("__" in order_str or "." in order_str):
+            # Use aggregation pipeline for nested ordering
+            return await self.repository.list_with_aggregation(
+                search=search,
+                search_fields=self.search_fields,
+                filters=applied_filters,
+                order_by=order_str,
+                page=page,
+                count=count,
+                **kwargs,
+            )
+        else:
+            # Use standard query for simple ordering
+            order_list = None
+            if order_str:
+                # Parse the order string
+                direction = -1 if order_str.startswith("-") else 1
+                field = order_str.lstrip("-")
+                order_list = [(field, direction)]
+            
+            query = self.repository.build_filter_query(
+                search=search,
+                search_fields=self.search_fields,
+                filters=applied_filters,
+                order_by=order_list,
+                **kwargs,
+            )
+            return await self.repository.paginate(query, page, count, order_by=order_list)
 
     async def create(
         self, payload: BaseModel, check_fields: Optional[List[str]] = None

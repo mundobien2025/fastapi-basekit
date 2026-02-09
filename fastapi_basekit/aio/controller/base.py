@@ -21,6 +21,7 @@ class BaseController:
         "page",
         "count",
         "search",
+        "order_by",
         "__class__",
         "args",
         "kwargs",
@@ -142,12 +143,13 @@ class BaseController:
         query_params = self.request.query_params if self.request else {}
 
         # Parámetros especiales de paginación y búsqueda
-        standard_params = {"page", "count", "search"}
+        standard_params = {"page", "count", "search", "order_by"}
 
         # Valores por defecto
         page = 1
         count = 10
         search = None
+        order_by = None
         filters = {}
 
         # Intentar obtener valores validados del frame local
@@ -191,6 +193,8 @@ class BaseController:
                 )
             elif param_name == "search":
                 search = final_value
+            elif param_name == "order_by":
+                order_by = final_value
             elif param_name not in standard_params:
                 # Es un filtro
                 filters[param_name] = final_value
@@ -199,6 +203,7 @@ class BaseController:
             "page": page,
             "count": count,
             "search": search,
+            "order_by": order_by,
             "filters": filters,
         }
 
