@@ -5,7 +5,7 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
-## [0.1.17] - 2026-02-11
+## [0.1.25] - 2026-02-11
 
 ### ✨ Agregado
 
@@ -140,6 +140,7 @@ El `BaseController` genérico sigue disponible para compatibilidad, pero se reco
 
 ---
 
+[0.1.25]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.16...v0.1.25
 [0.1.16]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.15...v0.1.16
 [0.1.15]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.0...v0.1.15
 [0.1.0]: https://github.com/mundobien2025/fastapi-basekit/releases/tag/v0.1.0
