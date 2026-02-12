@@ -5,6 +5,27 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.1.17] - 2026-02-11
+
+### ✨ Agregado
+
+- **Vínculo bidireccional Servicio-Repositorio**
+  - `BaseRepository` ahora tiene un atributo `service` que referencia al servicio que lo utiliza.
+  - `BaseService` vincula automáticamente su instancia (`self`) a todos los repositorios inyectados durante la inicialización.
+
+### 🔧 Cambiado
+
+- **Refactor de Construcción de QuerySet**
+  - Se eliminó el método redundante `build_queryset` de `BaseService`.
+  - El método `BaseRepository.list_paginated` ahora es el único responsable de iniciar la construcción del query a través de `build_list_queryset()`.
+  - Se simplificó la firma de `list_paginated` eliminando el parámetro `base_query`.
+  - `BaseService.list` ahora es más limpio al delegar la gestión del query completamente al repositorio.
+
+### 🔧 Mejorado
+
+- **Inicialización de Servicios**
+  - `BaseService.__init__` ahora acepta `**kwargs` y vincula automáticamente cualquier instancia de `BaseRepository` pasada como argumento nombrado, permitiendo que servicios complejos con múltiples repositorios mantengan el vínculo correctamente.
+
 ## [0.1.16] - 2025-10-14
 
 ### ✨ Agregado

@@ -53,7 +53,6 @@ class SQLAlchemyBaseController(BaseController):
             **params,
             "use_or": use_or,
             "joins": joins,
-            "order_by": order_by,
         }
         items, total = await self.service.list(**service_params)
         count = params.get("count") or 0

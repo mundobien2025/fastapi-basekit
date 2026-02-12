@@ -16,10 +16,12 @@ class BaseRepository:
     """
 
     model: Type[Any]
+    service: Optional[Any] = None
 
     def __init__(self, db: AsyncSession):
         """Inicializa el repositorio con la sesión a reutilizar."""
         self._session = db
+        self.service = None
 
     @property
     def session(self) -> AsyncSession:
@@ -49,6 +51,51 @@ class BaseRepository:
                     else:
                         query = query.options(joinedload(relationship_attr))
         return query
+
+    def _resolve_field_path(
+        self, path: str
+    ) -> Tuple[Optional[Any], Dict[str, Any]]:
+        """
+        Resuelve una ruta de campo (ej. 'user__role__name') a su atributo
+        de SQLAlchemy y el conjunto de JOINs necesarios para el filtrado.
+
+        Args:
+            path: Ruta del campo con sintaxis '__'
+
+        Returns:
+            Tuple con:
+            - attr: Atributo final (columna o relación) o None si no existe
+            - joins_to_apply: Dict con las relaciones intermedias (name: attr)
+        """
+        parts = path.split("__")
+        current_model = self.model
+        attr = getattr(current_model, parts[0], None)
+        joins_to_apply = {}
+
+        if attr is None:
+            return None, {}
+
+        # Recorrer la cadena de relaciones intermedias
+        for part in parts[1:]:
+            # Chequear si el atributo actual es una relación ORM
+            if hasattr(attr.property, "entity") and isinstance(
+                attr.property, Relationship
+            ):
+                # Es una relación: Añadir al diccionario de JOINs
+                relation_name = attr.key
+                joins_to_apply[relation_name] = attr
+
+                # Mover al modelo relacionado y obtener el siguiente atributo
+                current_model = attr.property.mapper.class_
+                attr = getattr(current_model, part, None)
+
+                if attr is None:
+                    return None, {}
+            else:
+                # No es una relación o es el final del path
+                break
+
+        return attr, joins_to_apply
 
     def _resolve_attribute(
         self, filters: Dict[str, Any]
@@ -84,16 +131,12 @@ class BaseRepository:
         joins_to_apply = {}
 
         for filter_path, value in filters.items():
-            parts = filter_path.split("__")
-
-            # Inicialización
-            current_model = self.model
-            attr = getattr(current_model, parts[0], None)
+            attr, field_joins = self._resolve_field_path(filter_path)
 
             if attr is None:
-                # Si no existe el campo base, omitir silenciosamente
-                # (mantiene compatibilidad con código existente)
                 continue
+
+            joins_to_apply.update(field_joins)
 
             # Procesar valor (manejo de Enum a su valor/lista de valores)
             processed_value = value
@@ -106,47 +149,14 @@ class BaseRepository:
             elif hasattr(value, "value"):
                 processed_value = value.value
 
-            # 1. Recorrer la cadena de relaciones intermedias
-            for part in parts[1:]:
-                # Chequear si el atributo actual es una relación ORM
-                if hasattr(attr.property, "entity") and isinstance(
-                    attr.property, Relationship
-                ):
-                    # Es una relación: Añadir al diccionario de JOINs si no
-                    # está ya
-                    relation_name = (
-                        attr.key
-                    )  # Nombre del atributo en el modelo
-                    # (e.g., 'user_roles')
-                    joins_to_apply[relation_name] = attr
+            # Verificar que no sea una relación (solo queremos columnas para filtrar)
+            is_relationship = isinstance(attr.property, Relationship)
+            is_column = hasattr(attr.property, "columns") or hasattr(
+                attr, "comparator"
+            )
 
-                    # Mover al modelo relacionado y obtener el siguiente
-                    # atributo
-                    current_model = attr.property.mapper.class_
-                    attr = getattr(current_model, part, None)
-
-                    if attr is None:
-                        break  # El siguiente campo no existe
-                else:
-                    # No es una relación (parte final del path), romper el
-                    # bucle
-                    break
-
-            # 2. Si el atributo final es válido, añadir a las condiciones
-            # resueltas
-            # Verificamos si es una Columna (o un campo scalar)
-            # Para columnas simples, attr.property.columns existe
-            # Para relaciones, attr.property es Relationship
-            if attr is not None:
-                # Verificar que no sea una relación (solo queremos columnas)
-                is_relationship = isinstance(attr.property, Relationship)
-                # Verificar que sea una columna o atributo válido
-                is_column = hasattr(attr.property, "columns") or hasattr(
-                    attr, "comparator"
-                )
-
-                if not is_relationship and is_column:
-                    resolved_filters[filter_path] = (attr, processed_value)
+            if not is_relationship and is_column:
+                resolved_filters[filter_path] = (attr, processed_value)
 
         return resolved_filters, joins_to_apply
 
@@ -233,53 +243,21 @@ class BaseRepository:
             order_expression = attr.desc() if should_descend else attr.asc()
             return order_expression, {}
 
-        # 2. Si no es un campo especial, procesar como campo normal o relación
-        # Dividir la ruta en partes (puede ser simple o con relaciones)
-        parts = field_path.split("__")
-
-        # Inicialización: empezar con el modelo base
-        current_model = self.model
-        attr = getattr(current_model, parts[0], None)
+        # 2. Si no es un campo especial, procesar con el helper
+        attr, field_joins = self._resolve_field_path(field_path)
 
         if attr is None:
-            # Campo base no existe, retornar None
             return None, {}
 
-        # 3. Recorrer la cadena de relaciones intermedias
-        for part in parts[1:]:
-            # Chequear si el atributo actual es una relación ORM
-            if hasattr(attr.property, "entity") and isinstance(
-                attr.property, Relationship
-            ):
-                # Es una relación: Añadir al diccionario de JOINs si no está ya
-                relation_name = attr.key  # Nombre del atributo en el modelo
-                joins_to_apply[relation_name] = attr
-
-                # Mover al modelo relacionado y obtener el siguiente atributo
-                current_model = attr.property.mapper.class_
-                attr = getattr(current_model, part, None)
-
-                if attr is None:
-                    # El siguiente campo no existe
-                    return None, {}
-            else:
-                # No es una relación (parte final del path), romper el bucle
-                break
+        joins_to_apply.update(field_joins)
 
         # 4. Verificar que el atributo final es válido para ordenar
-        # Solo queremos columnas, no relaciones
-        if attr is None:
-            return None, {}
-
-        # Verificar que no sea una relación (solo queremos columnas)
         is_relationship = isinstance(attr.property, Relationship)
-        # Verificar que sea una columna o atributo válido
         is_column = hasattr(attr.property, "columns") or hasattr(
             attr, "comparator"
         )
 
         if is_relationship or not is_column:
-            # No es una columna válida para ordenar
             return None, {}
 
         # 5. Determinar la dirección del ordenamiento
@@ -337,25 +315,44 @@ class BaseRepository:
 
     def _build_search_condition(
         self, search: Optional[str], search_fields: Optional[List[str]]
-    ) -> Optional[Any]:
+    ) -> Tuple[Optional[Any], Dict[str, Any]]:
         """Construye una condición OR para búsqueda textual en múltiples campos
 
         Usa ilike (insensible a mayúsculas) si hay término y campos válidos.
-        Ignora campos inexistentes silenciosamente.
+        Soporta rutas anidadas con '__'.
+
+        Returns:
+            Tuple con:
+            - search_condition: Condición OR de SQLAlchemy o None
+            - search_joins: Dict con JOINs necesarios para la búsqueda
         """
         if not search or not search_fields:
-            return None
+            return None, {}
+        
         exprs: List[Any] = []
-        for field_name in search_fields:
-            try:
-                field = self._get_field(field_name)
-            except AttributeError:
-                # Si el campo no existe en el modelo, lo omitimos
+        search_joins: Dict[str, Any] = {}
+
+        for field_path in search_fields:
+            attr, field_joins = self._resolve_field_path(field_path)
+            
+            if attr is None:
                 continue
-            exprs.append(field.ilike(f"%{search}%"))
+
+            search_joins.update(field_joins)
+
+            # Verificar que sea una columna válida para ILIKE
+            is_column = hasattr(attr.property, "columns") or hasattr(
+                attr, "comparator"
+            )
+            is_relationship = isinstance(attr.property, Relationship)
+
+            if not is_relationship and is_column:
+                exprs.append(attr.ilike(f"%{search}%"))
+
         if not exprs:
-            return None
-        return or_(*exprs)
+            return None, {}
+
+        return or_(*exprs), search_joins
 
     async def create(self, obj_in: Any | Dict) -> Any:
         """Crea un nuevo registro en la base de datos."""
@@ -578,9 +575,17 @@ class BaseRepository:
         )
 
         # 4. Aplicar búsqueda textual (search)
-        search_condition = self._build_search_condition(search, search_fields)
+        search_condition, search_joins = self._build_search_condition(
+            search, search_fields
+        )
 
-        # 5. Combina todos los filtros
+        # 5. Aplicar JOINs de búsqueda
+        for relation_name, relation_attr in search_joins.items():
+            # Evitar unir dos veces la misma relación si ya se hizo por filtros
+            # NOTA: join() en SQLAlchemy es idempotente si es la misma entidad/atributo
+            queryset = queryset.join(relation_attr)
+
+        # 6. Combina todos los filtros
         if combined_filters is not None and search_condition is not None:
             queryset = queryset.where(
                 and_(combined_filters, search_condition)
@@ -625,12 +630,11 @@ class BaseRepository:
         order_by: Optional[Any] = None,
         search: Optional[str] = None,
         search_fields: Optional[List[str]] = None,
-        base_query: Optional[Select[Tuple[Any]]] = None,
         **kwargs: Any,
     ) -> tuple[List[Any], int]:
         
-        # 1. Construir query personalizado
-        kwargs = {
+        # 1. Construir query base
+        query_kwargs = {
             "filters": filters,
             "use_or": use_or,
             "joins": joins,
@@ -638,13 +642,12 @@ class BaseRepository:
             "search": search,
             "search_fields": search_fields,
         }
-
         try:
-             # Try with arguments (Modern subclasses)
-             queryset = self.build_list_queryset(**kwargs)
+            # Intentar con argumentos (subclases modernas)
+            queryset = self.build_list_queryset(**query_kwargs)
         except TypeError:
-             # Fallback to no arguments (Legacy subclasses)
-             queryset = self.build_list_queryset()
+            # Fallback sin argumentos (subclases legacy)
+            queryset = self.build_list_queryset()
 
         # 2. Aplicar filtros estándar
         queryset = self.apply_list_filters(
