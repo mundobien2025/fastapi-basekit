@@ -1,1 +1,1 @@
-__all__ = ["controller", "beanie", "sqlalchemy"]
+__all__ = ["controller", "beanie", "sqlalchemy", "sqlmodel"]

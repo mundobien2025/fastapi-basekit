@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapi-basekit"
-version = "0.1.25"
-description = "Utilities and base classes for FastAPI async projects (Beanie or SQLAlchemy)"
+version = "0.2.0"
+description = "Utilities and base classes for FastAPI async projects (Beanie, SQLAlchemy or SQLModel)"
 readme = "README.md"
 requires-python = ">=3.11"
 
@@ -41,11 +41,15 @@ sqlalchemy = [
   "SQLAlchemy[asyncio]>=2.0.0",
   "psycopg2>=2.9.0",
 ]
+sqlmodel = [
+  "sqlmodel>=0.0.37",
+]
 all = [
   "beanie>=1.24.0",
   "motor>=3.3.0",
   "SQLAlchemy[asyncio]>=2.0.0",
   "psycopg2>=2.9.0",
+  "sqlmodel>=0.0.37",
 ]
 
 [project.urls]

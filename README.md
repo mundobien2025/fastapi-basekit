@@ -1,759 +1,739 @@
-# 🚀 FastAPI BaseKit
+# FastAPI BaseKit
 
-<div align="center">
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi)
+![Python](https://img.shields.io/badge/python-3.11+-blue?style=flat-square&logo=python)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?style=flat-square)
+![SQLModel](https://img.shields.io/badge/SQLModel-0.0.21+-orange?style=flat-square)
+![MongoDB](https://img.shields.io/badge/MongoDB-Beanie-47A248?style=flat-square&logo=mongodb)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![Python](https://img.shields.io/badge/python-3.8+-blue?style=for-the-badge&logo=python)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?style=for-the-badge)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+Clases base para construir APIs REST con FastAPI de forma rápida: repositorios, servicios y controllers con CRUD, paginación, búsqueda, filtros y ordenamiento ya resueltos.
 
-**Toolkit base para desarrollo rápido de APIs REST con FastAPI**
-
-[Documentación](https://github.com/mundobien2025/fastapi-basekit) •
-[Ejemplos](./examples) •
-[Changelog](./CHANGELOG.md)
-
-</div>
+Soporta **SQLAlchemy**, **SQLModel** y **Beanie (MongoDB)**.
 
 ---
 
-## ✨ Características
-
-- 🎯 **CRUD Automático**: Controllers base con operaciones CRUD listas para usar
-- 🔍 **Búsqueda Inteligente**: Búsqueda multi-campo con filtros dinámicos
-- 📊 **Paginación Avanzada**: Paginación automática con metadata completa
-- 🔗 **Relaciones Optimizadas**: Joins dinámicos para evitar queries N+1 (SQLAlchemy)
-- 🎨 **Type-Safe**: Type hints completos para mejor DX
-- 🧪 **Testeable**: Diseño que facilita testing
-- 🗃️ **Multi-DB**: Controllers separados para SQLAlchemy y Beanie (MongoDB)
-- 🔒 **Permisos**: Sistema de permisos basado en clases
-- ⚡ **Performance**: Queries optimizados y lazy loading
-- 📝 **Validación**: Validación automática con Pydantic
-- 🔧 **Queryset Personalizable**: Personaliza queries sin reescribir métodos
-
----
-
-## 📦 Instalación
+## Instalación  
 
 ```bash
-# Instalación básica
+# Solo lo base (sin ORM)
 pip install fastapi-basekit
 
-# Con soporte SQLAlchemy (PostgreSQL, MySQL, etc.)
+# SQLAlchemy (PostgreSQL / MySQL / SQLite)
 pip install fastapi-basekit[sqlalchemy]
 
-# Con soporte Beanie (MongoDB)
+# SQLModel
+pip install fastapi-basekit[sqlmodel]
+
+# Beanie (MongoDB)
 pip install fastapi-basekit[beanie]
 
-# Con todo
+# Todo
 pip install fastapi-basekit[all]
 ```
 
 ---
 
-## 🚀 Inicio Rápido
+## Inicio rápido — SQLAlchemy
 
-### Ejemplo Simple: CRUD Básico
+El patrón real usado en producción: class-based views con `@cbv` de `fastapi-restful`.
 
-#### 1. Modelo (SQLAlchemy)
+### 1. Modelo
 
 ```python
-# models/user.py
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.orm import declarative_base
-from datetime import datetime
+# app/models/auth.py
+from sqlalchemy import String, Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from .base import BaseModel  # tu Base con id, created_at, etc.
+from .enums import UserStatusEnum
 
-Base = declarative_base()
-
-class User(Base):
+class Users(BaseModel):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False, index=True)
-    age = Column(Integer, nullable=True)
-    is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
+    email: Mapped[str] = mapped_column(String(320), unique=True)
+    full_name: Mapped[str | None] = mapped_column(String(255))
+    document: Mapped[str | None] = mapped_column(String(64))
+    phone: Mapped[str | None] = mapped_column(String(50))
+    status: Mapped[UserStatusEnum] = mapped_column(SAEnum(UserStatusEnum))
+
+    # Relación many-to-many
+    user_roles: Mapped[list["UserRoles"]] = relationship(back_populates="user")
 ```
 
-#### 2. Schema (Pydantic)
+### 2. Schemas
+
+Puedes tener múltiples schemas por recurso — el controller decide cuál usar por acción.
 
 ```python
-# schemas/user.py
-from pydantic import BaseModel, EmailStr
-from typing import Optional
-from datetime import datetime
+# app/schemas/user.py
+from pydantic import BaseModel, ConfigDict
+from uuid import UUID
 
-class UserSchema(BaseModel):
-    id: int
-    name: str
-    email: EmailStr
-    age: Optional[int] = None
-    is_active: bool
-    created_at: datetime
-    updated_at: Optional[datetime] = None
+class UserListResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    email: str
+    full_name: str | None
+    role_name: str | None   # columna extra del queryset enriquecido
 
-    class Config:
-        from_attributes = True
-
-class UserCreateSchema(BaseModel):
-    name: str
-    email: EmailStr
-    age: Optional[int] = None
-    is_active: bool = True
+class UserResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    email: str
+    full_name: str | None
+    document: str | None
+    phone: str | None
+    status: str
 ```
 
-#### 3. Repository
+### 3. Repository
+
+En el 90% de los casos el repositorio solo necesita declarar el modelo. Todo el CRUD ya está implementado en `BaseRepository`.
 
 ```python
-# repositories/user.py
+# app/repositories/user.py
 from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository
-from models.user import User
+from app.models.auth import Users
 
 class UserRepository(BaseRepository):
-    model = User
+    model = Users
 ```
 
-#### 4. Service
+Sobreescribe `build_list_queryset` solo si necesitas un query base distinto al `select(model)` por defecto — por ejemplo para agregar columnas calculadas que el schema pueda consumir directamente:
 
 ```python
-# services/user.py
-from fastapi_basekit.aio.sqlalchemy.service.base import BaseService
+from sqlalchemy import select, func
+from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository
+from app.models.auth import Roles, UserRoles
 
-class UserService(BaseService):
-    # Campos por los que se puede buscar
-    search_fields = ["name", "email"]
+class RoleRepository(BaseRepository):
+    model = Roles
 
-    # Campos que deben ser únicos al crear
-    duplicate_check_fields = ["email"]
-```
-
-#### 5. Controller
-
-```python
-# controllers/user.py
-from typing import Optional
-from fastapi import APIRouter, Query, Depends, Request
-from fastapi_basekit.aio.sqlalchemy.controller.base import SQLAlchemyBaseController
-from schemas.user import UserSchema, UserCreateSchema, UserUpdateSchema
-from services.user import UserService
-from repositories.user import UserRepository
-
-router = APIRouter(prefix="/users", tags=["users"])
-
-def get_user_service(request: Request) -> UserService:
-    repository = UserRepository(db=request.state.db)
-    return UserService(repository=repository, request=request)
-
-@router.get("/")
-class ListUsers(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
-
-    async def __call__(
-        self,
-        page: int = Query(1, ge=1),
-        count: int = Query(10, ge=1, le=100),
-        search: Optional[str] = Query(None),
-        is_active: Optional[bool] = Query(None),
-    ):
-        return await self.list()
-
-@router.get("/{id}")
-class GetUser(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
-
-    async def __call__(self, id: int):
-        return await self.retrieve(str(id))
-
-@router.post("/", status_code=201)
-class CreateUser(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
-
-    async def __call__(self, data: UserCreateSchema):
-        return await self.create(data)
-
-@router.put("/{id}")
-class UpdateUser(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
-
-    async def __call__(self, id: int, data: UserUpdateSchema):
-        return await self.update(str(id), data)
-
-@router.delete("/{id}")
-class DeleteUser(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
-
-    async def __call__(self, id: int):
-        return await self.delete(str(id))
-```
-
-#### 6. ¡Listo! 🎉
-
-Ya tienes un CRUD completo con:
-
-- ✅ Paginación automática
-- ✅ Búsqueda por nombre o email
-- ✅ Filtrado por `is_active`
-- ✅ Validación de duplicados
-- ✅ Type hints completos
-
----
-
-## 📚 Ejemplos Avanzados
-
-### Ejemplo 1: Queryset Personalizado con Agregaciones
-
-**Caso de uso**: Listar usuarios con COUNT de referidos y SUM de órdenes sin reescribir `list()`.
-
-```python
-# services/user.py
-from sqlalchemy import Select, func, select
-from sqlalchemy.orm import aliased
-from fastapi_basekit.aio.sqlalchemy.service.base import BaseService
-from models.user import User, Referral, Order
-
-class UserService(BaseService):
-    search_fields = ["name", "email"]
-    duplicate_check_fields = ["email"]
-
-    def build_queryset(self) -> Select:
-        """
-        Personaliza el queryset base para incluir agregaciones.
-        Este método se ejecuta ANTES de aplicar filtros.
-        """
-        referral_alias = aliased(Referral)
-        order_alias = aliased(Order)
-
-        query = (
-            select(
-                User,
-                func.count(func.distinct(referral_alias.id)).label("referidos_count"),
-                func.count(func.distinct(order_alias.id)).label("total_orders"),
-                func.coalesce(func.sum(order_alias.total), 0).label("total_spent"),
-            )
-            .outerjoin(referral_alias, User.id == referral_alias.user_id)
-            .outerjoin(order_alias, User.id == order_alias.user_id)
-            .group_by(User.id)
+    def build_list_queryset(self, **kwargs):
+        """Agrega el conteo de usuarios por rol como columna extra."""
+        member_count = (
+            select(func.count(UserRoles.user_id))
+            .where(UserRoles.role_id == Roles.id)
+            .scalar_subquery()
+            .label("member_count")
         )
-        return query
+        return select(Roles, member_count)
 ```
 
-**Schema con agregaciones**:
+El schema recibe `member_count` directamente (no hace falta nada más):
 
 ```python
-# schemas/user.py
-class UserWithStatsSchema(BaseModel):
-    id: int
+class RoleResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
     name: str
-    email: EmailStr
-    created_at: datetime
-    referidos_count: int
-    total_orders: Optional[int] = None
-    total_spent: Optional[int] = None  # En centavos
-
-    class Config:
-        from_attributes = True
+    code: str
+    member_count: int
 ```
 
-**Controller** (sin cambios en `list()`):
+### Métodos disponibles en BaseRepository
 
 ```python
-@router.get("/")
-class ListUsersWithStats(SQLAlchemyBaseController):
-    schema_class = UserWithStatsSchema
-    service: UserService = Depends(get_user_service)
+# Por ID
+user = await repo.get(user_id)
+user = await repo.get_with_joins(user_id, joins=["user_roles", "company"])
 
-    async def __call__(
-        self,
-        page: int = Query(1, ge=1),
-        count: int = Query(10, ge=1, le=100),
-        search: Optional[str] = Query(None),
-    ):
-        # El queryset personalizado se aplica automáticamente
-        return await self.list(search=search)
+# Por campo
+user = await repo.get_by_field("email", "john@example.com")
+user = await repo.get_by_field_with_joins("email", "john@example.com", joins=["user_roles"])
+
+# Por múltiples filtros
+users = await repo.get_by_filters({"status": "active", "company_id": company_id})
+users = await repo.get_by_filters({"status": ["active", "pending"]})  # IN
+users = await repo.get_by_filters({"status": "active"}, use_or=False)
+
+# Con joins + filtros
+user = await repo.get_by_filters_with_joins(
+    {"email": "john@example.com"}, joins=["user_roles"], one=True
+)
+
+# Filtros en relaciones con sintaxis __
+admins = await repo.get_by_filters({"user_roles__role__code": "admin"})
+
+# CRUD
+created = await repo.create({"email": "new@example.com", "full_name": "Jane"})
+updated = await repo.update(user_id, {"full_name": "Jane Doe"})
+deleted = await repo.delete(user_id)
 ```
 
-**Resultado**:
+### 4. Service
 
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "Juan Pérez",
-      "email": "juan@example.com",
-      "created_at": "2024-01-01T00:00:00",
-      "referidos_count": 5,
-      "total_orders": 12,
-      "total_spent": 150000
-    }
-  ],
-  "pagination": { ... }
-}
-```
-
-### Ejemplo 2: Joins Dinámicos con Relaciones
-
-**Caso de uso**: Cargar relaciones automáticamente para evitar queries N+1.
+El servicio usa los métodos del repositorio en sus métodos de negocio. No necesita escribir SQL.
 
 ```python
-# services/user.py
+# app/services/user.py
+from fastapi import Request, Depends
+from fastapi_basekit.aio.sqlalchemy.service.base import BaseService
+from fastapi_basekit.exceptions.api_exceptions import NotFoundException, DatabaseIntegrityException
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.config.database import get_db
+from app.repositories.user import UserRepository
+
 class UserService(BaseService):
-    search_fields = ["name", "email"]
+    repository: UserRepository
+
+    # Búsqueda textual sobre estos campos (ILIKE %term%)
+    search_fields = ["full_name", "email", "document", "phone"]
+
+    # Verifica duplicados en estos campos al crear
     duplicate_check_fields = ["email"]
 
     def get_kwargs_query(self) -> dict:
-        """
-        Define joins según la acción.
-        En 'list' y 'retrieve' carga automáticamente las relaciones.
-        """
-        if self.action in ["list", "retrieve"]:
-            return {"joins": ["role", "roles"]}
+        """Joins cargados automáticamente según la acción."""
+        if self.action in ["list_users", "retrieve"]:
+            return {"joins": ["user_roles"]}
         return {}
+
+    def get_filters(self, filters: dict | None = None) -> dict:
+        """Inyecta filtros de negocio antes de consultar."""
+        filters = {k: v for k, v in (filters or {}).items() if v is not None}
+        user = getattr(self.request.state, "user", None) if self.request else None
+        if user and "company_id" not in filters:
+            filters["company_id"] = user.company_id
+        return filters
+
+    # Métodos de negocio usando las herramientas del repositorio
+    async def get_by_email(self, email: str):
+        user = await self.repository.get_by_field("email", email)
+        if not user:
+            raise NotFoundException(message="Usuario no encontrado")
+        return user
+
+    async def get_with_roles(self, user_id: str):
+        return await self.repository.get_with_joins(user_id, joins=["user_roles"])
+
+    async def get_active_by_company(self, company_id):
+        return await self.repository.get_by_filters(
+            {"company_id": company_id, "status": "active"}
+        )
+
+    async def find_admins(self):
+        # Filtro sobre relación: user_roles → role → code
+        return await self.repository.get_by_filters(
+            {"user_roles__role__code": "admin"}
+        )
+
+
+def get_user_service(
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+) -> UserService:
+    return UserService(
+        repository=UserRepository(session),
+        request=request,
+    )
 ```
 
-**Modelo con relaciones**:
+### 5. Controller
 
 ```python
-# models/user.py
-class User(Base):
-    __tablename__ = "users"
+# app/api/v1/endpoints/user/user.py
+from typing import List, Optional, Type
+from uuid import UUID
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    email = Column(String(100), unique=True)
-    role_id = Column(Integer, ForeignKey("roles.id"))
+from fastapi import APIRouter, Depends, Query, status
+from fastapi_restful.cbv import cbv
+from pydantic import BaseModel
 
-    # Relación uno a muchos
-    role = relationship("Role", foreign_keys=[role_id])
+from fastapi_basekit.aio.sqlalchemy.controller.base import SQLAlchemyBaseController
+from fastapi_basekit.aio.permissions.base import BasePermission
+from fastapi_basekit.schema.base import BaseResponse, BasePaginationResponse
 
-    # Relación muchos a muchos
-    roles = relationship("Role", secondary=user_roles, back_populates="users")
+from app.schemas.user import UserResponseSchema, UserListResponseSchema
+from app.services.user import UserService, get_user_service
+from app.permissions.user import IsAdminPermission
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+
+@cbv(router)
+class UserController(SQLAlchemyBaseController):
+    service: UserService = Depends(get_user_service)
+    schema_class = UserResponseSchema
+
+    def get_schema_class(self) -> Type[BaseModel]:
+        """Schema diferente según la acción."""
+        if self.action == "list_users":
+            return UserListResponseSchema  # incluye role_name
+        return UserResponseSchema
+
+    def check_permissions(self) -> List[Type[BasePermission]]:
+        """Permisos por acción."""
+        if self.action in ["delete_user"]:
+            return [IsAdminPermission]
+        return []
+
+    @router.get(
+        "/",
+        response_model=BasePaginationResponse[UserListResponseSchema],
+        status_code=status.HTTP_200_OK,
+    )
+    async def list_users(
+        self,
+        page: int = Query(1, ge=1),
+        count: int = Query(10, ge=1, le=100),
+        search: Optional[str] = Query(None, description="Busca en nombre, email, documento, teléfono"),
+        order_by: Optional[str] = Query(None, description="Ej: created_at, -created_at"),
+        status: Optional[str] = Query(None),
+    ):
+        """Lista usuarios con paginación, búsqueda y filtros."""
+        return await self.list()
+
+    @router.get("/{user_id}/", response_model=BaseResponse[UserResponseSchema])
+    async def get_user(self, user_id: UUID):
+        return await self.retrieve(str(user_id))
+
+    @router.delete("/{user_id}/", response_model=BaseResponse[None])
+    async def delete_user(self, user_id: UUID):
+        await self.check_permissions_class()
+        await self.service.delete(str(user_id))
+        return BaseResponse(data=None, message="Usuario eliminado")
 ```
 
-**Controller**:
+---
+
+## Características destacadas
+
+### Búsqueda multi-campo
+
+Define `search_fields` en el servicio. El parámetro `search` del query se convierte automáticamente en `ILIKE %term%` sobre todos esos campos con `OR`.
+
+```python
+class UserService(BaseService):
+    search_fields = ["full_name", "email", "document", "phone"]
+```
+
+```
+GET /users?search=juan          → busca "juan" en full_name, email, document, phone
+GET /users?search=@gmail.com    → encuentra todos los emails de gmail
+```
+
+Soporta rutas anidadas con `__`:
+
+```python
+search_fields = ["name", "user_roles__role__name"]  # busca también en rol relacionado
+```
+
+---
+
+### Filtros automáticos desde query params
+
+Todo lo que el endpoint declara como `Query(...)` (que no sea `page`, `count`, `search`, `order_by`) se pasa automáticamente como filtro. No necesitas extraerlos manualmente.
 
 ```python
 @router.get("/")
-class ListUsers(SQLAlchemyBaseController):
-    schema_class = UserSchema  # Incluye role y roles
-    service: UserService = Depends(get_user_service)
-
-    async def __call__(self, ...):
-        # Los joins se aplican automáticamente desde get_kwargs_query()
-        return await self.list()
+async def list_tools(
+    self,
+    page: int = Query(1, ge=1),
+    count: int = Query(10),
+    search: Optional[str] = Query(None),
+    active: bool | None = Query(None),      # → filters["active"]
+    tool_type: str | None = Query(None),    # → filters["tool_type"]
+    platform: str | None = Query(None),     # → filters["platform"]
+):
+    return await self.list()  # _params() extrae todos los filtros del frame
 ```
 
-### Ejemplo 3: Sistema de Permisos
+Soporta filtros con relaciones usando `__`:
 
-**Caso de uso**: Control de acceso basado en roles y propiedad.
+```
+GET /users?user_roles__role__code=admin   → JOIN automático + WHERE
+```
+
+---
+
+### Filtros inyectados desde el servicio
+
+Usa `get_filters()` para agregar, transformar o validar filtros antes de consultar. Muy útil para filtrar por el usuario autenticado.
 
 ```python
-# permissions/user.py
+def get_filters(self, filters: dict | None = None) -> dict:
+    filters = super().get_filters(filters)
+    filters = {k: v for k, v in filters.items() if v is not None}
+
+    # Inyectar company_id del usuario autenticado
+    user = getattr(self.request.state, "user", None) if self.request else None
+    if user and "company_id" not in filters:
+        filters["company_id"] = user.company_id
+
+    # Mapear parámetros de query a columnas internas
+    if "folder_id" in filters:
+        filters["parent_id"] = filters.pop("folder_id")
+
+    return filters
+```
+
+---
+
+### Ordenamiento
+
+El parámetro `order_by` acepta:
+
+| Valor | Resultado |
+|---|---|
+| `created_at` | ORDER BY created_at ASC |
+| `-created_at` | ORDER BY created_at DESC |
+| `user__full_name` | JOIN users + ORDER BY users.full_name ASC |
+| `-user__email` | JOIN users + ORDER BY users.email DESC |
+
+```
+GET /users?order_by=-created_at           → más recientes primero
+GET /tools?order_by=tool_type__name       → ordenado por nombre del tipo
+```
+
+Para Beanie, soporta ordenamiento anidado usando pipeline de agregación automáticamente:
+
+```
+GET /tools?order_by=-created_at           → sort simple
+GET /tools?order_by=tool_type__name       → $lookup + $sort automático
+```
+
+---
+
+### Joins / eager loading (SQLAlchemy)
+
+Define qué relaciones cargar según la acción para evitar queries N+1:
+
+```python
+def get_kwargs_query(self) -> dict:
+    if self.action in ["list_users", "retrieve"]:
+        return {"joins": ["user_roles"]}          # selectinload para listas
+    return {}
+```
+
+O pásalos directamente desde el controller:
+
+```python
+async def retrieve(self, id: UUID):
+    return await self.service.retrieve(str(id), joins=["user_roles", "company"])
+```
+
+---
+
+### Queryset personalizado con subconsultas
+
+Sobreescribe `build_list_queryset()` en el repositorio para cambiar el query base del listado. Los filtros, búsqueda, ordenamiento y paginación se aplican encima automáticamente — no necesitas tocar `list()`.
+
+Los parámetros que recibe son los mismos kwargs estándar de `list_paginated` (`filters`, `search`, `order_by`, etc.) — úsalos si quieres tomar decisiones en el query base.
+
+```python
+from sqlalchemy import select
+from fastapi_basekit.aio.sqlalchemy.repository.base import BaseRepository
+from app.models.auth import Users, UserRoles, Roles
+
+class UserRepository(BaseRepository):
+    model = Users
+
+    def build_list_queryset(self, **kwargs):
+        # Subconsulta correlacionada: nombre del primer rol del usuario
+        role_name_subq = (
+            select(Roles.name)
+            .join(UserRoles, UserRoles.role_id == Roles.id)
+            .where(UserRoles.user_id == Users.id)
+            .limit(1)
+            .scalar_subquery()
+            .label("role_name")
+        )
+        return (
+            select(Users, role_name_subq)
+            .where(Users.deleted_at.is_(None))
+        )
+```
+
+El schema recibe la columna extra directamente gracias a `from_attributes=True`:
+
+```python
+class UserListResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    email: str
+    full_name: str | None
+    role_name: str | None  # inyectada desde la subconsulta
+```
+
+---
+
+### Múltiples schemas por controller
+
+```python
+def get_schema_class(self) -> Type[BaseModel]:
+    if self.action in ["retrieve", "create", "update"]:
+        return ToolDResponseSchema   # detallado con relaciones
+    return ToolResponseSchema        # resumido para el listado
+```
+
+---
+
+### Múltiples repositorios en un servicio
+
+```python
+class UserService(BaseService):
+    def __init__(
+        self,
+        repository: UserRepository,
+        user_role_repository: UserRoleRepository,
+        role_repository: RoleRepository,
+        permission_repository: PermissionRepository,
+        request: Request | None = None,
+    ):
+        super().__init__(repository, request=request)
+        self.user_role_repository = user_role_repository
+        self.role_repository = role_repository
+        self.permission_repository = permission_repository
+
+
+def get_user_service(
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+) -> UserService:
+    return UserService(
+        repository=UserRepository(session),
+        user_role_repository=UserRoleRepository(session),
+        role_repository=RoleRepository(session),
+        permission_repository=PermissionRepository(session),
+        request=request,
+    )
+```
+
+---
+
+### Permisos
+
+```python
+# app/permissions/user.py
+from fastapi import Request
 from fastapi_basekit.aio.permissions.base import BasePermission
 
-class IsAdmin(BasePermission):
+class IsAdminPermission(BasePermission):
     message_exception = "Solo administradores pueden realizar esta acción"
 
     async def has_permission(self, request: Request) -> bool:
         user = getattr(request.state, "user", None)
-        return getattr(user, "is_admin", False) if user else False
-
-class IsOwnerOrAdmin(BasePermission):
-    message_exception = "Solo el propietario o un administrador puede realizar esta acción"
-
-    async def has_permission(self, request: Request) -> bool:
-        user = getattr(request.state, "user", None)
-        if not user:
-            return False
-
-        resource_id = request.path_params.get("id")
-        if getattr(user, "is_admin", False):
-            return True
-
-        return str(user.id) == str(resource_id)
+        role_codes = getattr(request.state, "user_role_codes", [])
+        return "admin" in role_codes if user else False
 ```
 
-**Controller con permisos**:
+Aplicar en el controller:
 
 ```python
-@router.get("/{id}")
-class GetUser(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
+def check_permissions(self) -> List[Type[BasePermission]]:
+    if self.action in ["delete_user", "update_profile"]:
+        return [IsAdminPermission]
+    return []
 
-    def check_permissions(self) -> List[Type[BasePermission]]:
-        return [IsOwnerOrAdmin]
-
-    async def __call__(self, id: int):
-        return await self.retrieve(str(id))
-
-@router.post("/", status_code=201)
-class CreateUser(SQLAlchemyBaseController):
-    schema_class = UserSchema
-    service: UserService = Depends(get_user_service)
-
-    def check_permissions(self) -> List[Type[BasePermission]]:
-        return [IsAdmin]  # Solo admins pueden crear
-
-    async def __call__(self, data: UserCreateSchema):
-        return await self.create(data)
-```
-
-### Ejemplo 4: Filtros Personalizados
-
-**Caso de uso**: Transformar filtros antes de aplicarlos.
-
-```python
-# services/user.py
-class UserService(BaseService):
-    search_fields = ["name", "email"]
-    duplicate_check_fields = ["email"]
-
-    def get_filters(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Transforma filtros antes de aplicarlos.
-        Ejemplo: convertir age_min en filtro de edad.
-        """
-        applied = filters or {}
-
-        # Si viene age_min, lo convertimos en filtro de edad
-        if "age_min" in applied:
-            age_min = applied.pop("age_min")
-            # Aquí podrías agregar lógica adicional
-            # Por ejemplo, aplicar filtro de edad mínima
-
-        return applied
+# O manualmente en un método:
+async def delete_user(self, user_id: UUID):
+    await self.check_permissions_class()
+    await self.service.delete(str(user_id))
 ```
 
 ---
 
-## 📖 Uso de la API
+## Beanie (MongoDB)
 
-### Listar con Filtros y Paginación
+El mismo patrón, usando `BeanieBaseController` y `BeanieBaseService`.
 
-```bash
-# Página 1, 10 items
-GET /users?page=1&count=10
+```python
+# app/api/v1/endpoints/tool/tool.py
+from fastapi_basekit.aio.beanie.controller.base import BeanieBaseController
+from fastapi_basekit.aio.beanie.service.base import BaseService
 
-# Buscar usuarios
-GET /users?search=john
+@cbv(router)
+class ToolController(BeanieBaseController):
+    service: ToolService = Depends(get_tool_service)
+    schema_class = ToolResponseSchema
 
-# Filtrar activos
-GET /users?is_active=true
+    def get_schema_class(self):
+        if self.action in ["retrieve", "create", "update"]:
+            return ToolDResponseSchema
+        return ToolResponseSchema
 
-# Combinar filtros
-GET /users?search=john&is_active=true&page=1&count=10
+    @router.get("/", response_model=ToolPResponseSchema)
+    async def list(
+        self,
+        page: int = Query(1, ge=1),
+        count: int = Query(10, ge=1),
+        search: str | None = Query(None),
+        tool_type: PydanticObjectId | None = Query(None),
+        active: bool | None = Query(None),
+        order_by: str | None = Query(None),
+    ):
+        return await super().list()
 ```
 
-**Respuesta**:
+### fetch_links (relaciones en Beanie)
 
-```json
+```python
+class ToolService(BaseService):
+    search_fields = ["name", "description"]
+
+    def get_kwargs_query(self) -> dict:
+        """Carga relaciones según la acción."""
+        if self.action in ["list", "retrieve", "create", "update"]:
+            return {
+                "fetch_links": True,
+                "nesting_depths_per_field": {"tool_type": 2, "platform": 1},
+            }
+        return {}
+```
+
+### get_filters en Beanie
+
+```python
+def get_filters(self, filters: dict | None = None) -> dict:
+    filters = {k: v for k, v in (filters or {}).items() if v is not None}
+
+    user = getattr(self.request.state, "user", None) if self.request else None
+    if user:
+        category = filters.pop("category", "user")
+        if category == "user":
+            filters["user"] = user.id
+        elif category == "global":
+            filters["category"] = ToolCategoryEnum.GLOBAL
+        # category="all" → sin filtro adicional
+
+    return filters
+```
+
+---
+
+## SQLModel
+
+Mismo contrato que SQLAlchemy, solo cambia la sesión y la forma de definir modelos.
+
+```python
+pip install fastapi-basekit[sqlmodel]
+```
+
+```python
+from sqlmodel import SQLModel, Field, Relationship
+
+class Hero(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    team_id: int | None = Field(default=None, foreign_key="team.id")
+    team: "Team | None" = Relationship(back_populates="heroes")
+```
+
+```python
+from fastapi_basekit.aio.sqlmodel import (
+    SQLModelBaseController,
+    BaseRepository,
+    BaseService,
+)
+
+class HeroRepository(BaseRepository):
+    model = Hero
+
+class HeroService(BaseService):
+    search_fields = ["name"]
+    duplicate_check_fields = ["name"]
+
+@cbv(router)
+class HeroController(SQLModelBaseController):
+    service: HeroService = Depends(get_hero_service)
+    schema_class = HeroSchema
+```
+
+La sesión usa `sqlmodel.ext.asyncio.session.AsyncSession` internamente. Los queries usan `session.exec()` para tipos seguros.
+
+---
+
+## Formato de respuesta
+
+Todas las respuestas siguen el mismo envelope:
+
+```python
+# Detalle / create / update
+BaseResponse[Schema]
 {
-  "data": [
-    {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com",
-      "age": 30,
-      "is_active": true,
-      "created_at": "2024-01-01T00:00:00",
-      "updated_at": null
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "count": 10,
-    "total": 100,
-    "total_pages": 10
-  },
-  "message": "Operación exitosa",
-  "status": "success"
+    "data": { ... },
+    "message": "Operación exitosa",
+    "status": "success"
+}
+
+# Listado paginado
+BasePaginationResponse[Schema]
+{
+    "data": [ ... ],
+    "pagination": {
+        "page": 1,
+        "count": 10,
+        "total": 87,
+        "total_pages": 9
+    },
+    "message": "Operación exitosa",
+    "status": "status"
 }
 ```
 
-### Crear Usuario
+Declara el `response_model` en el decorador para que FastAPI genere el OpenAPI correcto:
 
-```bash
-POST /users
-Content-Type: application/json
+```python
+@router.get("/", response_model=BasePaginationResponse[UserListResponseSchema])
+async def list_users(self, ...):
+    return await self.list()
 
-{
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "age": 25,
-  "is_active": true
-}
-```
-
-**Respuesta**:
-
-```json
-{
-  "data": {
-    "id": 2,
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "age": 25,
-    "is_active": true,
-    "created_at": "2024-01-02T00:00:00",
-    "updated_at": null
-  },
-  "message": "Creado exitosamente",
-  "status": "success"
-}
+@router.get("/{id}/", response_model=BaseResponse[UserResponseSchema])
+async def get_user(self, id: UUID):
+    return await self.retrieve(str(id))
 ```
 
 ---
 
-## 🎯 Características Avanzadas
-
-### build_queryset(): Personalización de Queries
-
-El método `build_queryset()` permite personalizar el query base **antes** de aplicar filtros, búsqueda y paginación. Esto es útil para:
-
-- Agregar JOINs complejos
-- Incluir agregaciones (COUNT, SUM, AVG)
-- Aplicar GROUP BY
-- Seleccionar campos calculados
-- Optimizar queries específicas
-
-**Ventajas**:
-
-- ✅ No necesitas reescribir `list()`
-- ✅ Los filtros se aplican automáticamente sobre tu query personalizado
-- ✅ Mantiene toda la funcionalidad de paginación y búsqueda
-
-### get_kwargs_query(): Configuración Dinámica
-
-Permite definir configuración de queries según la acción:
+## Excepciones
 
 ```python
-def get_kwargs_query(self) -> dict:
-    if self.action == "list":
-        return {"joins": ["role", "profile"]}
-    elif self.action == "retrieve":
-        return {"joins": ["role", "profile", "orders"]}
-    return {}
+from fastapi_basekit.exceptions.api_exceptions import (
+    NotFoundException,          # 404
+    DatabaseIntegrityException, # 400 — registro duplicado
+    ValidationException,        # 422
+    PermissionException,        # 403
+    JWTAuthenticationException, # 401
+    GlobalException,            # 500
+)
+
+# Uso en servicio o repositorio
+raise NotFoundException(message="Usuario no encontrado")
+raise DatabaseIntegrityException(message="El email ya está en uso", data={"email": email})
 ```
 
-### get_filters(): Transformación de Filtros
-
-Transforma o valida filtros antes de aplicarlos:
+Registra el handler global en `main.py`:
 
 ```python
-def get_filters(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    applied = filters or {}
-
-    # Validar o transformar filtros
-    if "date_from" in applied:
-        # Convertir formato de fecha, etc.
-        pass
-
-    return applied
-```
-
----
-
-## 📁 Estructura de Ejemplos
-
-El proyecto incluye ejemplos completos en la carpeta `examples/`:
-
-```
-examples/
-├── simple_crud/          # CRUD básico
-│   ├── models.py
-│   ├── schemas.py
-│   ├── repository.py
-│   ├── service.py
-│   └── controller.py
-│
-├── advanced_queryset/    # Queryset personalizado con agregaciones
-│   ├── models.py
-│   ├── schemas.py
-│   ├── repository.py
-│   ├── service.py        # build_queryset() con COUNT y SUM
-│   └── controller.py
-│
-├── with_relations/       # Relaciones y joins dinámicos
-│   ├── models.py
-│   ├── schemas.py
-│   ├── repository.py
-│   ├── service.py        # get_kwargs_query() con joins
-│   └── controller.py
-│
-└── with_permissions/     # Sistema de permisos
-    ├── models.py
-    ├── schemas.py
-    ├── repository.py
-    ├── service.py
-    ├── permissions.py    # Permisos personalizados
-    └── controller.py
-```
-
----
-
-## 🔧 Configuración
-
-### Variables de Entorno
-
-```bash
-# .env
-DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
-FASTAPI_BASEKIT_DEFAULT_PAGE_SIZE=25
-FASTAPI_BASEKIT_MAX_PAGE_SIZE=200
-```
-
-### Setup de Base de Datos
-
-```python
-# database.py
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-
-engine = create_async_engine("postgresql+asyncpg://user:pass@localhost/dbname")
-async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-async def get_db():
-    async with async_session_maker() as session:
-        yield session
-```
-
-### Middleware para DB
-
-```python
-# main.py
-from fastapi import FastAPI, Request
-from database import get_db
+from fastapi_basekit.exceptions.handler import register_exception_handlers
 
 app = FastAPI()
-
-@app.middleware("http")
-async def db_session_middleware(request: Request, call_next):
-    async for session in get_db():
-        request.state.db = session
-        response = await call_next(request)
-        await session.commit()
-        return response
+register_exception_handlers(app)
 ```
 
 ---
 
-## 🧪 Testing
+## Arquitectura
 
-```python
-# tests/test_user_controller.py
-import pytest
-from fastapi.testclient import TestClient
-
-def test_list_users(client: TestClient):
-    response = client.get("/users?page=1&count=10")
-    assert response.status_code == 200
-    data = response.json()
-    assert "data" in data
-    assert "pagination" in data
-    assert data["pagination"]["page"] == 1
-
-def test_create_user(client: TestClient):
-    user_data = {
-        "name": "Test User",
-        "email": "test@example.com"
-    }
-    response = client.post("/users", json=user_data)
-    assert response.status_code == 201
-    data = response.json()
-    assert data["data"]["name"] == "Test User"
+```
+Controller  ←  valida parámetros, permisos, schema de respuesta
+    ↓
+Service     ←  lógica de negocio, get_filters(), build_queryset()
+    ↓
+Repository  ←  acceso a datos, queries SQL/Mongo, build_list_queryset()
+    ↓
+DB          ←  SQLAlchemy / SQLModel / Beanie
 ```
 
 ---
 
-## 📊 Arquitectura
+## Changelog
 
-```
-┌─────────────┐
-│   Client    │
-└─────┬───────┘
-      │ HTTP Request
-      ▼
-┌─────────────────┐
-│   Controller    │  ← Validación, permisos, formato de respuesta
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│    Service      │  ← Lógica de negocio, build_queryset(), get_filters()
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Repository    │  ← Acceso a datos, queries optimizados
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│    Database     │
-└─────────────────┘
-```
+Ver [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 
-## 🤝 Contribuir
+## Licencia
 
-¡Las contribuciones son bienvenidas! Por favor lee [CONTRIBUTING.md](./CONTRIBUTING.md) para detalles.
-
-### Desarrollo Local
-
-```bash
-# Clonar
-git clone https://github.com/mundobien2025/fastapi-basekit.git
-cd fastapi-basekit
-
-# Instalar dependencias
-pip install -e ".[dev]"
-
-# Ejecutar tests
-pytest
-
-# Linting
-black fastapi_basekit
-flake8 fastapi_basekit
-mypy fastapi_basekit
-```
-
----
-
-## 📄 Licencia
-
-Este proyecto está licenciado bajo la licencia MIT - ver [LICENSE](./LICENSE) para detalles.
-
----
-
-## 🙏 Agradecimientos
-
-- [FastAPI](https://fastapi.tiangolo.com/) - El framework web moderno y rápido
-- [SQLAlchemy](https://www.sqlalchemy.org/) - El ORM SQL para Python
-- [Pydantic](https://pydantic-docs.helpmanual.io/) - Validación de datos usando Python type hints
-
----
-
-## 📞 Soporte
-
-- 📖 [Documentación](https://github.com/mundobien2025/fastapi-basekit)
-- 🐛 [Issues](https://github.com/mundobien2025/fastapi-basekit/issues)
-- 💬 [Discussions](https://github.com/mundobien2025/fastapi-basekit/discussions)
-
----
-
-<div align="center">
-
-**Hecho con ❤️ para la comunidad FastAPI**
-
-⭐ Si te gusta este proyecto, dale una estrella en GitHub
-
-</div>
+MIT — ver [LICENSE](./LICENSE)

@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import Request
 from pydantic import BaseModel
+
 from ..repository.base import BaseRepository
 from ....exceptions.api_exceptions import (
     NotFoundException,
@@ -10,7 +11,12 @@ from ....exceptions.api_exceptions import (
 
 
 class BaseService:
-    """Servicio base para SQLAlchemy AsyncSession."""
+    """Servicio base para SQLModel AsyncSession.
+
+    Idéntico en contrato al servicio de SQLAlchemy pero referencia el
+    repositorio SQLModel.  Proporciona CRUD, paginación, búsqueda y
+    verificación de duplicados.
+    """
 
     repository: BaseRepository
     search_fields: List[str] = []
@@ -28,21 +34,19 @@ class BaseService:
         self.repository = repository
         self.request = request
 
-        # Vincular el servicio al repositorio principal
         if self.repository:
             self.repository.service = self
 
-        # Procesar kwargs adicionales para vincular otros repositorios
         for name, value in kwargs.items():
             if isinstance(value, BaseRepository):
                 value.service = self
             setattr(self, name, value)
+
         endpoint_func = (
             self.request.scope.get("endpoint") if self.request else None
         )
         self.action = endpoint_func.__name__ if endpoint_func else None
 
-        # Parámetros compartidos para consultas (especialmente list)
         self.params: Dict[str, Any] = {
             "search": None,
             "page": 1,
@@ -58,27 +62,24 @@ class BaseService:
     def get_filters(
         self, filters: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Sobrescribe para validar/transformar filtros entrantes
-        antes de consultar."""
+        """Sobrescribe para validar/transformar filtros antes de consultar."""
         return filters or {}
 
     def get_kwargs_query(self) -> Dict[str, Any]:
         """Sobrescribe para retornar kwargs de consulta para el repositorio.
 
-        Ejemplo de uso en un servicio:
+        Ejemplo::
 
             def get_kwargs_query(self):
                 if self.action in ["retrieve", "list"]:
-                    return {"joins": ["role"]}
+                    return {"joins": ["team"]}
                 return super().get_kwargs_query()
-
         """
         return self.kwargs_query or {}
 
     async def retrieve(
         self, id: str, joins: Optional[List[str]] = None
     ) -> Any:
-        # Permite que el servicio defina joins u otros kwargs por acción
         kwargs = self.get_kwargs_query()
         if joins is None:
             joins = kwargs.get("joins")
@@ -100,8 +101,6 @@ class BaseService:
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
     ) -> tuple[List[Any], int]:
-        # Actualiza self.params con los argumentos
-        # proporcionados (si no son None)
         if search is not None:
             self.params["search"] = search
         if page is not None:
@@ -117,18 +116,13 @@ class BaseService:
         if order_by is not None:
             self.params["order_by"] = order_by
 
-        # Aplica filtros y kwargs de consulta definidos por el servicio
         applied_filters = self.get_filters(self.params["filters"])
         kwargs = self.get_kwargs_query()
 
-        # Prioridad de joins: argumento explícito >
-        # kwargs del servicio (por acción)
         final_joins = self.params["joins"]
         if final_joins is None:
             final_joins = kwargs.get("joins")
 
-        # Prioridad de order_by: argumento explícito >
-        # kwargs del servicio > default del servicio
         final_order_by = self.params["order_by"]
         if order_by is None:
             final_order_by = kwargs.get("order_by", self.params["order_by"])
@@ -158,15 +152,14 @@ class BaseService:
             else self.duplicate_check_fields
         )
         if fields:
-            filters = {f: data[f] for f in fields if f in data}
-            if filters:
-                existing = await self.repository.get_by_filters(filters)
+            field_filters = {f: data[f] for f in fields if f in data}
+            if field_filters:
+                existing = await self.repository.get_by_filters(field_filters)
                 if existing:
                     raise DatabaseIntegrityException(
-                        message="Registro ya existe", data=filters
+                        message="Registro ya existe", data=field_filters
                     )
-        created = await self.repository.create(data)
-        return created
+        return await self.repository.create(data)
 
     async def update(self, id: str, data: BaseModel | Dict[str, Any]) -> Any:
         update_data = (
@@ -174,8 +167,7 @@ class BaseService:
             if isinstance(data, BaseModel)
             else data
         )
-        updated = await self.repository.update(id, update_data)
-        return updated
+        return await self.repository.update(id, update_data)
 
     async def delete(self, id: str) -> bool:
         return await self.repository.delete(id)

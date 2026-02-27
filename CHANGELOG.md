@@ -5,6 +5,27 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-02-27
+
+### ✨ Agregado
+
+- **Soporte para SQLModel ORM** (`fastapi_basekit.aio.sqlmodel`)
+  - `BaseRepository` — repositorio async con `sqlmodel.ext.asyncio.session.AsyncSession`.
+    Usa `session.exec()` para queries tipados sobre modelos SQLModel; mantiene
+    `session.execute()` para consultas de agregación y queries complejos con
+    Result Hydration. Contrato idéntico al repositorio SQLAlchemy.
+  - `BaseService` — servicio base que referencia el repositorio SQLModel.
+    Mismas operaciones: `retrieve`, `list`, `create`, `update`, `delete`.
+  - `SQLModelBaseController` — controlador base con soporte para `joins`,
+    `use_or` y `order_by`. La serialización aprovecha que los modelos SQLModel
+    son también modelos Pydantic (`model_dump()` nativo).
+  - `to_dict()` simplificado en el controlador gracias a la integración
+    Pydantic de SQLModel.
+
+- **Dependencia opcional `sqlmodel`** en `pyproject.toml`
+  - Instalar con: `pip install fastapi-basekit[sqlmodel]`
+  - Incluido en el extra `[all]`.
+
 ## [0.1.25] - 2026-02-11
 
 ### ✨ Agregado
