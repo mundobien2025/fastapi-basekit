@@ -152,8 +152,14 @@ class BaseRepository:
 
             return False
 
+        raw_filters: Dict[str, Any] = {}
+
         for k, v in (filters or {}).items():
-            if hasattr(self.model, k):
+            # MongoDB-style keys (dot-notation like "user.$id" or operators like "$or")
+            # cannot be resolved via hasattr — pass them as a raw dict to find()
+            if "." in k or k.startswith("$"):
+                raw_filters[k] = v
+            elif hasattr(self.model, k):
                 field_attr = getattr(self.model, k)
 
                 if _is_link_field(k):
@@ -161,7 +167,9 @@ class BaseRepository:
                 else:
                     exprs.append(field_attr == v)
 
-        query = self.model.find(*exprs, **self._get_query_kwargs(**kwargs))
+        # Raw MongoDB filters go first so Beanie processes them as a dict condition
+        query_args: list = ([raw_filters] if raw_filters else []) + exprs
+        query = self.model.find(*query_args, **self._get_query_kwargs(**kwargs))
         
         # Apply ordering if provided
         if order_by:
