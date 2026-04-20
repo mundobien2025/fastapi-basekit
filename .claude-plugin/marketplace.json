@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "fastapi-basekit",
-      "source": "../",
+      "source": "https://github.com/mundobien2025/fastapi-basekit",
       "description": "Skills and conventions for projects using fastapi-basekit (SQLAlchemy, Beanie or SQLModel with async CBV pattern)",
       "version": "0.2.1"
     }
