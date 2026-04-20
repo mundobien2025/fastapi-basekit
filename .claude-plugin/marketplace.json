@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "name": "fastapi-basekit",
+      "path": "../",
+      "description": "Skills and conventions for projects using fastapi-basekit (SQLAlchemy, Beanie or SQLModel with async CBV pattern)",
+      "version": "0.2.1"
+    }
+  ]
+}
