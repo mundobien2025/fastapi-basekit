@@ -1,8 +1,13 @@
 {
+  "name": "fastapi-basekit",
+  "owner": {
+    "name": "Jerson Moreno",
+    "email": "jerson.ml820@hotmail.com"
+  },
   "plugins": [
     {
       "name": "fastapi-basekit",
-      "path": "../",
+      "source": "../",
       "description": "Skills and conventions for projects using fastapi-basekit (SQLAlchemy, Beanie or SQLModel with async CBV pattern)",
       "version": "0.2.1"
     }
