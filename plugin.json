@@ -20,5 +20,5 @@
     "cbv",
     "basekit"
   ],
-  "skills": "../.claude/skills/"
+  "skills": "./.claude/skills/"
 }
