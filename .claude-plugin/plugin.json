@@ -1,0 +1,24 @@
+{
+  "name": "fastapi-basekit",
+  "version": "0.2.1",
+  "description": "Skills and conventions for projects using fastapi-basekit (SQLAlchemy async CBV pattern)",
+  "author": {
+    "name": "Jerson Moreno",
+    "email": "jerson.ml820@hotmail.com",
+    "url": "https://github.com/mundobien2025"
+  },
+  "homepage": "https://github.com/mundobien2025/fastapi-basekit",
+  "repository": "https://github.com/mundobien2025/fastapi-basekit",
+  "license": "MIT",
+  "keywords": [
+    "fastapi",
+    "sqlalchemy",
+    "beanie",
+    "SQLModel",
+    "python",
+    "crud",
+    "cbv",
+    "basekit"
+  ],
+  "skills": "./.claude/skills/"
+}
