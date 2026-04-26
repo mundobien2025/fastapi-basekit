@@ -144,6 +144,7 @@ nav:
   - Changelog: changelog.md
 
 extra:
+  version_label: 0.3.x
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/mundobien2025/fastapi-basekit
