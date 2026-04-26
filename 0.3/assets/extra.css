@@ -1,0 +1,180 @@
+/* fastapi-basekit — custom polish */
+
+:root {
+  --md-primary-fg-color:        #009485;
+  --md-primary-fg-color--light: #00b89c;
+  --md-primary-fg-color--dark:  #00675b;
+  --md-accent-fg-color:         #ff6e40;
+}
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color:        #fafbfc;
+  --md-code-bg-color:           #f3f5f7;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 210;
+  --md-default-bg-color:        hsla(var(--md-hue), 15%, 12%, 1);
+  --md-code-bg-color:           hsla(var(--md-hue), 15%, 17%, 1);
+}
+
+/* Hero */
+.bk-hero {
+  position: relative;
+  padding: 4rem 1rem 3rem;
+  margin: -1.5rem -1rem 3rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 148, 133, 0.18), transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(255, 110, 64, 0.12), transparent 50%),
+    linear-gradient(180deg, var(--md-default-bg-color) 0%, transparent 100%);
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  overflow: hidden;
+}
+
+.bk-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--md-default-fg-color--lightest) 1px, transparent 1px),
+    linear-gradient(90deg, var(--md-default-fg-color--lightest) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.25;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 75%);
+          mask-image: radial-gradient(ellipse at center, #000 0%, transparent 75%);
+  pointer-events: none;
+}
+
+.bk-hero > * { position: relative; }
+
+.bk-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 0.6rem;
+  background: linear-gradient(90deg, var(--md-primary-fg-color), var(--md-accent-fg-color));
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+
+.bk-hero .bk-tagline {
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  color: var(--md-default-fg-color--light);
+  max-width: 720px;
+  margin: 0 auto 1.6rem;
+  line-height: 1.55;
+}
+
+.bk-hero .bk-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.4rem;
+}
+
+.bk-hero .bk-actions .md-button {
+  font-weight: 600;
+}
+
+.bk-badges {
+  display: inline-flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bk-badges img { height: 22px; }
+
+/* Card grid polish */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid.cards > .card {
+  border-radius: 12px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover,
+.md-typeset .grid.cards > .card:hover {
+  transform: translateY(-2px);
+  border-color: var(--md-primary-fg-color);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+
+.md-typeset .grid.cards .twemoji {
+  color: var(--md-primary-fg-color);
+}
+
+/* Buttons */
+.md-typeset .md-button {
+  border-radius: 999px;
+  padding: 0.55em 1.4em;
+}
+
+.md-typeset .md-button--primary {
+  background: linear-gradient(90deg, var(--md-primary-fg-color), var(--md-primary-fg-color--light));
+  border: none;
+}
+
+.md-typeset .md-button--primary:hover {
+  background: linear-gradient(90deg, var(--md-primary-fg-color--dark), var(--md-primary-fg-color));
+  filter: brightness(1.05);
+}
+
+/* Code blocks */
+.md-typeset pre > code {
+  border-radius: 10px;
+  font-size: 0.85em;
+}
+
+.md-typeset code {
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+}
+
+/* Headings */
+.md-typeset h1 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.md-typeset h2 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  padding-bottom: 0.4em;
+  margin-top: 2.5em;
+}
+
+/* Tables */
+.md-typeset table:not([class]) {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--md-primary-fg-color);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Admonitions */
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 10px;
+  border-width: 0 0 0 4px;
+}
+
+/* Top-right header buttons */
+.md-header__topic {
+  font-weight: 700;
+}
+
+/* Mermaid */
+.md-typeset .mermaid {
+  text-align: center;
+}
