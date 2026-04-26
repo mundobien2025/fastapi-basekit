@@ -67,7 +67,7 @@ mike set-default --push latest
 `.github/workflows/`:
 - `tests.yml` — pytest + lint en PR
 - `docs.yml` — push a main con cambios de docs → deploy alias `dev` (preview)
-- `release.yml` — tag `v*` push → PyPI + docs versionadas (mike alias `X.Y` + `latest`). Manual dispatch permite togglear `pypi` y `deploy_docs` independientes.
+- `publish.yml` — tag `v*` push → PyPI + docs versionadas (mike alias `X.Y` + `latest`). Manual dispatch permite togglear `pypi` y `deploy_docs` independientes.
 
 ## Release flow
 
@@ -93,14 +93,14 @@ make release-dry V=0.3.0      # preview sin escribir
 6. Push branch + tag (`--follow-tags`)
 7. Imprime URLs para monitorear
 
-Tag `v*` dispara `release.yml` en GitHub Actions:
+Tag `v*` dispara `publish.yml` en GitHub Actions:
 
 - Build wheel + sdist
 - Publica PyPI (OIDC trusted publishing)
 - `mike deploy 0.3 latest` → docs versionadas + alias `latest`
 - `mike set-default latest` → root URL apunta a último
 
-`release.yml` corre en cada `v*` tag:
+`publish.yml` corre en cada `v*` tag:
 1. Build wheel + sdist
 2. Publica PyPI (OIDC trusted publishing)
 3. `mike deploy 0.3 latest` → docs versionadas + alias `latest`
@@ -120,7 +120,7 @@ URLs resultantes:
 make release-no-docs V=0.3.0
 ```
 
-Bumpea + commit + push (sin tag) + dispatcha `release.yml` con `pypi=true deploy_docs=false`. Útil para patches internos que no cambian docs.
+Bumpea + commit + push (sin tag) + dispatcha `publish.yml` con `pypi=true deploy_docs=false`. Útil para patches internos que no cambian docs.
 
 ### Docs sin tocar PyPI
 
@@ -146,7 +146,7 @@ make docs-deploy-version
 #    - PyPI → Account → Publishing → Add pending publisher
 #    - Owner: mundobien2025
 #    - Repo: fastapi-basekit
-#    - Workflow: release.yml
+#    - Workflow: publish.yml
 #    - Environment: pypi
 ```
 

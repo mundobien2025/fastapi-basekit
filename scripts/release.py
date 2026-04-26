@@ -20,7 +20,7 @@ What it does (default mode):
     6. git push origin <branch> --follow-tags
     7. Print URLs to monitor the workflow
 
-The remote release.yml workflow handles PyPI + docs deployment.
+The remote publish.yml workflow handles PyPI + docs deployment.
 """
 from __future__ import annotations
 
@@ -177,13 +177,13 @@ def dispatch_workflow(version: str, deploy_docs: bool, pypi: bool) -> None:
     if not subprocess.run(["which", "gh"], capture_output=True).stdout.strip():
         fail("gh CLI required for --no-docs / --docs-only modes")
     args = [
-        "gh", "workflow", "run", "release.yml",
+        "gh", "workflow", "run", "publish.yml",
         "-f", f"version={version}",
         "-f", f"deploy_docs={'true' if deploy_docs else 'false'}",
         "-f", f"pypi={'true' if pypi else 'false'}",
     ]
     run(args)
-    ok(f"Dispatched release.yml — pypi={pypi} deploy_docs={deploy_docs}")
+    ok(f"Dispatched publish.yml — pypi={pypi} deploy_docs={deploy_docs}")
 
 
 def main() -> None:
@@ -197,17 +197,17 @@ def main() -> None:
     parser.add_argument(
         "--no-docs",
         action="store_true",
-        help="Tag-based release WITHOUT docs deploy. Bumps + commits + tags as usual but tag message contains [skip-docs]; release.yml still runs but you'd dispatch manually for PyPI-only behavior. To be 100% docs-free, use --pypi-only.",
+        help="Tag-based release WITHOUT docs deploy. Bumps + commits + tags as usual but tag message contains [skip-docs]; publish.yml still runs but you'd dispatch manually for PyPI-only behavior. To be 100% docs-free, use --pypi-only.",
     )
     parser.add_argument(
         "--pypi-only",
         action="store_true",
-        help="Bump + commit (NO tag, NO push). Then dispatch release.yml via gh CLI with deploy_docs=false.",
+        help="Bump + commit (NO tag, NO push). Then dispatch publish.yml via gh CLI with deploy_docs=false.",
     )
     parser.add_argument(
         "--docs-only",
         action="store_true",
-        help="Bump + commit (NO tag, NO push). Then dispatch release.yml via gh CLI with pypi=false.",
+        help="Bump + commit (NO tag, NO push). Then dispatch publish.yml via gh CLI with pypi=false.",
     )
     parser.add_argument(
         "--dry-run",
@@ -270,7 +270,7 @@ def main() -> None:
         return
 
     if mode == "full":
-        # Tag-based release: tag triggers release.yml automatically
+        # Tag-based release: tag triggers publish.yml automatically
         commit_and_tag(version, mode)
         push(version)
         print()

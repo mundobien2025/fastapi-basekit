@@ -1,7 +1,7 @@
 name: Docs (dev preview)
 
 # Deploys the latest main into the `dev` alias of mike.
-# Released docs (versioned X.Y + latest) are handled by release.yml on tag push.
+# Released docs (versioned X.Y + latest) are handled by publish.yml on tag push.
 #
 # Triggers:
 #   1. Push to main with doc-relevant changes → deploy `dev`
