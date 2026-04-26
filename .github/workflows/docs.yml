@@ -1,0 +1,57 @@
+name: Docs (dev preview)
+
+# Deploys the latest main into the `dev` alias of mike.
+# Released docs (versioned X.Y + latest) are handled by release.yml on tag push.
+#
+# Triggers:
+#   1. Push to main with doc-relevant changes → deploy `dev`
+#   2. Manual dispatch → deploy `dev`
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "fastapi_basekit/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-dev
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[docs]
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch gh-pages
+        run: git fetch origin gh-pages --depth=1 || true
+
+      - name: Deploy `dev` via mike
+        run: mike deploy --push dev
+
+      - name: URL
+        run: echo "Dev: https://mundobien2025.github.io/fastapi-basekit/dev/"

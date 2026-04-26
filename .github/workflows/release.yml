@@ -1,0 +1,135 @@
+name: Release
+
+# Triggers:
+#   1. Push tag v* → PyPI + docs (versioned via mike)
+#   2. Manual dispatch → choose PyPI only OR PyPI + docs
+on:
+  push:
+    tags:
+      - 'v*'              # e.g. v0.3.0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.3.0). Required for manual runs.'
+        required: true
+        type: string
+      deploy_docs:
+        description: 'Also deploy docs (versioned via mike)?'
+        required: true
+        type: boolean
+        default: true
+      pypi:
+        description: 'Publish to PyPI?'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write          # mike push to gh-pages
+  id-token: write          # PyPI OIDC trusted publishing
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      alias: ${{ steps.ver.outputs.alias }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            V="${GITHUB_REF_NAME#v}"
+          else
+            V="${{ github.event.inputs.version }}"
+          fi
+          if [ -z "$V" ]; then
+            echo "::error::version not resolved"; exit 1
+          fi
+          MAJOR_MINOR=$(echo "$V" | cut -d. -f1-2)
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "alias=$MAJOR_MINOR" >> "$GITHUB_OUTPUT"
+          echo "Resolved: version=$V alias=$MAJOR_MINOR"
+
+      - name: Install build backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build wheel + sdist
+        run: python -m build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  publish-pypi:
+    needs: build
+    if: |
+      github.event_name == 'push' ||
+      github.event.inputs.pypi == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@v1.12.2
+        with:
+          skip-existing: true
+
+  deploy-docs:
+    needs: build
+    if: |
+      github.event_name == 'push' ||
+      github.event.inputs.deploy_docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install docs deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[docs]
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch gh-pages
+        run: git fetch origin gh-pages --depth=1 || true
+
+      - name: Deploy versioned docs (mike)
+        run: |
+          mike deploy --push --update-aliases \
+            "${{ needs.build.outputs.alias }}" latest
+          mike set-default --push latest
+
+      - name: Show URLs
+        run: |
+          echo "Latest: https://mundobien2025.github.io/fastapi-basekit/latest/"
+          echo "Pinned: https://mundobien2025.github.io/fastapi-basekit/${{ needs.build.outputs.alias }}/"

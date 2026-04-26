@@ -1,45 +1,61 @@
 site_name: FastAPI BaseKit
 site_description: Toolkit base para desarrollo rápido de APIs con FastAPI
-site_url: https://tu-usuario.github.io/fastapi-basekit
-repo_url: https://github.com/tu-usuario/fastapi-basekit
+site_url: https://mundobien2025.github.io/fastapi-basekit
+repo_url: https://github.com/mundobien2025/fastapi-basekit
 repo_name: fastapi-basekit
 edit_uri: edit/main/docs/
 
 theme:
   name: material
   language: es
+  custom_dir: docs/overrides
+  font:
+    text: Inter
+    code: JetBrains Mono
   palette:
-    # Modo claro
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: teal
-      accent: amber
+      accent: deep orange
       toggle:
-        icon: material/brightness-7
-        name: Cambiar a modo oscuro
-    # Modo oscuro
+        icon: material/weather-night
+        name: Modo oscuro
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: teal
-      accent: amber
+      accent: deep orange
       toggle:
-        icon: material/brightness-4
-        name: Cambiar a modo claro
-  
+        icon: material/weather-sunny
+        name: Modo claro
+
   features:
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
-    - navigation.expand
+    - navigation.path
     - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
     - content.code.annotate
-  
+    - content.tabs.link
+    - content.tooltips
+    - announce.dismiss
+
   icon:
     repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+    logo: material/atom-variant
+  favicon: assets/favicon.svg
 
 plugins:
   - search:
@@ -73,6 +89,15 @@ markdown_extensions:
   - md_in_html
   - def_list
   - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.caret
+  - pymdownx.tilde
+  - footnotes
 
 nav:
   - Inicio: index.md
@@ -121,12 +146,27 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/tu-usuario
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/tu-usuario
-    - icon: fontawesome/brands/linkedin
-      link: https://linkedin.com/in/tu-usuario
-  
+      link: https://github.com/mundobien2025/fastapi-basekit
+      name: GitHub
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fastapi-basekit/
+      name: PyPI
+  generator: false
+
   version:
     provider: mike
+    default: latest
+
+  status:
+    new: Recently added
+    deprecated: Deprecated
+
+extra_css:
+  - assets/extra.css
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
+  - assets/mermaid-init.js
+
+copyright: Copyright &copy; 2026 Jerson Moreno · MIT License
 

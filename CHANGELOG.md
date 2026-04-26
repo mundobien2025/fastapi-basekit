@@ -5,6 +5,87 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.0] - 2026-04-26
+
+### Agregado
+
+- **`basekit init` — scaffolder cookiecutter** (`pip install fastapi-basekit[init]`)
+  - CLI `basekit` con subcomandos `init` y `version`.
+  - Template completo en `fastapi_basekit/templates/project/` con conditionals Jinja.
+  - Choices: `orm` (sqlalchemy/beanie), `database` (postgres/mariadb/sqlite/mongodb),
+    `server` (uvicorn/gunicorn), `cache` (none/redis), `background_tasks` (none/arq),
+    `bucket` (none/s3), `include_alembic`, `include_docker`, `license`.
+  - Hooks `pre_gen_project.py` (valida orm↔db) y `post_gen_project.py` (poda archivos no usados).
+  - Genera `app/` completo (config, models, repos, services, controllers, middleware, permissions,
+    schemas, scripts, utils), `alembic/`, `docker-compose.yml`, `Dockerfile`, `Makefile`,
+    `.env.example`, `LICENSE`, `pytest.ini`, `requirements.txt`, `README.md`.
+  - Boot end-to-end verificado: `make up-d` → `make migrate-up` → `make seed` → login.
+
+- **Sitio de documentación MkDocs Material** (`pip install fastapi-basekit[docs]`)
+  - 22+ páginas: getting-started, user-guide, advanced, api-reference, examples.
+  - Hero CSS custom con gradient + grid pattern + cards con hover lift.
+  - Mermaid diagrams con tema custom basekit (teal + accent orange).
+  - Versionado con `mike`: aliases `latest`, `X.Y`, `dev`.
+  - Auto-deploy a GitHub Pages vía workflow.
+
+- **Workflows GitHub Actions reestructurados**
+  - `release.yml` — tag `v*` push → PyPI (OIDC trusted publishing) + mike-versioned docs.
+    `workflow_dispatch` con inputs `version` / `pypi` / `deploy_docs` para releases parciales.
+  - `docs.yml` — push a main con cambios doc-relevantes → deploya alias `dev` (preview).
+  - Concurrencia + permisos OIDC + cache pip configurados.
+
+- **Comando único de release** (`scripts/release.py`)
+  - Bumpea atómicamente `pyproject.toml`, `plugin.json`, `marketplace.json`, `CHANGELOG.md`.
+  - Valida semver + working tree limpio + tag no existe.
+  - Commit + tag + push con `--follow-tags`.
+  - Modos: `--bump patch|minor|major`, `--dry-run`, `--pypi-only`, `--docs-only`, `--no-changelog`.
+  - Makefile targets: `release V=`, `release-no-docs`, `release-docs-only`, `release-dry`.
+
+- **Skill `fastapi-basekit-crud` v2** (`.claude/skills/fastapi-basekit-crud/SKILL.md`)
+  - Secciones nuevas: §22 servicios deben extender `BaseService` (incluso no-CRUD),
+    §23 alembic `render_item` para `GUID` + `LowercaseEnum`, §24 API real de `JWTService`
+    (`create_token`, NO `encode_token`), §25 política de extender `SQLAlchemyBaseController`,
+    §26 pinning de deps, §27 checklist sync→async migration, §28 `get_db` lean
+    (translation en handlers, no en generator).
+
+- **Documentación interna `RELEASING.md`**
+  - Guía completa para mantenedores: setup PyPI OIDC, GitHub Pages bootstrap,
+    release flow, modos parciales, mike aliases, troubleshooting (8 escenarios), checklist.
+
+### Corregido
+
+- **`BasePaginationResponse[Schema]`** (no `[List[Schema]]`)
+  - `BasePaginationResponse` ya declara `data: List[T]`. Wrappear con `List[]` doble-anida
+    a `List[List[T]]` y Pydantic itera filas como tuplas `(field, value)` → 8 errores per row.
+  - Fix en swapdealer + skill + template cookiecutter.
+
+- **Mermaid runtime en docs** (Material 9.7+)
+  - Material removió auto-bootstrap de mermaid.
+  - Carga explícita CDN + init script con tema matching + hook re-render en instant nav.
+
+- **Alembic `render_item` para tipos custom**
+  - Sin esto, autogen emite `app.models.types.LowercaseEnum(...)` literal → `NameError` en upgrade.
+  - Renderiza `GUID` y `LowercaseEnum` como `sa.String(length=N)`.
+
+### Cambiado
+
+- **`get_db` lean** — solo `yield + commit / except: rollback + raise`.
+  Translation de errores (IntegrityError → mensaje friendly) vive en `app/utils/exception_handlers.py`,
+  registrado globalmente. Saca domain knowledge del session generator.
+
+- **`self.action` automático** en controllers/services — `BaseController.__init__` lo asigna
+  desde `request.scope["endpoint"].__name__`. Skill actualizada: nunca asignar manual,
+  branch en `self.action == "method_name"`.
+
+- **mkdocs.yml** — `pymdownx.emoji` con `material.extensions.emoji.twemoji`,
+  custom palette (teal/deep-orange), font Inter + JetBrains Mono, navigation features ampliados.
+
+### Empaquetado
+
+- Optional extras nuevos: `[init]` (cookiecutter), `[docs]` (mkdocs-material + mkdocstrings).
+- `[project.scripts]` registra `basekit = "fastapi_basekit.cli:main"`.
+- `package-data` incluye templates en el wheel.
+
 ## [0.2.0] - 2026-02-27
 
 ### ✨ Agregado
@@ -161,6 +242,8 @@ El `BaseController` genérico sigue disponible para compatibilidad, pero se reco
 
 ---
 
+[0.3.0]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.2.1...v0.3.0
+[0.2.0]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.25...v0.2.0
 [0.1.25]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.16...v0.1.25
 [0.1.16]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.15...v0.1.16
 [0.1.15]: https://github.com/mundobien2025/fastapi-basekit/compare/v0.1.0...v0.1.15

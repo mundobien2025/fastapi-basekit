@@ -1,0 +1,19 @@
+{
+    "project_name": "My FastAPI Service",
+    "project_slug": "{{ cookiecutter.project_name.lower()|replace(' ', '_')|replace('-', '_') }}",
+    "package_name": "{{ cookiecutter.project_slug }}",
+    "description": "Backend API built with fastapi-basekit",
+    "author_name": "Your Name",
+    "author_email": "you@example.com",
+    "python_version": "3.12",
+    "orm": ["sqlalchemy", "beanie"],
+    "database": ["postgres", "mariadb", "sqlite", "mongodb"],
+    "server": ["uvicorn", "gunicorn"],
+    "cache": ["none", "redis"],
+    "background_tasks": ["none", "arq"],
+    "bucket": ["none", "s3"],
+    "include_alembic": ["yes", "no"],
+    "license": ["MIT", "Apache-2.0", "GPL-3.0", "Proprietary"],
+    "include_docker": ["yes", "no"],
+    "_extensions": ["jinja2.ext.do"]
+}

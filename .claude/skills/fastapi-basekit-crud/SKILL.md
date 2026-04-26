@@ -29,6 +29,28 @@ find app/ -name "*.py" | head -40
 Read one existing controller + service + repo to match the project's exact style.
 Check if it uses SQLAlchemy or Beanie. Check if `app/models/base.py` has `deleted_at` (soft delete).
 
+### Starting a NEW project? Use `basekit init`
+
+The library ships a cookiecutter scaffolder. Don't hand-roll `app/main.py`, `config/database.py`, alembic env, etc. — generate them:
+
+```bash
+pip install fastapi-basekit[init]
+basekit init                                                    # interactive
+basekit init --no-input                                         # defaults
+basekit init --extra-context project_name="My Service" \
+             --extra-context orm=sqlalchemy \
+             --extra-context database=postgres \
+             --extra-context cache=redis \
+             --extra-context bucket=s3 \
+             --extra-context license=MIT
+```
+
+Choices exposed (see `cookiecutter.json`): `orm` (sqlalchemy / beanie), `database` (postgres / mariadb / sqlite / mongodb), `server` (uvicorn / gunicorn), `cache` (none / redis), `background_tasks` (none / arq), `bucket` (none / s3), `include_alembic` (yes / no), `include_docker` (yes / no), `license` (MIT / Apache-2.0 / GPL-3.0 / Proprietary).
+
+Pre-gen hook validates ORM ↔ database compatibility (beanie ⇒ mongodb, sqlalchemy ⇒ SQL). Post-gen hook prunes alembic/Docker if disabled.
+
+Generated project boots with: `cp .env.example .env && make up-d && make migrate-create && make migrate-up && make seed`.
+
 ---
 
 ## 1. Canonical project structure
@@ -415,7 +437,8 @@ class ThingController(SQLAlchemyBaseController):
     user: Users = Depends(get_dependency_service)  # auth guard; omit for public endpoints
 
     def get_schema_class(self) -> Type:
-        # Override to return different schema per action (e.g. list vs detail)
+        # self.action is auto-set to the endpoint method name (e.g. "list_things").
+        # Override to return a different schema per action.
         if self.action == "list_things":
             return ThingListResponseSchema
         return super().get_schema_class()
@@ -433,23 +456,19 @@ class ThingController(SQLAlchemyBaseController):
         count: int = Query(10, ge=1, le=100),
         search: Optional[str] = Query(None),
     ):
-        self.action = "list_things"
         return await self.list()
 
     @router.post("/", response_model=BaseResponse[ThingResponseSchema], status_code=201)
     async def create_thing(self, data: ThingCreateSchema):
-        self.action = "create_thing"
         thing = await self.service.create(data)
         return self.format_response(ThingResponseSchema.model_validate(thing))
 
     @router.get("/{thing_id}", response_model=BaseResponse[ThingResponseSchema])
     async def get_thing(self, thing_id: uuid.UUID):
-        self.action = "get_thing"
         return await self.retrieve(thing_id)
 
     @router.patch("/{thing_id}", response_model=BaseResponse[ThingResponseSchema])
     async def update_thing(self, thing_id: uuid.UUID, data: ThingUpdateSchema):
-        self.action = "update_thing"
         await self.check_permissions_class()
         thing = await self.service.update(str(thing_id), data.model_dump(exclude_unset=True))
         return self.format_response(
@@ -459,27 +478,32 @@ class ThingController(SQLAlchemyBaseController):
 
     @router.delete("/{thing_id}", status_code=status.HTTP_204_NO_CONTENT)
     async def delete_thing(self, thing_id: uuid.UUID):
-        self.action = "delete_thing"
         await self.check_permissions_class()
         return await self.delete(thing_id)
 
     # Custom action
     @router.post("/{thing_id}/activate", response_model=BaseResponse[dict])
     async def activate_thing(self, thing_id: uuid.UUID):
-        self.action = "activate_thing"
         result = await self.service.my_custom_action(thing_id)
         return self.format_response(result, message="Activado exitosamente")
 ```
+
+**`self.action` is automatic — do NOT assign it manually.**
+
+`BaseController.__init__` (and `BaseService.__init__`) read `request.scope["endpoint"].__name__` and assign it to `self.action`. So inside every endpoint method, `self.action` already equals that method's name (e.g. inside `list_things`, `self.action == "list_things"`). Branch on it in `get_schema_class()` / `check_permissions()` / `get_filters()` using the method name as the key — no boilerplate `self.action = "..."` line needed.
+
+**Override only if you need a different key** than the method name (rare — usually a sign you should rename the method instead).
 
 **Controller rules (hard):**
 
 | Rule | Why |
 |------|-----|
-| Always `self.action = "verb_noun"` before calling `self.list()` / `self.retrieve()` / `self.delete()` | Needed for `get_filters()`, `get_schema_class()`, `check_permissions()` dispatch |
+| Branch on `self.action` (auto = method name) — never assign it manually | `BaseController.__init__` reads it from `request.scope["endpoint"].__name__` per request |
+| Method names ARE the action keys — name them `verb_noun` (e.g. `list_things`, `update_thing`) | They feed `get_filters()`, `get_schema_class()`, `check_permissions()` dispatch |
 | Standard CRUD: `self.list()`, `self.retrieve(id)`, `self.delete(id)` | Inherits pagination, formatting, soft-delete |
 | Custom create/update: `self.service.method()` → `self.format_response(Schema.model_validate(obj))` | Consistent wrapping |
 | `self.format_response(data, message="...")` — NOT raw `BaseResponse(data=...)` | Uses controller's schema class and standard format |
-| `BasePaginationResponse[List[Schema]]` — use `List` from `typing` in `@cbv` class bodies | Built-in `list` fails inside CBV class body |
+| `BasePaginationResponse[Schema]` (NOT `BasePaginationResponse[List[Schema]]`) | The class already declares `data: List[T]`; wrapping with `List[]` doubles to `List[List[T]]` and Pydantic validates each row as a list-of-rows, raising `model_attributes_type` 8× per row |
 | `id: uuid.UUID` in response schemas | `model_validate` fails if typed as `str` |
 | NEVER import `Request`, `AsyncSession`, `get_db`, repo classes, or `BaseModel` in controller | Those are dependency concerns |
 | `get_thing_service` factory lives in `dependency.py` only | Reusable, separation of concerns |
@@ -501,7 +525,7 @@ class ThingController(BeanieBaseController):
 
     @router.get("/", response_model=BasePaginationResponse[ThingResponseSchema])
     async def list_things(self, page: int = Query(1, ge=1), count: int = Query(10)):
-        self.action = "list_things"
+        # self.action == "list_things" automatically (auto-set in __init__)
         return await self.list()
 ```
 
@@ -614,16 +638,44 @@ app = create_application()
 
 ## 17. Alembic migration
 
+**Always generate via CLI — never hand-craft a migration script.**
+
 ```bash
-# Naming: date + time prefix (alembic.ini configured)
-# Output: alembic/versions/20250310_1200_abc123_add_things_table.py
-make migrate-create  # interactive, asks for message
-# or:
+# Inside the API container (so it picks up the models + render_item config)
 alembic revision --autogenerate -m "add_things_table"
 alembic upgrade head
+
+# Output naming (alembic.ini configured): 20250310_1200_abc123_add_things_table.py
+make migrate-create   # convenience wrapper (asks for message interactively)
+make migrate-up
+make migrate-down
 ```
 
 `alembic/env.py` imports ALL models from `app.models` via `pkgutil.walk_packages` so Alembic detects them all. Adding a new model to `app/models/__init__.py` is enough.
+
+**Workflow rules (hard):**
+
+| Rule | Why |
+|------|-----|
+| Never edit `alembic/versions/*.py` by hand | Drifts `alembic_version` from the model graph; future autogens emit nonsense diffs |
+| Always inspect the generated file before `upgrade head` | Autogen misses things (e.g. server_default changes, `LowercaseEnum` rendering — see §23) |
+| Regenerate, don't patch | If the diff is wrong, fix the model + `render_item`, delete the file, run `alembic revision --autogenerate` again |
+| Run inside the API container | Local `alembic` binary may resolve to a different env / pickup wrong DB URL |
+
+### ⚠️ ENUM columns — STOP and ask the user
+
+Native `sa.Enum(...)` and database-level ENUM types break autogen in subtle ways:
+
+- Adding a value to an existing enum: autogen emits an `op.alter_column` that may DROP/recreate the column on Postgres, losing data
+- Removing a value: silently rejected on upgrade if rows still hold it
+- Renaming the enum class: autogen sometimes emits no diff at all
+- Switching ENUM ↔ String/`LowercaseEnum`: emits a destructive recreate
+
+**Whenever a change touches an enum column** (adding/removing values, switching enum class, swapping ENUM ↔ String/LowercaseEnum), pause before running `alembic revision --autogenerate` and ask the user how to proceed:
+
+> "This change touches enum `<X>` (model: `<Model.field>`). Autogen's diff is unreliable here — do you want me to: (a) generate and let you review, (b) hand-write the upgrade with explicit `op.execute("ALTER TYPE ...")`, or (c) revert the model change?"
+
+**Prefer `LowercaseEnum` (TypeDecorator on `String`) over native `sa.Enum`** in new models — it stores values as plain strings, so adding/removing enum members is a code-only change with no DDL needed, and `render_item` (§23) handles the autogen rendering cleanly.
 
 ---
 
@@ -714,7 +766,8 @@ make test-e2e       # docker compose --profile tests run --rm tests
 | Factory function in controller file | Untestable, hard to reuse | Move to `app/services/dependency.py` |
 | `list` instead of `List` in `@cbv` class body | `TypeError` at class definition | `from typing import List` |
 | `repo.update(id, key=val)` kwargs | `TypeError` — wrong signature | `repo.update(id, {"key": val})` dict |
-| Missing `self.action = "..."` before `self.list()` | Wrong filters, schema, or permissions applied | Always set before calling base methods |
+| Manually assigning `self.action = "..."` | Redundant + diverges from method name; future readers wonder why it's there | `self.action` is auto-set by `BaseController.__init__` to `request.scope["endpoint"].__name__` — branch on it, never assign |
+| `response_model=BasePaginationResponse[List[Schema]]` | Returns `data` validated as `List[List[Schema]]`; rows get treated as iterables of `(field_name, value)` tuples → 8 validation errors per row | Drop `List[]` — use `BasePaginationResponse[Schema]`. The class already has `data: List[T]` |
 | Hard deleting records | Breaks audit trail | Always `soft_delete()` or `BaseService.delete()` |
 | Not adding model import to `app/models/__init__.py` | Alembic doesn't detect table | Import in `__init__.py` |
 | `BaseResponse(data=...)` directly in controller | Bypasses `format_response` message/status | Use `self.format_response(data, message=...)` |
@@ -723,3 +776,282 @@ make test-e2e       # docker compose --profile tests run --rm tests
 | Accessing `self.db` in SQLAlchemy repo | `AttributeError` | Use `self.session` (stored as `self._session`) |
 | Importing `Request`, `AsyncSession`, `get_db` in controller | Breaks separation of concerns, coupling | Those belong only in `dependency.py` |
 | Soft-delete not filtered in custom queries | Deleted records appear in results | Always add `.where(Model.deleted_at.is_(None))` |
+| Hand-written migration script | Drifts `alembic_version`; future autogens emit garbage | Always `alembic revision --autogenerate -m "..."` — never hand-craft `alembic/versions/*.py` (see §17) |
+| Autogen run after touching native `sa.Enum` | Destructive `ALTER TYPE` / silent no-op / data loss | STOP — ask user before generating; prefer `LowercaseEnum` for new fields (see §17 ⚠️ block) |
+| Service without `self.repository` attr called by `format_response` | `AttributeError: object has no attribute 'repository'` | Every service used by a `SQLAlchemyBaseController` must expose `self.repository` (real repo or `None`) — see §22 |
+| Alembic autogen emits `app.models.types.LowercaseEnum(...)` | `NameError: name 'app' is not defined` at upgrade | Add `LowercaseEnum` to `render_item` in `alembic/env.py` — see §23 |
+| `JWTService().encode_token(...)` | `AttributeError: 'JWTService' object has no attribute 'encode_token'` | Real method is `create_token(subject, extra_data=None)` — see §24 |
+| Service ctor missing `super().__init__(repository, request=...)` | `format_response` schema lookup fails / `self.action` always `None` | Always call `super().__init__(repository, request=request)` in service `__init__` |
+
+---
+
+## 22. Always extend `BaseService` — even for non-CRUD services
+
+Same uniformity rule as controllers (§25): **every service extends `BaseService`**, even when it doesn't have standard CRUD semantics. You get:
+
+- `self.action` auto-set from `request.scope["endpoint"].__name__` per request — usable in `get_filters()` / `get_kwargs_query()` overrides
+- `self.repository` wired automatically (`BaseService.__init__` does `self.repository = repository` and `repository.service = self` if non-None)
+- `self.params` dict pre-seeded for `list()` (search/page/count/filters/order_by)
+- Consistent constructor shape across the codebase — `super().__init__(repository, request=request)`
+
+`BaseService.__init__` accepts `repository=None` (it has an `if self.repository:` guard internally), so services without a single primary repo still extend cleanly.
+
+### Standard single-repo CRUD service
+
+```python
+class UserService(BaseService):
+    repository: UserRepository
+    search_fields = ["email", "full_name"]
+    duplicate_check_fields = ["email"]
+
+    def __init__(self, repository, request=None, session=None):
+        super().__init__(repository, request=request)
+        self.repository = repository  # explicit alias (BaseService sets it too)
+        self.session = session
+```
+
+### Multi-repo service — pick a "primary" for `format_response`
+
+Services that depend on several repositories (e.g. `CatalogService` → states + makes + models) still pass ONE primary to `super().__init__`. The other repos hang off `self` as named attrs:
+
+```python
+class CatalogService(BaseService):
+    repository: VenezuelanStateRepository
+
+    def __init__(self, state_repository, make_repository, model_repository,
+                 request=None, session=None):
+        super().__init__(state_repository, request=request)  # primary = states
+        self.state_repository = state_repository
+        self.make_repository = make_repository
+        self.model_repository = model_repository
+        self.session = session
+```
+
+The "primary" should be whatever the controller's default `schema_class` validates — that schema is what `format_response` uses when no `get_schema_class` override fires.
+
+### No-repo service (pure aggregations / cross-cutting)
+
+`AnalyticsService` runs ad-hoc aggregation queries — no single ORM model owns the result. Pass `None`:
+
+```python
+class AnalyticsService(BaseService):
+    def __init__(self, request=None, session=None):
+        super().__init__(None, request=request)  # no primary repository
+        self.session = session
+
+    async def dashboard(self) -> dict:
+        # raw select(func.count(...)).where(...) over multiple models
+        ...
+```
+
+When you do this, the controller MUST wrap raw return values in a Pydantic schema before calling `self.format_response(...)` — `format_response` uses `schema.model_validate(data)` on dict input, which fails if the dict shape doesn't match `schema_class`. Either:
+
+```python
+# Option A — wrap into a dedicated schema
+@router.get("/metrics")
+async def metrics(self):
+    result = await self.service.metrics()
+    return self.format_response(PlatformMetricsSchema(**result), message="OK")
+    # data is now a BaseModel instance → format_response passes it through
+```
+
+```python
+# Option B — define a per-action schema via get_schema_class
+def get_schema_class(self) -> Type:
+    if self.action == "metrics":
+        return PlatformMetricsSchema
+    return DealerResponseSchema
+```
+
+Combine both for the cleanest pattern: dedicated schema + `get_schema_class` dispatch.
+
+### Why not skip `BaseService` for non-CRUD services?
+
+You can — a plain `class FooService:` with `self.repository = None` works at runtime. But:
+
+1. Future readers can't tell at a glance whether `Foo` is intentionally non-basekit or just outdated.
+2. You re-implement the `request`/`action` boilerplate by hand (or omit it and lose `self.action`).
+3. When the service eventually needs ONE list endpoint, you have to refactor the constructor.
+
+Cost of extending: one `super().__init__(repository, request=request)` line. Always do it.
+
+---
+
+## 23. Alembic `render_item` for custom column types
+
+Custom `TypeDecorator` columns (`GUID`, `LowercaseEnum`, etc.) make autogen emit `app.models.types.GUID(...)` literals into the migration script — which fail at runtime because the migration file doesn't import `app`. Fix with `render_item` in `alembic/env.py`:
+
+```python
+from app.models.types import GUID, LowercaseEnum
+
+def render_item(type_, obj, autogen_context):
+    if type_ == "type" and isinstance(obj, GUID):
+        return "sa.String(length=36)"
+    if type_ == "type" and isinstance(obj, LowercaseEnum):
+        length = obj.impl.length or 50
+        return f"sa.String(length={length})"
+    return False  # default rendering for everything else
+
+# In both run_migrations_offline / do_run_migrations:
+context.configure(..., render_item=render_item)
+```
+
+Without this, `alembic upgrade head` fails with `NameError: name 'app' is not defined` on the first migration that references the custom type.
+
+---
+
+## 24. JWT integration with `fastapi_basekit.servicios.JWTService`
+
+The library ships a `JWTService` that reads three env vars:
+
+```bash
+JWT_SECRET=<secret>          # required
+JWT_ALGORITHM=HS256          # default
+JWT_EXPIRE_SECONDS=3600      # default 1h
+```
+
+Set these in `docker-compose.yml` or `.env`. Real API:
+
+```python
+from fastapi_basekit.servicios import JWTService
+
+jwt = JWTService()
+token = jwt.create_token(subject=str(user.id), extra_data={"role": "admin"})
+payload = jwt.decode_token(token)         # → TokenSchema(sub: str, exp: int)
+refreshed = jwt.refresh_token(token)      # extends expiry, same payload
+```
+
+The class only emits ONE expiration window (`JWT_EXPIRE_SECONDS`). For per-token-type expirations (access vs refresh), encode manually with `pyjwt`:
+
+```python
+import os, time
+import jwt as pyjwt
+
+def build_token_pair(user, settings) -> dict:
+    secret = os.getenv("JWT_SECRET", settings.SECRET_KEY)
+    alg = os.getenv("JWT_ALGORITHM", "HS256")
+    now = int(time.time())
+    return {
+        "access_token": pyjwt.encode(
+            {"sub": str(user.id), "exp": now + settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60},
+            secret, algorithm=alg,
+        ),
+        "refresh_token": pyjwt.encode(
+            {"sub": str(user.id),
+             "exp": now + settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+             "type": "refresh"},
+            secret, algorithm=alg,
+        ),
+        "token_type": "bearer",
+    }
+```
+
+**Do NOT call** `JWTService().encode_token(...)` — that method does not exist. Use `create_token` for single-window tokens, or `pyjwt.encode` directly for asymmetric expirations. `decode_token` always returns `TokenSchema(sub, exp)`; cast `payload.sub` to `UUID` if your model uses UUID PKs.
+
+---
+
+## 25. When to extend `SQLAlchemyBaseController`
+
+**Default: extend it everywhere**, even for controllers that have no standard CRUD endpoints. You get:
+
+- `self.format_response(data, message=, pagination=)` — uniform JSON envelope, schema auto-validation
+- `self.get_schema_class()` — switch schema per `self.action` for list vs detail vs custom
+- `self.check_permissions()` / `self.check_permissions_class()` — uniform permission enforcement
+- `self.action` set automatically from the endpoint function name
+- `self._params(skip_frames=2)` — pulls `page`/`count`/`search`/filters from query string
+
+The only requirement: the underlying `service` must expose `.repository` (see §22). `self.action` is filled in automatically — name your endpoint methods `verb_noun` and they'll work as dispatch keys for `get_schema_class()` / `check_permissions()` / `get_filters()`. The boilerplate is minimal and worth it because:
+
+1. Controllers stay uniform across the codebase — same shape, same response envelope.
+2. New endpoints fall into `format_response` automatically; no drift to raw `BaseResponse(...)` constructions.
+3. `get_schema_class()` lets one controller serve list/detail/custom schemas without duplicating routes.
+
+Only skip extension if the controller is genuinely outside the response-envelope convention (e.g. a webhook receiver returning plain `{"ok": true}` for a third-party integration).
+
+---
+
+## 26. Pinned dependencies (current `fastapi-basekit==0.2.1`)
+
+The library hard-pins:
+
+```
+fastapi==0.116.1
+pydantic==2.11.7
+```
+
+Your project's `requirements.txt` MUST match these (or pip resolves to `ResolutionImpossible`). Compatible companions:
+
+```
+fastapi==0.116.1
+pydantic[email]==2.11.7
+pydantic-settings==2.7.1
+fastapi-restful==0.6.0
+SQLAlchemy[asyncio]==2.0.36
+greenlet==3.1.1
+PyJWT==2.10.1            # used by JWTService internally
+```
+
+For Postgres async, use `asyncpg==0.30.0` and switch the URL: `postgresql+asyncpg://user:pw@host:5432/db`. For MariaDB/MySQL, `aiomysql==0.2.0` plus `mysql+aiomysql://`.
+
+---
+
+## 27. Cleanup when migrating an existing sync project
+
+When porting a sync SQLAlchemy project to fastapi-basekit:
+
+1. **Wipe alembic versions** (`rm alembic/versions/*.py`) and generate ONE new baseline — UUID PKs and the `GUID` type don't autogenerate cleanly on top of integer-PK history.
+2. **Drop `app/database.py`** in favor of `app/config/database.py` (async engine + `AsyncSessionFactory` + `lifespan`). Update every `from app.database import ...` import in models.
+3. **Drop `app/core/security.py` + `app/core/deps.py`** — JWT lives in `JWTService` + `AuthenticationMiddleware`, auth dep lives in `app/services/dependency.py:get_dependency_service`.
+4. **Move sync DB-touching helpers (matching engines, calculators) to `app/domain/`** as async functions accepting `AsyncSession`. Stale `db.query(...)` calls won't run on `AsyncSession`.
+5. **Routers (`app/routers/*.py`) → `app/api/v1/endpoints/<domain>/<resource>.py`** as `@cbv` classes extending `SQLAlchemyBaseController`.
+6. **Schemas: `id: int` → `id: uuid.UUID`** in every response model. Pydantic `model_validate` on a SQLAlchemy row with UUID PK silently fails when the schema expects `str`.
+7. **Set `JWT_SECRET`, `JWT_ALGORITHM`, `JWT_EXPIRE_SECONDS`** in `docker-compose.yml` env so `JWTService()` picks them up — do not rely on the library's `secret_dev_key` default.
+8. **Soft-delete every domain table going forward** — basekit's `BaseRepository` and example services assume `deleted_at` exists. Always filter `.where(Model.deleted_at.is_(None))` in custom queries; the default `build_list_queryset` does not filter for you unless you override it to do so.
+
+---
+
+## 28. `get_db` stays lean — error translation lives in handlers, not the generator
+
+The async `get_db` dependency must do ONE thing: yield a session, commit on success, rollback + reraise on failure. Domain-specific error translation (e.g. duplicate-email → friendly message) belongs in `app/utils/exception_handlers.py`, registered at app startup with `app.add_exception_handler(IntegrityError, integrity_error_handler)`.
+
+```python
+# app/config/database.py — CORRECT
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionFactory() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+```
+
+```python
+# app/utils/exception_handlers.py — translation lives HERE
+async def integrity_error_handler(request: Request, exc: IntegrityError):
+    error_msg = str(exc.orig).lower()
+    if "email" in error_msg and ("duplicate" in error_msg or "unique" in error_msg):
+        message = "Email ya en uso"
+    elif "foreign key" in error_msg:
+        message = "Registro relacionado no existe"
+    else:
+        message = "Error de integridad en la base de datos"
+    return JSONResponse(
+        status_code=400,
+        content=BaseResponse(
+            status="DATABASE_INTEGRITY_ERROR", message=message, data=None
+        ).model_dump(),
+    )
+
+# app/main.py
+from sqlalchemy.exc import IntegrityError
+app.add_exception_handler(IntegrityError, integrity_error_handler)
+```
+
+**Why:**
+- Single responsibility — `get_db` only manages the session lifecycle.
+- The handler runs in the regular FastAPI middleware chain, so it composes with `BaseResponse`, the OpenAPI schema, and other handlers.
+- Error matchers (column names, constraint names) belong with the per-project domain knowledge, not buried in infrastructure code.
+- Pre-emptive validation in services (e.g. `await repo.get_by_email(email)` before insert) catches duplicates before the DB roundtrip; `IntegrityError` only fires on race conditions, where the global handler is the safety net.
+
+**Anti-pattern (don't do this):** the `mariadb-template`-style `get_db` that walks the error message and raises `DatabaseIntegrityException` inline. It mixes session management with domain rules and forces every project to copy/paste the same conditional ladder.

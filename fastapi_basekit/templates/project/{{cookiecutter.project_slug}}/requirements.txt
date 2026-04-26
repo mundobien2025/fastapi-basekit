@@ -1,0 +1,60 @@
+# Core
+fastapi==0.116.1
+uvicorn[standard]==0.32.1
+{% if cookiecutter.server == "gunicorn" -%}
+gunicorn==23.0.0
+{%- endif %}
+fastapi-restful==0.6.0
+fastapi-basekit
+pydantic[email]==2.11.7
+pydantic-settings==2.7.1
+
+# Security
+PyJWT==2.10.1
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.18
+
+{% if cookiecutter.orm == "sqlalchemy" -%}
+# Database (SQLAlchemy async)
+SQLAlchemy[asyncio]==2.0.36
+{% if cookiecutter.include_alembic == "yes" -%}
+alembic==1.14.0
+{%- endif %}
+greenlet==3.1.1
+{% if cookiecutter.database == "postgres" -%}
+asyncpg==0.30.0
+{%- elif cookiecutter.database == "mariadb" -%}
+aiomysql==0.2.0
+{%- elif cookiecutter.database == "sqlite" -%}
+aiosqlite==0.20.0
+{%- endif %}
+{%- elif cookiecutter.orm == "beanie" -%}
+# Database (Beanie / MongoDB)
+beanie==1.27.0
+motor==3.6.0
+{%- endif %}
+
+{% if cookiecutter.cache == "redis" -%}
+# Cache
+redis==5.2.1
+{%- endif %}
+
+{% if cookiecutter.background_tasks == "arq" -%}
+# Background tasks
+arq==0.26.3
+{%- endif %}
+
+{% if cookiecutter.bucket == "s3" -%}
+# S3
+boto3==1.35.50
+aioboto3==13.2.0
+{%- endif %}
+
+# Utils
+httpx==0.28.1
+python-dateutil==2.9.0.post0
+aiofiles==24.1.0
+
+# Tests
+pytest==8.3.3
+pytest-asyncio==0.24.0

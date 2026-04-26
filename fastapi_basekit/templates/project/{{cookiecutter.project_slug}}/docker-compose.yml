@@ -1,0 +1,88 @@
+services:
+{% if cookiecutter.database == "postgres" %}
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: {{ cookiecutter.package_name }}
+      POSTGRES_USER: {{ cookiecutter.package_name }}
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ cookiecutter.package_name }}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+{% elif cookiecutter.database == "mariadb" %}
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: {{ cookiecutter.package_name }}
+      MARIADB_USER: {{ cookiecutter.package_name }}
+      MARIADB_PASSWORD: secret
+      MARIADB_ROOT_PASSWORD: rootsecret
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+{% elif cookiecutter.database == "mongodb" %}
+  db:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - "27017:27017"
+    volumes:
+      - dbdata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+{% endif %}
+
+{% if cookiecutter.cache == "redis" %}
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+{% endif %}
+
+  api:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      RUNNING_IN_DOCKER: "1"
+    volumes:
+      - .:/app
+    depends_on:
+{% if cookiecutter.database != "sqlite" %}
+      db:
+        condition: service_healthy
+{% endif %}
+{% if cookiecutter.cache == "redis" %}
+      redis:
+        condition: service_healthy
+{% endif %}
+
+{% if cookiecutter.database != "sqlite" %}
+volumes:
+  dbdata:
+{% endif %}
