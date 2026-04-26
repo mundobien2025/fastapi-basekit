@@ -1,12 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#009485"/>
-      <stop offset="100%" stop-color="#00d4b8"/>
+    <linearGradient id="fbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#003a35"/>
+      <stop offset="100%" stop-color="#0e1419"/>
+    </linearGradient>
+    <linearGradient id="fbk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00d4b8"/>
+      <stop offset="100%" stop-color="#00b89c"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#g)"/>
-  <path d="M16 22 L32 14 L48 22 L48 42 L32 50 L16 42 Z" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
-  <circle cx="32" cy="32" r="5" fill="#fff"/>
-  <text x="32" y="60" text-anchor="middle" font-family="monospace" font-size="9" font-weight="700" fill="#003a35">BK</text>
+
+  <rect width="64" height="64" rx="14" fill="url(#fbg)"/>
+
+  <path d="
+    M 14 10
+    L 38 10
+    Q 50 10 50 21
+    Q 50 28 44 31
+    L 44 33
+    Q 52 35 52 43
+    Q 52 56 38 56
+    L 14 56
+    Z
+    M 22 18
+    L 22 28
+    L 35 28
+    Q 41 28 41 23
+    Q 41 18 35 18
+    Z
+    M 22 36
+    L 22 48
+    L 37 48
+    Q 43 48 43 42
+    Q 43 36 37 36
+    Z
+  " fill="url(#fbk)" fill-rule="evenodd"/>
+
+  <circle cx="51" cy="32" r="3" fill="#ff6e40"/>
 </svg>

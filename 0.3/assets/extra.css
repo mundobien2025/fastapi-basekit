@@ -48,6 +48,18 @@
 
 .bk-hero > * { position: relative; }
 
+.bk-hero-logo {
+  display: block;
+  margin: 0 auto 1rem;
+  filter: drop-shadow(0 4px 18px rgba(0, 148, 133, 0.35));
+  animation: bk-float 6s ease-in-out infinite;
+}
+
+@keyframes bk-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
 .bk-hero h1 {
   font-size: clamp(2.2rem, 5vw, 3.6rem);
   font-weight: 800;
