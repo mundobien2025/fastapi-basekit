@@ -97,7 +97,7 @@
             
             
   <a href="https://github.com/mundobien2025/fastapi-basekit" target="_blank" rel="noopener">
-    ⭐ Dale star al repo si te ayuda &nbsp;·&nbsp; <strong>v0.2.x</strong> ya disponible
+    Dale star al repo si te ayuda &nbsp;·&nbsp; <strong>v0.3.x</strong> ya disponible
   </a>
 
           </div>
@@ -1768,13 +1768,63 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#02x-current" class="md-nav__link">
+  <a href="#030-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.2.x — current
+        0.3.0 — current
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="0.3.0 — current">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agregado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agregado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#corregido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Corregido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cambiado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empaquetado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empaquetado
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1846,13 +1896,63 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#02x-current" class="md-nav__link">
+  <a href="#030-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.2.x — current
+        0.3.0 — current
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="0.3.0 — current">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agregado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agregado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#corregido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Corregido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cambiado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empaquetado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empaquetado
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1919,28 +2019,57 @@
 
 <h1 id="changelog">Changelog</h1>
 <p>Ver el archivo raw en el repo: <a href="https://github.com/mundobien2025/fastapi-basekit/blob/main/CHANGELOG.md">CHANGELOG.md</a></p>
-<h2 id="02x-current">0.2.x — current</h2>
+<h2 id="030-current">0.3.0 — current</h2>
+<h3 id="agregado">Agregado</h3>
 <ul>
-<li>✨ <code>basekit init</code> CLI con cookiecutter (multi-ORM, multi-DB, redis, s3, license)</li>
-<li>📚 Docs site MkDocs Material en GitHub Pages</li>
-<li>🐛 <code>BasePaginationResponse[Schema]</code> (no <code>[List[Schema]]</code>) — fix double-nesting</li>
-<li>📝 Skill <code>fastapi-basekit-crud</code> v2 (auto <code>self.action</code>, BaseService policy, alembic render_item)</li>
+<li><strong><code>basekit init</code></strong> — scaffolder cookiecutter con multi-ORM (sqlalchemy/beanie),
+  multi-DB (postgres/mariadb/sqlite/mongodb), opcional redis/s3/arq, license picker.
+  Genera proyecto completo: <code>app/</code>, <code>alembic/</code>, <code>docker-compose.yml</code>, <code>Dockerfile</code>,
+  <code>Makefile</code>, <code>.env.example</code>, tests scaffold. <code>pip install fastapi-basekit[init]</code>.</li>
+<li><strong>Sitio docs MkDocs Material</strong> versionado con <code>mike</code> (aliases <code>latest</code>, <code>X.Y</code>, <code>dev</code>).
+  Auto-deploy a GitHub Pages.</li>
+<li><strong>Workflows GitHub Actions</strong>: <code>publish.yml</code> (tag <code>v*</code> → PyPI OIDC + docs versionadas) y
+  <code>docs.yml</code> (push main → preview en <code>dev</code> alias).</li>
+<li><strong><code>scripts/release.py</code> + Makefile</strong> — comando único <code>make release V=X.Y.Z</code>
+  bumpea pyproject + plugin.json + marketplace.json + CHANGELOG, commit + tag + push.
+  Modos: <code>--bump patch|minor|major</code>, <code>--dry-run</code>, <code>--pypi-only</code>, <code>--docs-only</code>.</li>
+<li><strong>Skill <code>fastapi-basekit-crud</code> v2</strong> con secciones nuevas (§22-28): BaseService policy,
+  alembic <code>render_item</code>, JWTService API real, <code>get_db</code> lean.</li>
+<li><strong><code>RELEASING.md</code></strong> doc interna de mantenimiento.</li>
+</ul>
+<h3 id="corregido">Corregido</h3>
+<ul>
+<li><code>BasePaginationResponse[Schema]</code> (era <code>[List[Schema]]</code> doble-anidado, rompía 8 errores per row).</li>
+<li>Mermaid runtime en docs (Material 9.7+ no auto-bootstrap).</li>
+<li>Alembic <code>render_item</code> para tipos custom (<code>GUID</code> y <code>LowercaseEnum</code>).</li>
+</ul>
+<h3 id="cambiado">Cambiado</h3>
+<ul>
+<li><code>get_db</code> lean — solo session lifecycle. Translation de errores en handlers.</li>
+<li><code>self.action</code> automático en controllers/services. Skill: nunca asignar manual.</li>
+<li><code>mkdocs.yml</code> con <code>pymdownx.emoji</code>, palette teal/deep-orange, font Inter + JetBrains Mono.</li>
+</ul>
+<h3 id="empaquetado">Empaquetado</h3>
+<ul>
+<li>Optional extras nuevos: <code>[init]</code> (cookiecutter), <code>[docs]</code> (mkdocs-material).</li>
+<li><code>[project.scripts]</code>: <code>basekit = "fastapi_basekit.cli:main"</code>.</li>
 </ul>
 <h2 id="021">0.2.1</h2>
 <ul>
-<li>Plugin Claude Code estable</li>
-<li>Skill expanded — sections 22-28 (real-world fixes)</li>
+<li>Plugin Claude Code estable.</li>
+<li>Skill expandida con real-world fixes.</li>
 </ul>
 <h2 id="020">0.2.0</h2>
 <ul>
-<li>Multi-ORM: SQLAlchemy + SQLModel + Beanie</li>
-<li>Async-only stack</li>
-<li><code>BasePermission</code> async base class</li>
+<li>Soporte SQLModel ORM (<code>fastapi_basekit.aio.sqlmodel</code>).</li>
+<li>BaseRepository / BaseService / SQLModelBaseController.</li>
 </ul>
 <h2 id="01x">0.1.x</h2>
 <ul>
-<li>Initial release</li>
-<li><code>BaseRepository</code>, <code>BaseService</code>, <code>BaseController</code> para SQLAlchemy</li>
+<li>Versiones iniciales con SQLAlchemy + Beanie.</li>
+<li>BaseRepository, BaseService, BaseController genérico.</li>
+<li>Sistema de permisos basado en clases.</li>
+<li>Paginación, búsqueda multi-campo, extracción automática de parámetros.</li>
 </ul>
 
 
