@@ -2289,7 +2289,7 @@
 <p><code>.github/workflows/</code>:
 - <code>tests.yml</code> — pytest + lint en PR
 - <code>docs.yml</code> — push a main con cambios de docs → deploy alias <code>dev</code> (preview)
-- <code>release.yml</code> — tag <code>v*</code> push → PyPI + docs versionadas (mike alias <code>X.Y</code> + <code>latest</code>). Manual dispatch permite togglear <code>pypi</code> y <code>deploy_docs</code> independientes.</p>
+- <code>publish.yml</code> — tag <code>v*</code> push → PyPI + docs versionadas (mike alias <code>X.Y</code> + <code>latest</code>). Manual dispatch permite togglear <code>pypi</code> y <code>deploy_docs</code> independientes.</p>
 <h2 id="release-flow">Release flow</h2>
 <p>Tres caminos según qué publicar:</p>
 <h3 id="release-completo-pypi-docs-un-solo-comando">Release completo (PyPI + docs) — un solo comando</h3>
@@ -2309,14 +2309,14 @@
 <li>Push branch + tag (<code>--follow-tags</code>)</li>
 <li>Imprime URLs para monitorear</li>
 </ol>
-<p>Tag <code>v*</code> dispara <code>release.yml</code> en GitHub Actions:</p>
+<p>Tag <code>v*</code> dispara <code>publish.yml</code> en GitHub Actions:</p>
 <ul>
 <li>Build wheel + sdist</li>
 <li>Publica PyPI (OIDC trusted publishing)</li>
 <li><code>mike deploy 0.3 latest</code> → docs versionadas + alias <code>latest</code></li>
 <li><code>mike set-default latest</code> → root URL apunta a último</li>
 </ul>
-<p><code>release.yml</code> corre en cada <code>v*</code> tag:
+<p><code>publish.yml</code> corre en cada <code>v*</code> tag:
 1. Build wheel + sdist
 2. Publica PyPI (OIDC trusted publishing)
 3. <code>mike deploy 0.3 latest</code> → docs versionadas + alias <code>latest</code>
@@ -2347,7 +2347,7 @@
 <h3 id="pypi-sin-tocar-docs">PyPI sin tocar docs</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>make<span class="w"> </span>release-no-docs<span class="w"> </span><span class="nv">V</span><span class="o">=</span><span class="m">0</span>.3.0
 </code></pre></div>
-<p>Bumpea + commit + push (sin tag) + dispatcha <code>release.yml</code> con <code>pypi=true deploy_docs=false</code>. Útil para patches internos que no cambian docs.</p>
+<p>Bumpea + commit + push (sin tag) + dispatcha <code>publish.yml</code> con <code>pypi=true deploy_docs=false</code>. Útil para patches internos que no cambian docs.</p>
 <h3 id="docs-sin-tocar-pypi">Docs sin tocar PyPI</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>make<span class="w"> </span>release-docs-only<span class="w"> </span><span class="nv">V</span><span class="o">=</span><span class="m">0</span>.3.0
 </code></pre></div>
@@ -2364,7 +2364,7 @@
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1">#    - PyPI → Account → Publishing → Add pending publisher</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="c1">#    - Owner: mundobien2025</span>
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="c1">#    - Repo: fastapi-basekit</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1">#    - Workflow: release.yml</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1">#    - Workflow: publish.yml</span>
 <a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="c1">#    - Environment: pypi</span>
 </code></pre></div>
 <p>Después: <code>make release</code> y todo automático.</p>
