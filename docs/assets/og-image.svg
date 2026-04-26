@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <linearGradient id="ogbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#003a35"/>
+      <stop offset="100%" stop-color="#0e1419"/>
+    </linearGradient>
+    <linearGradient id="ogB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00d4b8"/>
+      <stop offset="100%" stop-color="#009485"/>
+    </linearGradient>
+    <linearGradient id="ogW" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00d4b8"/>
+      <stop offset="100%" stop-color="#ff9966"/>
+    </linearGradient>
+    <radialGradient id="oggl" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00d4b8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00d4b8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="oggrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1f2a35" stroke-width="0.6"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#ogbg)"/>
+  <rect width="1280" height="640" fill="url(#oggrid)"/>
+  <ellipse cx="320" cy="200" rx="380" ry="320" fill="url(#oggl)"/>
+
+  <!-- Big B mark left -->
+  <g transform="translate(120 130) scale(6)">
+    <path d="
+      M 12 6 L 38 6 Q 52 6 52 18 Q 52 26 46 30 L 46 32
+      Q 54 35 54 44 Q 54 58 38 58 L 12 58 Z
+      M 22 16 L 22 28 L 36 28 Q 42 28 42 22 Q 42 16 36 16 Z
+      M 22 36 L 22 48 L 38 48 Q 44 48 44 42 Q 44 36 38 36 Z
+    " fill="url(#ogB)" fill-rule="evenodd"/>
+    <circle cx="55" cy="32" r="3.5" fill="#ff6e40"/>
+  </g>
+
+  <!-- Title block right -->
+  <g transform="translate(560 200)">
+    <text font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif"
+          font-size="84" font-weight="800" letter-spacing="-2" fill="#fafbfc">
+      <tspan x="0" y="0">fastapi</tspan>
+      <tspan x="0" y="100" fill="url(#ogW)">-basekit</tspan>
+    </text>
+    <text font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif"
+          font-size="26" font-weight="500" fill="#a4afba" letter-spacing="0.5">
+      <tspan x="0" y="160">FastAPI toolkit con repos, services y controllers</tspan>
+      <tspan x="0" y="195">listos para producción · multi-ORM · CLI scaffolder</tspan>
+    </text>
+    <g transform="translate(0 240)">
+      <rect x="0" y="0" width="220" height="46" rx="8" fill="#009485"/>
+      <text x="110" y="30" text-anchor="middle"
+            font-family="ui-monospace,'JetBrains Mono','Menlo',monospace"
+            font-size="17" font-weight="700" fill="#fff" letter-spacing="0.3">
+        pip install fastapi-basekit
+      </text>
+    </g>
+  </g>
+
+  <text x="1240" y="610" text-anchor="end"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif"
+        font-size="20" font-weight="600" fill="#5a6571" letter-spacing="0.4">
+    mundobien2025.github.io/fastapi-basekit
+  </text>
+</svg>

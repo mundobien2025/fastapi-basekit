@@ -6,7 +6,9 @@ hide:
 
 <div class="bk-hero" markdown>
 
-# FastAPI BaseKit
+<img class="bk-hero-logo" src="assets/logo-mark.svg" alt="fastapi-basekit" width="96">
+
+# fastapi-basekit
 
 <p class="bk-tagline">
 Construye APIs FastAPI listas para producción en minutos —

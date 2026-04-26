@@ -50,12 +50,12 @@ theme:
     - content.tooltips
     - announce.dismiss
 
+  logo: assets/logo-mark.svg
+  favicon: assets/favicon.svg
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
     view: material/eye
-    logo: material/atom-variant
-  favicon: assets/favicon.svg
 
 plugins:
   - search:

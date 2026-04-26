@@ -1,17 +1,23 @@
 <div align="center">
 
-# FastAPI BaseKit
+<img src="docs/assets/logo-mark.svg" width="120" alt="fastapi-basekit">
 
-**Toolkit base para construir APIs FastAPI rápido — sin reinventar repos, services y controllers.**
+# fastapi-basekit
 
-[![PyPI](https://img.shields.io/pypi/v/fastapi-basekit?style=flat-square&color=teal)](https://pypi.org/project/fastapi-basekit/)
-![Python](https://img.shields.io/badge/python-3.11+-blue?style=flat-square&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?style=flat-square)
-![Beanie](https://img.shields.io/badge/MongoDB-Beanie-47A248?style=flat-square&logo=mongodb)
-![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+**FastAPI toolkit con repos, services y controllers listos para producción.**
+**Multi-ORM · CLI scaffolder · plugin Claude Code.**
 
-[**Docs**](https://mundobien2025.github.io/fastapi-basekit) · [**PyPI**](https://pypi.org/project/fastapi-basekit/) · [**Issues**](https://github.com/mundobien2025/fastapi-basekit/issues) · [**Changelog**](./CHANGELOG.md)
+[![PyPI](https://img.shields.io/pypi/v/fastapi-basekit?style=flat-square&color=009485&logo=pypi&logoColor=white)](https://pypi.org/project/fastapi-basekit/)
+[![Python](https://img.shields.io/badge/python-3.11+-2c5282?style=flat-square&logo=python&logoColor=white)](https://pypi.org/project/fastapi-basekit/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-c41616?style=flat-square)](https://www.sqlalchemy.org/)
+[![Beanie](https://img.shields.io/badge/MongoDB-Beanie-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://beanie-odm.dev/)
+[![License](https://img.shields.io/badge/license-MIT-009485?style=flat-square)](./LICENSE)
+
+[**Docs**](https://mundobien2025.github.io/fastapi-basekit) ·
+[**PyPI**](https://pypi.org/project/fastapi-basekit/) ·
+[**Issues**](https://github.com/mundobien2025/fastapi-basekit/issues) ·
+[**Changelog**](./CHANGELOG.md)
 
 </div>
 
@@ -41,7 +47,7 @@ Abre http://localhost:8000/docs. Login con `admin@example.com` / `ChangeMe2026!`
 
 ## Documentación
 
-📚 **[mundobien2025.github.io/fastapi-basekit](https://mundobien2025.github.io/fastapi-basekit)**
+**[mundobien2025.github.io/fastapi-basekit](https://mundobien2025.github.io/fastapi-basekit)**
 
 | Sección | Contenido |
 |---|---|
