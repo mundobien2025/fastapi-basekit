@@ -2,122 +2,122 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/changelog/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/contributing/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/development/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/advanced/configuration/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/advanced/logging/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/advanced/performance/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/advanced/permissions/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/advanced/soft-deletes/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/api-reference/base-controller/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/api-reference/base-repository/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/api-reference/base-service/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/api-reference/exceptions/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/api-reference/schemas/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/api-reference/sqlalchemy-controller/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/examples/authentication/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/examples/basic-crud/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/examples/complex-filters/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/examples/relationships/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/getting-started/configuration/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/getting-started/first-crud/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/getting-started/installation/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/controllers/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/filtering/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/ordering/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/pagination/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/repositories/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/search/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/services/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
     <url>
          <loc>https://mundobien2025.github.io/fastapi-basekit/0.3/user-guide/validation/</loc>
-         <lastmod>2026-04-26</lastmod>
+         <lastmod>2026-04-29</lastmod>
     </url>
 </urlset>

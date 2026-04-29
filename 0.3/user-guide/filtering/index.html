@@ -911,13 +911,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#filtros-con-relaciones-sintaxis-__" class="md-nav__link">
+  <a href="#filtros-con-relaciones-sintaxis-__-sqlalchemy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Filtros con relaciones (sintaxis __)
+        Filtros con relaciones (sintaxis __) — SQLAlchemy
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtros-con-beanie-linkx-alias-field_id-031" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtros con Beanie Link[X] — alias &lt;field&gt;_id (0.3.1+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtros con Beanie Link[X] — alias &lt;field&gt;_id (0.3.1+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtros-forzados-desde-el-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtros forzados desde el service
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1895,13 +1923,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#filtros-con-relaciones-sintaxis-__" class="md-nav__link">
+  <a href="#filtros-con-relaciones-sintaxis-__-sqlalchemy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Filtros con relaciones (sintaxis __)
+        Filtros con relaciones (sintaxis __) — SQLAlchemy
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtros-con-beanie-linkx-alias-field_id-031" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtros con Beanie Link[X] — alias &lt;field&gt;_id (0.3.1+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtros con Beanie Link[X] — alias &lt;field&gt;_id (0.3.1+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtros-forzados-desde-el-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtros forzados desde el service
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2033,41 +2089,103 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">GET /api/v1/things/?status=active&amp;category_id=abc-123</span>
 </code></pre></div>
 <p>Auto-aplicados por <code>BaseController._params(skip_frames=2)</code> — cualquier query param que NO sea <code>page</code>/<code>count</code>/<code>search</code>/<code>order_by</code> se vuelve filtro.</p>
-<h2 id="filtros-con-relaciones-sintaxis-__">Filtros con relaciones (sintaxis <code>__</code>)</h2>
+<h2 id="filtros-con-relaciones-sintaxis-__-sqlalchemy">Filtros con relaciones (sintaxis <code>__</code>) — SQLAlchemy</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="err">GET /api/v1/things/?owner__role__code=admin</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="err">GET /api/v1/things/?category__name=Premium</span>
 </code></pre></div>
 <p><code>BaseRepository._resolve_attribute()</code> parsea la ruta y agrega los JOINs necesarios automáticamente.</p>
+<h2 id="filtros-con-beanie-linkx-alias-field_id-031">Filtros con Beanie <code>Link[X]</code> — alias <code>&lt;field&gt;_id</code> (0.3.1+)</h2>
+<p>Para modelos Beanie con <code>Link[...]</code>, basekit auto-traduce el filtro a la
+sintaxis Mongo nested. El caller no escribe nunca <code>customer.$id</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Conversation</span><span class="p">(</span><span class="n">Document</span><span class="p">):</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">customer</span><span class="p">:</span> <span class="n">Link</span><span class="p">[</span><span class="n">Customer</span><span class="p">]</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">user</span><span class="p">:</span> <span class="n">Link</span><span class="p">[</span><span class="n">User</span><span class="p">]</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err"># Por el campo Link directamente</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="err">GET /api/v1/conversations/?customer=507f1f77bcf86cd799439011</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="err"># Por alias `&lt;field&gt;_id` (más amigable para el front)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="err">GET /api/v1/conversations/?customer_id=507f1f77bcf86cd799439011</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="err"># Combinable con campos planos</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="err">GET /api/v1/conversations/?customer_id=...&amp;channel=whatsapp&amp;active=true</span>
+</code></pre></div>
+<p>Reglas de resolución (<code>build_filter_query</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key del filter</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>customer.$id</code> o cualquier key con <code>.</code> o <code>$</code></td>
+<td>Passthrough Mongo (raw filter)</td>
+</tr>
+<tr>
+<td><code>customer</code> (existe en modelo, es Link)</td>
+<td><code>Conversation.customer.id == ObjectId(v)</code></td>
+</tr>
+<tr>
+<td><code>customer</code> (existe en modelo, NO es Link)</td>
+<td><code>Conversation.customer == v</code></td>
+</tr>
+<tr>
+<td><code>customer_id</code> (alias, <code>customer</code> existe y es Link)</td>
+<td><code>Conversation.customer.id == ObjectId(v)</code></td>
+</tr>
+<tr>
+<td><code>unknown_field</code></td>
+<td>Ignorado silenciosamente</td>
+</tr>
+</tbody>
+</table>
+<p>Los <code>str</code> se castean a <code>ObjectId</code> automáticamente — útil cuando el ID viene
+crudo del query string.</p>
+<h3 id="filtros-forzados-desde-el-service">Filtros forzados desde el service</h3>
+<p>Combina con <code>get_filters()</code> para auto-scope por usuario sin que el caller
+escriba el filtro nested:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">ConversationService</span><span class="p">(</span><span class="n">BaseService</span><span class="p">):</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>            <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>  <span class="c1"># ← alias resolvuelto por basekit</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado: cada <code>list()</code> filtra por <code>user.$id == authenticated_user.id</code>.</p>
 <h2 id="filtros-in">Filtros IN</h2>
 <p>Pasa lista al filter dict:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">]})</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># → WHERE status IN (&#39;active&#39;, &#39;pending&#39;)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">]})</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># → WHERE status IN (&#39;active&#39;, &#39;pending&#39;)</span>
 </code></pre></div>
 <p>Desde HTTP, repite el param:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">?status=active&amp;status=pending</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">?status=active&amp;status=pending</span>
 </code></pre></div></p>
 <h2 id="filtros-or">Filtros OR</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">use_or</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># → WHERE status=&#39;active&#39; OR category_id=&#39;...&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">use_or</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># → WHERE status=&#39;active&#39; OR category_id=&#39;...&#39;</span>
 </code></pre></div>
 <h2 id="filtros-forzados-del-service">Filtros forzados (del service)</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_platform_admin</span><span class="p">:</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;company_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">return</span> <span class="n">filters</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_platform_admin</span><span class="p">:</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;company_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">return</span> <span class="n">filters</span>
 </code></pre></div>
 <p>Este filtro NO se puede sobreescribir por query string.</p>
 <h2 id="filtros-enum">Filtros enum</h2>
 <p>Pydantic <code>Enum</code> se serializa a su <code>.value</code> automáticamente:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ThingStatus</span><span class="o">.</span><span class="n">active</span><span class="p">})</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># → WHERE status = &#39;active&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ThingStatus</span><span class="o">.</span><span class="n">active</span><span class="p">})</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># → WHERE status = &#39;active&#39;</span>
 </code></pre></div>
 <h2 id="soft-delete-filtros">Soft delete + filtros</h2>
 <p>Soft-delete NO se aplica automáticamente. Override <code>build_list_queryset</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">deleted_at</span><span class="o">.</span><span class="n">is_</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">deleted_at</span><span class="o">.</span><span class="n">is_</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
 </code></pre></div>
 
 

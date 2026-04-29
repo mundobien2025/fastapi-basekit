@@ -1766,15 +1766,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#030-current" class="md-nav__link">
+  <a href="#031-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.3.0 — current
+        0.3.1 — current
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.3.0 — current">
+    <nav class="md-nav" aria-label="0.3.1 — current">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1801,6 +1801,56 @@
         
           <li class="md-nav__item">
   <a href="#cambiado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiado
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agregado_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agregado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#corregido_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Corregido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cambiado_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Cambiado
@@ -1894,15 +1944,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#030-current" class="md-nav__link">
+  <a href="#031-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.3.0 — current
+        0.3.1 — current
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.3.0 — current">
+    <nav class="md-nav" aria-label="0.3.1 — current">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1929,6 +1979,56 @@
         
           <li class="md-nav__item">
   <a href="#cambiado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiado
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agregado_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agregado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#corregido_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Corregido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cambiado_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Cambiado
@@ -2017,8 +2117,30 @@
 
 <h1 id="changelog">Changelog</h1>
 <p>Ver el archivo raw en el repo: <a href="https://github.com/mundobien2025/fastapi-basekit/blob/main/CHANGELOG.md">CHANGELOG.md</a></p>
-<h2 id="030-current">0.3.0 — current</h2>
+<h2 id="031-current">0.3.1 — current</h2>
 <h3 id="agregado">Agregado</h3>
+<ul>
+<li><strong>Beanie filter alias <code>&lt;field&gt;_id</code></strong> en <code>BaseRepository.build_filter_query</code>.
+  Filtros tipo <code>customer_id</code>, <code>user_id</code>, <code>tool_id</code> se traducen automáticamente
+  a <code>Model.&lt;field&gt;.id == ObjectId(v)</code> cuando el campo base es <code>Link[X]</code>.
+  Ver <a href="../user-guide/filtering/#filtros-con-beanie-linkx--alias-field_id-031">Filtering &gt; Beanie Link alias</a>.</li>
+<li><strong>Coerción automática <code>str</code> → <code>ObjectId</code></strong> para queries contra <code>Link.id</code>.
+  El front puede mandar el id crudo del query string sin cast.</li>
+</ul>
+<h3 id="corregido">Corregido</h3>
+<ul>
+<li>Import roto <code>from bson import ObjectId, Link</code> → <code>from beanie import Link</code>
+  (<code>Link</code> no existe en bson; vive en <code>beanie.odm.fields.Link</code>).
+  En 0.3.0 el import explotaba al cargar <code>BaseRepository</code> aislado.</li>
+</ul>
+<h3 id="cambiado">Cambiado</h3>
+<ul>
+<li>Mínimos de deps: <code>pydantic&gt;=2.13</code>, <code>pyjwt&gt;=2.12.1</code>,
+  extras <code>[beanie]</code> ahora pide <code>beanie&gt;=2.0,&lt;3</code> (sin <code>motor</code>),
+  extras <code>[sqlalchemy]</code> ahora pide <code>SQLAlchemy[asyncio]&gt;=2.0.30,&lt;3</code>.</li>
+</ul>
+<h2 id="030">0.3.0</h2>
+<h3 id="agregado_1">Agregado</h3>
 <ul>
 <li><strong><code>basekit init</code></strong> — scaffolder cookiecutter con multi-ORM (sqlalchemy/beanie),
   multi-DB (postgres/mariadb/sqlite/mongodb), opcional redis/s3/arq, license picker.
@@ -2035,13 +2157,13 @@
   alembic <code>render_item</code>, JWTService API real, <code>get_db</code> lean.</li>
 <li><strong><code>RELEASING.md</code></strong> doc interna de mantenimiento.</li>
 </ul>
-<h3 id="corregido">Corregido</h3>
+<h3 id="corregido_1">Corregido</h3>
 <ul>
 <li><code>BasePaginationResponse[Schema]</code> (era <code>[List[Schema]]</code> doble-anidado, rompía 8 errores per row).</li>
 <li>Mermaid runtime en docs (Material 9.7+ no auto-bootstrap).</li>
 <li>Alembic <code>render_item</code> para tipos custom (<code>GUID</code> y <code>LowercaseEnum</code>).</li>
 </ul>
-<h3 id="cambiado">Cambiado</h3>
+<h3 id="cambiado_1">Cambiado</h3>
 <ul>
 <li><code>get_db</code> lean — solo session lifecycle. Translation de errores en handlers.</li>
 <li><code>self.action</code> automático en controllers/services. Skill: nunca asignar manual.</li>
