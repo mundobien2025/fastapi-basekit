@@ -2,9 +2,9 @@ from typing import Any, Dict, List, Optional, Type, Union
 from typing import get_args, get_origin
 import re
 
-from bson import ObjectId, Link
+from bson import ObjectId
 from pydantic import BaseModel
-from beanie import Document
+from beanie import Document, Link
 from beanie.odm.queries.find import FindMany
 from beanie.operators import Or, RegEx
 
@@ -154,18 +154,42 @@ class BaseRepository:
 
         raw_filters: Dict[str, Any] = {}
 
+        def _coerce_objectid(value: Any) -> Any:
+            """str/UUID → ObjectId para queries Mongo sobre Link.id."""
+            if isinstance(value, ObjectId):
+                return value
+            if isinstance(value, str):
+                try:
+                    return ObjectId(value)
+                except Exception:
+                    return value
+            return value
+
         for k, v in (filters or {}).items():
             # MongoDB-style keys (dot-notation like "user.$id" or operators like "$or")
             # cannot be resolved via hasattr — pass them as a raw dict to find()
             if "." in k or k.startswith("$"):
                 raw_filters[k] = v
-            elif hasattr(self.model, k):
-                field_attr = getattr(self.model, k)
+                continue
 
+            if hasattr(self.model, k):
+                field_attr = getattr(self.model, k)
                 if _is_link_field(k):
-                    exprs.append(field_attr.id == v)
+                    exprs.append(field_attr.id == _coerce_objectid(v))
                 else:
                     exprs.append(field_attr == v)
+                continue
+
+            # `<field>_id` alias para Link fields. Permite filtros con
+            # `customer_id`, `user_id`, etc. sin que el caller deba conocer
+            # la sintaxis Mongo nested. Sólo se activa si <field> existe en
+            # el modelo y es un Link[X].
+            if k.endswith("_id"):
+                base = k[:-3]
+                if hasattr(self.model, base) and _is_link_field(base):
+                    field_attr = getattr(self.model, base)
+                    exprs.append(field_attr.id == _coerce_objectid(v))
+                    continue
 
         # Raw MongoDB filters go first so Beanie processes them as a dict condition
         query_args: list = ([raw_filters] if raw_filters else []) + exprs

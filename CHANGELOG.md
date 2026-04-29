@@ -5,6 +5,51 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.1] - 2026-04-29
+
+### Agregado
+
+- **`BaseRepository.build_filter_query` — alias `<field>_id` para campos `Link[X]`**
+  (`fastapi_basekit/aio/beanie/repository/base.py`).
+  Permite filtrar conversaciones/mensajes/cualquier modelo con Link sin
+  conocer la sintaxis Mongo nested (`customer.$id`):
+  ```python
+  # Antes: el caller tenía que escribir filtros raw o
+  # subclasear build_filter_query para traducir customer_id → customer.$id.
+  # Ahora: basekit auto-traduce.
+  service.list(filters={"customer_id": "507f1f77bcf86cd799439011"})
+  # → genera Conversation.customer.id == ObjectId(...)
+  ```
+  Reglas de resolución (en orden):
+  1. Key con `.` o `$` → passthrough Mongo (`customer.$id` sigue funcionando).
+  2. `hasattr(model, key)` true:
+     - Es `Link[X]` → `model.<key>.id == ObjectId(v)`
+     - No-Link → `model.<key> == v`
+  3. Key termina en `_id` y `model.<base>` es `Link[X]` →
+     `model.<base>.id == ObjectId(v)` (alias).
+  4. Sin match → ignora silenciosamente (igual que antes).
+
+- **Helper interno `_coerce_objectid()`** — convierte `str`/`ObjectId` a
+  `ObjectId` automáticamente cuando la query es contra `Link.id`. Evita que
+  el caller tenga que castear manualmente al pasar query params del API.
+
+### Cambiado
+
+- **Mínimos de dependencias**:
+  - `pydantic>=2.13.0,<3` (era `>=2.11.7,<3`)
+  - `pyjwt>=2.12.1` (era `>=2.10.1`)
+  - extras `[beanie]`: `beanie>=2.0,<3` (era `>=1.24.0`); `motor` removido
+    porque basekit no lo usa en runtime (sólo en templates cookiecutter).
+  - extras `[sqlalchemy]`: `SQLAlchemy[asyncio]>=2.0.30,<3` (era `>=2.0.0`).
+
+### Corregido
+
+- **Import roto**: `from bson import ObjectId, Link` → `from beanie import Link`
+  en `aio/beanie/repository/base.py`. `Link` no existe en el paquete `bson`;
+  estaba en `beanie.odm.fields.Link` re-exportado en `beanie.__init__`.
+  En 0.3.0 el import explotaba al cargar tests aislados aunque la app real
+  toleraba el side-effect por orden de carga del intérprete.
+
 ## [0.3.0] - 2026-04-26
 
 ### Agregado

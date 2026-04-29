@@ -2,7 +2,30 @@
 
 Ver el archivo raw en el repo: [CHANGELOG.md](https://github.com/mundobien2025/fastapi-basekit/blob/main/CHANGELOG.md)
 
-## 0.3.0 — current
+## 0.3.1 — current
+
+### Agregado
+
+- **Beanie filter alias `<field>_id`** en `BaseRepository.build_filter_query`.
+  Filtros tipo `customer_id`, `user_id`, `tool_id` se traducen automáticamente
+  a `Model.<field>.id == ObjectId(v)` cuando el campo base es `Link[X]`.
+  Ver [Filtering > Beanie Link alias](user-guide/filtering.md#filtros-con-beanie-linkx--alias-field_id-031).
+- **Coerción automática `str` → `ObjectId`** para queries contra `Link.id`.
+  El front puede mandar el id crudo del query string sin cast.
+
+### Corregido
+
+- Import roto `from bson import ObjectId, Link` → `from beanie import Link`
+  (`Link` no existe en bson; vive en `beanie.odm.fields.Link`).
+  En 0.3.0 el import explotaba al cargar `BaseRepository` aislado.
+
+### Cambiado
+
+- Mínimos de deps: `pydantic>=2.13`, `pyjwt>=2.12.1`,
+  extras `[beanie]` ahora pide `beanie>=2.0,<3` (sin `motor`),
+  extras `[sqlalchemy]` ahora pide `SQLAlchemy[asyncio]>=2.0.30,<3`.
+
+## 0.3.0
 
 ### Agregado
 

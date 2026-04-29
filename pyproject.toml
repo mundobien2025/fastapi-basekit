@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapi-basekit"
-version = "0.3.0"
+version = "0.3.1"
 description = "Utilities and base classes for FastAPI async projects (Beanie, SQLAlchemy or SQLModel)"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -25,9 +25,9 @@ classifiers = [
 
 dependencies = [
   "fastapi>=0.116.1",
-  "pydantic>=2.11.7,<3",
+  "pydantic>=2.13.0,<3",
   "fastapi-restful[all]>=0.6.0",
-  "pyjwt>=2.10.1",
+  "pyjwt>=2.12.1",
 ]
 
 [tool.setuptools]
@@ -46,11 +46,10 @@ basekit = "fastapi_basekit.cli:main"
 
 [project.optional-dependencies]
 beanie = [
-  "beanie>=1.24.0",
-  "motor>=3.3.0",
+  "beanie>=2.0,<3",
 ]
 sqlalchemy = [
-  "SQLAlchemy[asyncio]>=2.0.0",
+  "SQLAlchemy[asyncio]>=2.0.30,<3",
   "psycopg2>=2.9.0",
 ]
 sqlmodel = [
@@ -67,9 +66,8 @@ docs = [
   "mike>=2.1.0",
 ]
 all = [
-  "beanie>=1.24.0",
-  "motor>=3.3.0",
-  "SQLAlchemy[asyncio]>=2.0.0",
+  "beanie>=2.0,<3",
+  "SQLAlchemy[asyncio]>=2.0.30,<3",
   "psycopg2>=2.9.0",
   "sqlmodel>=0.0.37",
   "cookiecutter>=2.5.0",

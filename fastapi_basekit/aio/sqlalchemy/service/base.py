@@ -10,7 +10,14 @@ from ....exceptions.api_exceptions import (
 
 
 class BaseService:
-    """Servicio base para SQLAlchemy AsyncSession."""
+    """Servicio base para SQLAlchemy AsyncSession.
+
+    Regla del proyecto: los servicios NO deben llamar `session.flush()`,
+    `session.commit()` ni `session.refresh()`. El flush vive en
+    `BaseRepository.create / update`; el commit/rollback único por
+    request lo gestiona el lifecycle creado con
+    `fastapi_basekit.aio.sqlalchemy.make_session_lifecycle`.
+    """
 
     repository: BaseRepository
     search_fields: List[str] = []

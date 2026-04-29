@@ -2,15 +2,11 @@
 {% if cookiecutter.orm == "sqlalchemy" %}
 import os
 import sys
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from fastapi_basekit.aio.sqlalchemy import make_session_lifecycle
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app.config.settings import get_settings
@@ -43,20 +39,11 @@ AsyncSessionFactory = async_sessionmaker(
     expire_on_commit=False,
 )
 
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Yield a session, commit on success, rollback + reraise on error.
-
-    Domain-specific error translation lives in `app/utils/exception_handlers.py`,
-    registered globally in `main.py`. This generator only manages session lifecycle.
-    """
-    async with AsyncSessionFactory() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
+# Single commit/rollback per request. Wire on_error / on_success hooks
+# here for logging, sentry, metrics, etc. — services must NOT call
+# session.flush / session.commit / session.refresh; repos own flush
+# via BaseRepository.create / update.
+get_db = make_session_lifecycle(AsyncSessionFactory)
 
 
 async def init_db():
