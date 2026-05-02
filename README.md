@@ -59,13 +59,25 @@ Abre http://localhost:8000/docs. Login con `admin@example.com` / `ChangeMe2026!`
 
 ## Como plugin de Claude Code
 
+Dentro de Claude Code (terminal) corre:
+
 ```bash
-/plugin marketplace add https://github.com/mundobien2025/fastapi-basekit
-/plugin install fastapi-basekit
-/plugin list
+/plugin marketplace add mundobien2025/fastapi-basekit
+/plugin install fastapi-basekit@fastapi-basekit
+/plugin list                                       # verifica instalación
 ```
 
-Luego pide: *"Crea el recurso `Invoice` con CRUD completo"* — Claude usa la skill automáticamente.
+Eso registra el marketplace `fastapi-basekit` desde el repo de GitHub e
+instala el plugin (que incluye la skill `fastapi-basekit-crud`). Luego
+pide: *"Crea el recurso `Invoice` con CRUD completo siguiendo
+fastapi-basekit"* — Claude detecta la skill y aplica el patrón canónico
+(model → repo → service → schema → controller con `@cbv`).
+
+Para actualizar a una versión nueva:
+
+```bash
+/plugin update fastapi-basekit@fastapi-basekit
+```
 
 ## Instalación por ORM
 

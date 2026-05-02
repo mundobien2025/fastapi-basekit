@@ -1,14 +1,25 @@
-# Dependencias de desarrollo y testing
+# Dev + testing dependencies
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pytest-cov>=4.1.0
+anyio>=4.0.0
+trio>=0.27.0
 
-# SQLAlchemy dependencies
+# HTTP test client (ASGI transport)
+httpx>=0.27.0
+
+# CBV decorator used by example controllers
+fastapi-restful>=0.6.0
+
+# SQLAlchemy
 aiosqlite>=0.19.0
 sqlalchemy[asyncio]>=2.0.43
 
-# Beanie (MongoDB) dependencies
-beanie>=1.24.0
+# SQLModel
+sqlmodel>=0.0.30
+
+# Beanie (MongoDB)
+beanie>=2.0.0
 motor>=3.3.0
 mongomock-motor>=0.0.21
 
