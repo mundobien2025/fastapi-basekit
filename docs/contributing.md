@@ -48,10 +48,94 @@ twine upload dist/*
 
 ## Convenciones
 
-- **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
-- **Branches**: `feat/...`, `fix/...`, `docs/...`
-- **PRs**: descripción clara, link a issue si existe, tests para cambios funcionales
-- **Versioning**: semver. Bump en `pyproject.toml` + `CHANGELOG.md`
+### Commits — Conventional Commits estricto
+
+Formato:
+
+```
+<type>(<scope>): <subject>
+
+<body opcional>
+
+<footer opcional>
+```
+
+**Tipos permitidos** (cualquier otro = rechazado por hook):
+
+| Tipo | Cuándo usar |
+|------|-------------|
+| `feat` | Funcionalidad nueva visible al usuario de la lib |
+| `fix` | Bug que afectaba comportamiento documentado |
+| `docs` | Solo `README.md`, `docs/`, docstrings, CHANGELOG |
+| `refactor` | Reestructuración sin cambio de comportamiento |
+| `perf` | Optimización de performance |
+| `test` | Tests añadidos/modificados, sin tocar código de producción |
+| `build` | `pyproject.toml`, requirements, packaging |
+| `ci` | `.github/workflows/`, scripts de release |
+| `chore` | Mantenimiento (bumps, renames, gitignore) |
+| `style` | Formato (black, isort) — sin cambio funcional |
+| `revert` | Revertir commit previo |
+
+**Reglas de subject** (línea 1):
+
+- Imperativo presente: `add X`, no `added X` ni `adds X`
+- Lowercase, sin punto final
+- ≤ 72 caracteres
+- Sin emoji ni marketing fluff (`amazing new feature` ← no)
+- Inglés (PyPI / GitHub audiencia internacional)
+- Scope opcional pero útil: `feat(beanie):`, `fix(repository):`, `docs(api-reference):`
+
+**Ejemplos reales del repo**:
+
+```
+✓ feat(beanie): add build_list_pipeline + build_list_queryset hooks
+✓ fix(repository): coerce str → ObjectId in Link.id filters
+✓ docs(api-reference): document use_aggregation flag
+✓ chore: bump version to 0.3.2
+✓ build: pin setuptools to emit Core Metadata 2.3
+✓ refactor(service): extract _build_match_stage helper
+
+✗ feature: add stuff                  ← typo + vago
+✗ fix: changes                        ← no es fix + vago
+✗ add version                         ← sin tipo + vago
+✗ Update README.md                    ← UI commit GitHub (evitar)
+```
+
+**Body** (opcional, separado por línea en blanco):
+
+- Wrap a 72 chars
+- Explica el *por qué*, no el *qué* (el diff ya muestra el qué)
+- Issue references al final: `Closes #123`, `Refs #456`
+
+### Setup del template + hook
+
+```bash
+# Activa template global del repo
+git config --local commit.template .gitmessage
+
+# Hook commitlint (rechaza commits que no cumplan)
+pip install pre-commit
+pre-commit install --hook-type commit-msg
+```
+
+### Branches
+
+- `feat/<descripción-corta>` — features nuevas
+- `fix/<bug-id-o-descripción>` — bugfixes
+- `docs/<área>` — solo docs
+- `chore/<descripción>` — mantenimiento
+
+### PRs
+
+- Título: mismo formato que commit
+- Descripción: contexto + cambios + tests + breaking changes (si aplica)
+- Link a issue: `Closes #N`
+- Tests obligatorios para `feat:` y `fix:`
+
+### Versioning
+
+- Semver. Bump en `pyproject.toml` + `plugin.json` + `marketplace.json` + `CHANGELOG.md`
+- `make release V=X.Y.Z` automatiza todo
 
 ## Estructura del repo
 

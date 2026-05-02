@@ -1,0 +1,35 @@
+# <type>(<scope>): <subject>   ← max 72 chars, imperative, lowercase, no period
+#
+# <body>   ← wrap at 72. Explain WHY, not WHAT. Blank line above.
+#
+# <footer>   ← Closes #N, Refs #N, BREAKING CHANGE: <desc>. Blank line above.
+#
+# ─────────────────────────────────────────────────────────────────────
+# Allowed types:
+#   feat      new user-visible functionality
+#   fix       bug affecting documented behavior
+#   docs      README, docs/, docstrings, CHANGELOG
+#   refactor  restructure, no behavior change
+#   perf      performance improvement
+#   test      tests only, no production code changes
+#   build     pyproject.toml, requirements, packaging
+#   ci        .github/workflows/, release scripts
+#   chore     maintenance (version bumps, renames, gitignore)
+#   style     formatting (black, isort) — no functional change
+#   revert    revert a previous commit
+#
+# Examples:
+#   feat(beanie): add build_list_pipeline hook for $lookup composition
+#   fix(repository): coerce str → ObjectId in Link.id filters
+#   docs(api-reference): document use_aggregation service flag
+#   chore: bump version to 0.3.2
+#   refactor(service): extract _build_match_stage helper
+#
+# Don't:
+#   ✗ feature: ...      → use feat:
+#   ✗ featuer: ...      → typo
+#   ✗ add version       → missing type + vague
+#   ✗ Update README.md  → GitHub UI commit, avoid
+#   ✗ fix: changes      → not a fix + meaningless
+#
+# Rules enforced by commit-msg hook (rejects on violation).

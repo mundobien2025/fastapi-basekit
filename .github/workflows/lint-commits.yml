@@ -1,0 +1,41 @@
+name: Lint commit messages
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  conventional-commits:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR commit messages
+        if: github.event_name == 'pull_request'
+        uses: webiny/action-conventional-commits@v1.3.0
+        with:
+          allowed-commit-types: "feat,fix,docs,refactor,perf,test,build,ci,chore,style,revert"
+
+      - name: Validate latest commit on main
+        if: github.event_name == 'push'
+        run: |
+          msg=$(git log -1 --pretty=%s)
+          regex='^(feat|fix|docs|refactor|perf|test|build|ci|chore|style|revert)(\([a-z0-9_/-]+\))?(!)?: .{1,72}$'
+          merge_regex='^(Merge|Deployed|Release) '
+          if echo "$msg" | grep -qE "$merge_regex"; then
+            echo "Skipping merge/auto commit: $msg"
+            exit 0
+          fi
+          if ! echo "$msg" | grep -qE "$regex"; then
+            echo "::error::Commit message does not match Conventional Commits spec:"
+            echo "::error::  $msg"
+            echo "::error::Expected: <type>(<scope>): <subject>"
+            echo "::error::Allowed types: feat fix docs refactor perf test build ci chore style revert"
+            exit 1
+          fi
+          echo "OK: $msg"
