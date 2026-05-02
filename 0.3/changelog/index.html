@@ -1766,15 +1766,65 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#031-current" class="md-nav__link">
+  <a href="#032-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.3.1 — current
+        0.3.2 — current
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.3.1 — current">
+    <nav class="md-nav" aria-label="0.3.2 — current">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agregado-beanie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agregado (Beanie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patron-de-uso-subquery-cross-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patrón de uso (subquery cross-collection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cambiado-beanie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiado (Beanie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#031" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1944,15 +1994,65 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#031-current" class="md-nav__link">
+  <a href="#032-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.3.1 — current
+        0.3.2 — current
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.3.1 — current">
+    <nav class="md-nav" aria-label="0.3.2 — current">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agregado-beanie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agregado (Beanie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patron-de-uso-subquery-cross-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patrón de uso (subquery cross-collection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cambiado-beanie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiado (Beanie)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#031" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2117,7 +2217,61 @@
 
 <h1 id="changelog">Changelog</h1>
 <p>Ver el archivo raw en el repo: <a href="https://github.com/mundobien2025/fastapi-basekit/blob/main/CHANGELOG.md">CHANGELOG.md</a></p>
-<h2 id="031-current">0.3.1 — current</h2>
+<h2 id="032-current">0.3.2 — current</h2>
+<h3 id="agregado-beanie">Agregado (Beanie)</h3>
+<ul>
+<li><strong><code>BaseRepository.build_list_queryset</code></strong> — hook FindMany equivalente al
+  de SQLAlchemy. Default delega a <code>build_filter_query</code>. Override en repo
+  o servicio para customizar filtros/proyección antes de paginar.</li>
+<li><strong><code>BaseRepository.build_list_pipeline</code></strong> — hook aggregation pipeline
+  para componer subqueries (<code>$lookup</code>, <code>$project</code>, <code>$group</code>). Default
+  emite <code>$match</code> + <code>$sort</code> (con auto-<code>$lookup</code> para nested ordering).</li>
+<li><strong><code>BaseRepository.paginate_pipeline(pipeline, page, count, validate)</code></strong>
+  — ejecuta pipeline arbitrario envuelto en <code>$facet</code> (data + total en una
+  sola query). <code>validate=False</code> cuando el <code>$project</code> aplana columnas
+  joined.</li>
+<li><strong><code>BaseService.use_aggregation: bool</code></strong> + <strong><code>aggregation_validate: bool</code></strong>.
+  Forza ruta de pipeline sin depender de nested ordering.</li>
+<li><strong><code>BaseService.build_list_queryset</code> / <code>build_list_pipeline</code></strong> — hooks
+  delegando al repo, override-ables a nivel servicio.</li>
+</ul>
+<h3 id="patron-de-uso-subquery-cross-collection">Patrón de uso (subquery cross-collection)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">AdminUserService</span><span class="p">(</span><span class="n">BaseService</span><span class="p">):</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">repository</span><span class="p">:</span> <span class="n">UserRepository</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">use_aggregation</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">aggregation_validate</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_list_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                            <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">build_list_pipeline</span><span class="p">(</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>            <span class="n">search</span><span class="o">=</span><span class="n">search</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="n">search_fields</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">order_by</span> <span class="ow">or</span> <span class="s2">&quot;-created_at&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="n">pipeline</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            <span class="p">{</span><span class="s2">&quot;$lookup&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="s2">&quot;wallets&quot;</span><span class="p">,</span> <span class="s2">&quot;localField&quot;</span><span class="p">:</span> <span class="s2">&quot;_id&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                         <span class="s2">&quot;foreignField&quot;</span><span class="p">:</span> <span class="s2">&quot;user.$id&quot;</span><span class="p">,</span> <span class="s2">&quot;as&quot;</span><span class="p">:</span> <span class="s2">&quot;wallet_data&quot;</span><span class="p">}},</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            <span class="p">{</span><span class="s2">&quot;$unwind&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;$wallet_data&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                         <span class="s2">&quot;preserveNullAndEmptyArrays&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            <span class="p">{</span><span class="s2">&quot;$project&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$toString&quot;</span><span class="p">:</span> <span class="s2">&quot;$_id&quot;</span><span class="p">},</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                <span class="s2">&quot;wallet_balance&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$convert&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="s2">&quot;$wallet_data.balance&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                    <span class="s2">&quot;to&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;onNull&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                <span class="p">}},</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>            <span class="p">}},</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="p">])</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>        <span class="k">return</span> <span class="n">pipeline</span>
+</code></pre></div>
+<p>Controlador solo expone <code>await super().list()</code> — composición vive en el
+pipeline declarativo del servicio.</p>
+<h3 id="cambiado-beanie">Cambiado (Beanie)</h3>
+<ul>
+<li><code>BaseService.list</code> ahora ramifica entre FindMany y aggregation pipeline
+  según <code>use_aggregation</code> o nested ordering. Backward compatible.</li>
+<li><code>BaseRepository.list_with_aggregation</code> se conserva como wrapper que
+  delega a <code>build_list_pipeline</code> + <code>paginate_pipeline</code>.</li>
+</ul>
+<h2 id="031">0.3.1</h2>
 <h3 id="agregado">Agregado</h3>
 <ul>
 <li><strong>Beanie filter alias <code>&lt;field&gt;_id</code></strong> en <code>BaseRepository.build_filter_query</code>.

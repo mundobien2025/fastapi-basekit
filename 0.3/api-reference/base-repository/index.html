@@ -1589,6 +1589,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#beanie-hooks-de-extension-032" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beanie — hooks de extensión (0.3.2+)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2220,6 +2231,17 @@
     <span class="md-ellipsis">
       
         Variantes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#beanie-hooks-de-extension-032" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beanie — hooks de extensión (0.3.2+)
       
     </span>
   </a>
@@ -4805,6 +4827,30 @@ Debe retornar un objeto Select.</p>
 <li><code>fastapi_basekit.aio.sqlmodel.repository.base.BaseRepository</code></li>
 <li><code>fastapi_basekit.aio.beanie.repository.base.BeanieBaseRepository</code></li>
 </ul>
+<h2 id="beanie-hooks-de-extension-032">Beanie — hooks de extensión (0.3.2+)</h2>
+<p>Beanie expone dos hooks paralelos al <code>build_list_queryset</code> de SQLAlchemy
++ un runner de aggregation con paginación atómica:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">UserRepository</span><span class="p">(</span><span class="n">BeanieBaseRepository</span><span class="p">):</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="c1"># FindMany path — equivalente directo de build_list_queryset SQL</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>                            <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_filter_query</span><span class="p">(</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>            <span class="n">search</span><span class="o">=</span><span class="n">search</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="n">search_fields</span> <span class="ow">or</span> <span class="p">[],</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span> <span class="ow">or</span> <span class="p">{},</span> <span class="n">order_by</span><span class="o">=</span><span class="n">order_by</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="p">)</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="c1"># Aggregation path — para subqueries cross-collection</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_list_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>                            <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="c1"># default: $match + $sort (con auto-$lookup en nested order)</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="c1"># override para añadir $lookup/$project/$group</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="o">...</span>
+</code></pre></div>
+<p><code>paginate_pipeline(pipeline, page, count, validate=True)</code> envuelve el
+pipeline con <code>$facet</code> (<code>data</code> + <code>metadata.total</code> en una sola query).
+<code>validate=False</code> cuando el <code>$project</code> produce shape distinta del modelo.</p>
 <p><a class="md-button md-button--primary" href="../../user-guide/repositories/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Patrón</a></p>
 
 

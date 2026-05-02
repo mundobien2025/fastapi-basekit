@@ -1495,6 +1495,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#beanie-hooks-de-extension-032" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beanie — hooks de extensión (0.3.2+)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2088,6 +2099,17 @@
     <span class="md-ellipsis">
       
         Variantes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#beanie-hooks-de-extension-032" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beanie — hooks de extensión (0.3.2+)
       
     </span>
   </a>
@@ -3032,6 +3054,72 @@ antes de consultar.</p>
 <li><code>fastapi_basekit.aio.sqlmodel.service.base.BaseService</code> — async SQLModel</li>
 <li><code>fastapi_basekit.aio.beanie.service.base.BaseService</code> — async Beanie/Mongo</li>
 </ul>
+<h2 id="beanie-hooks-de-extension-032">Beanie — hooks de extensión (0.3.2+)</h2>
+<p>Atributos extra de clase para servicios Beanie:</p>
+<table>
+<thead>
+<tr>
+<th>Atributo</th>
+<th>Tipo</th>
+<th>Default</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>use_aggregation</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Forza ruta de aggregation pipeline en <code>list()</code></td>
+</tr>
+<tr>
+<td><code>aggregation_validate</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Si <code>False</code>, devuelve dicts crudos del pipeline sin <code>model_validate</code></td>
+</tr>
+</tbody>
+</table>
+<p>Hooks que delegan al repositorio (override para componer subqueries
+cross-collection sin tocar el controlador):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">search_fields</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                        <span class="n">order_by</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FindMany</span><span class="p">:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;FindMany path — override para customizar query antes de paginar.&quot;&quot;&quot;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">build_list_queryset</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">search_fields</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>                        <span class="n">order_by</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregation path — override para añadir $lookup/$project/$group.&quot;&quot;&quot;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">build_list_pipeline</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<p>Ejemplo con join cross-collection (admin users + wallets + policies):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">AdminUserService</span><span class="p">(</span><span class="n">BaseService</span><span class="p">):</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">repository</span><span class="p">:</span> <span class="n">UserRepository</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">use_aggregation</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">aggregation_validate</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_list_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>                            <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">build_list_pipeline</span><span class="p">(</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>            <span class="n">search</span><span class="o">=</span><span class="n">search</span><span class="p">,</span> <span class="n">search_fields</span><span class="o">=</span><span class="n">search_fields</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="n">order_by</span> <span class="ow">or</span> <span class="s2">&quot;-created_at&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="p">)</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="n">pipeline</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>            <span class="p">{</span><span class="s2">&quot;$lookup&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="s2">&quot;wallets&quot;</span><span class="p">,</span> <span class="s2">&quot;localField&quot;</span><span class="p">:</span> <span class="s2">&quot;_id&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>                         <span class="s2">&quot;foreignField&quot;</span><span class="p">:</span> <span class="s2">&quot;user.$id&quot;</span><span class="p">,</span> <span class="s2">&quot;as&quot;</span><span class="p">:</span> <span class="s2">&quot;wallet_data&quot;</span><span class="p">}},</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>            <span class="p">{</span><span class="s2">&quot;$unwind&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;$wallet_data&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>                         <span class="s2">&quot;preserveNullAndEmptyArrays&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}},</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>            <span class="p">{</span><span class="s2">&quot;$project&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$toString&quot;</span><span class="p">:</span> <span class="s2">&quot;$_id&quot;</span><span class="p">},</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>                <span class="s2">&quot;wallet_balance&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$convert&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>                    <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="s2">&quot;$wallet_data.balance&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>                    <span class="s2">&quot;to&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;onNull&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>                <span class="p">}},</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>            <span class="p">}},</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>        <span class="p">])</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="k">return</span> <span class="n">pipeline</span>
+</code></pre></div>
 <p><a class="md-button md-button--primary" href="../../user-guide/services/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.75.75 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0"/></svg></span> Pattern</a></p>
 
 
