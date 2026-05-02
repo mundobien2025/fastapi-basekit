@@ -782,6 +782,9 @@ make test-e2e       # docker compose --profile tests run --rm tests
 | Alembic autogen emits `app.models.types.LowercaseEnum(...)` | `NameError: name 'app' is not defined` at upgrade | Add `LowercaseEnum` to `render_item` in `alembic/env.py` — see §23 |
 | `JWTService().encode_token(...)` | `AttributeError: 'JWTService' object has no attribute 'encode_token'` | Real method is `create_token(subject, extra_data=None)` — see §24 |
 | Service ctor missing `super().__init__(repository, request=...)` | `format_response` schema lookup fails / `self.action` always `None` | Always call `super().__init__(repository, request=request)` in service `__init__` |
+| Service `list()` returns `List[Schema]` (Pydantic instances) | `format_response` re-validates → mismatch with `schema_class` / wasteful double validation | Service returns `List[dict]` or `List[Model]`; controller dispatches schema via `get_schema_class()` |
+| Override `list(self, **kwargs)` instead of explicit signature | `_params(skip_frames=2)` loses frame introspection of FastAPI-validated values | Replicate full signature: `list(self, search, page, count, filters, order_by)` (Beanie) or `(..., use_or, joins, order_by)` (SQL) |
+| Manual N+1 enrichment loop in service `list` (multiple `await repo.get_for_users(...)` after the main query) | Slow; couples controller flow with DB roundtrips; breaks pagination correctness | Use `build_list_pipeline` (Beanie) / `build_list_queryset` (SQL) to compose `$lookup` / JOIN at repo level — see §29 |
 
 ---
 
@@ -1055,3 +1058,85 @@ app.add_exception_handler(IntegrityError, integrity_error_handler)
 - Pre-emptive validation in services (e.g. `await repo.get_by_email(email)` before insert) catches duplicates before the DB roundtrip; `IntegrityError` only fires on race conditions, where the global handler is the safety net.
 
 **Anti-pattern (don't do this):** the `mariadb-template`-style `get_db` that walks the error message and raises `DatabaseIntegrityException` inline. It mixes session management with domain rules and forces every project to copy/paste the same conditional ladder.
+
+---
+
+## 29. Subqueries / cross-collection joins — composer at repo level (0.3.2+)
+
+When a `list` endpoint needs data from another collection/table per row
+(wallets per user, comments-count per post, latest-message per
+conversation), **never** loop in the service after `super().list()`.
+Compose the query at repo level via the appropriate hook.
+
+### SQLAlchemy — `build_list_queryset`
+
+```python
+class UserRepository(BaseRepository):
+    model = User
+
+    def build_list_queryset(self, **kwargs):
+        return (
+            select(User, Wallet.balance, Policy.addon)
+            .outerjoin(Wallet, Wallet.user_id == User.id)
+            .outerjoin(Policy, Policy.user_id == User.id)
+            .where(User.deleted_at.is_(None))
+        )
+```
+
+### Beanie — `build_list_pipeline` + aggregation
+
+Service-level override (when the join is service-specific and the repo
+is shared):
+
+```python
+class AdminUserService(BaseService):
+    repository: UserRepository
+    use_aggregation = True              # forza ruta pipeline
+    aggregation_validate = False        # $project produce shape ≠ User
+
+    def build_list_pipeline(self, search=None, search_fields=None,
+                            filters=None, order_by=None, **kwargs):
+        pipeline = self.repository.build_list_pipeline(
+            search=search, search_fields=search_fields,
+            filters=filters, order_by=order_by or "-created_at",
+        )
+        pipeline.extend([
+            {"$lookup": {"from": "wallets", "localField": "_id",
+                         "foreignField": "user.$id", "as": "wallet_data"}},
+            {"$unwind": {"path": "$wallet_data",
+                         "preserveNullAndEmptyArrays": True}},
+            {"$lookup": {"from": "billing_policies", "localField": "_id",
+                         "foreignField": "user.$id", "as": "policy_data"}},
+            {"$unwind": {"path": "$policy_data",
+                         "preserveNullAndEmptyArrays": True}},
+            {"$project": {
+                "_id": 0,
+                "id": {"$toString": "$_id"},
+                "created_at": 1, "updated_at": 1,
+                "name": 1, "email": 1, "status": 1, "role": 1,
+                "wallet_balance": {"$convert": {
+                    "input": "$wallet_data.balance",
+                    "to": "string",                 # Decimal128 → str
+                    "onNull": None, "onError": None,
+                }},
+                "wallet_currency": {"$ifNull": ["$wallet_data.currency", "USD"]},
+                "addon": "$policy_data.addon",
+            }},
+        ])
+        return pipeline
+```
+
+Controller stays untouched — `await super().list()` runs the whole
+chain. Schema dispatch via `get_schema_class()` validates the projected
+dict against the right list schema.
+
+### Reglas duras
+
+| Regla | Por qué |
+|------|---------|
+| Pipeline `$convert` Decimal128 → string antes de validar | Pydantic `Decimal` no acepta `bson.Decimal128` directo |
+| `aggregation_validate = False` cuando el `$project` aplana columnas joined | `model_validate(User, dict)` falla con shape ≠ `User` |
+| `id: {"$toString": "$_id"}` en cualquier `$project` que va a JSON | Evita `ObjectId is not JSON serializable` downstream |
+| `preserveNullAndEmptyArrays: True` en `$unwind` de joins opcionales | Pierdes filas con LEFT JOIN ausente si no lo pones |
+| `$facet` para paginación atómica → usa `paginate_pipeline` del repo | Una sola query devuelve `data` + `total`. No re-cuentes |
+| `use_aggregation = True` solo en servicios que SIEMPRE necesitan pipeline | Aggregation es más caro que FindMany — no lo prendas si no hace falta |

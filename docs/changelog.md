@@ -2,7 +2,66 @@
 
 Ver el archivo raw en el repo: [CHANGELOG.md](https://github.com/mundobien2025/fastapi-basekit/blob/main/CHANGELOG.md)
 
-## 0.3.1 — current
+## 0.3.2 — current
+
+### Agregado (Beanie)
+
+- **`BaseRepository.build_list_queryset`** — hook FindMany equivalente al
+  de SQLAlchemy. Default delega a `build_filter_query`. Override en repo
+  o servicio para customizar filtros/proyección antes de paginar.
+- **`BaseRepository.build_list_pipeline`** — hook aggregation pipeline
+  para componer subqueries (`$lookup`, `$project`, `$group`). Default
+  emite `$match` + `$sort` (con auto-`$lookup` para nested ordering).
+- **`BaseRepository.paginate_pipeline(pipeline, page, count, validate)`**
+  — ejecuta pipeline arbitrario envuelto en `$facet` (data + total en una
+  sola query). `validate=False` cuando el `$project` aplana columnas
+  joined.
+- **`BaseService.use_aggregation: bool`** + **`aggregation_validate: bool`**.
+  Forza ruta de pipeline sin depender de nested ordering.
+- **`BaseService.build_list_queryset` / `build_list_pipeline`** — hooks
+  delegando al repo, override-ables a nivel servicio.
+
+### Patrón de uso (subquery cross-collection)
+
+```python
+class AdminUserService(BaseService):
+    repository: UserRepository
+    use_aggregation = True
+    aggregation_validate = False
+
+    def build_list_pipeline(self, search=None, search_fields=None,
+                            filters=None, order_by=None, **kwargs):
+        pipeline = self.repository.build_list_pipeline(
+            search=search, search_fields=search_fields,
+            filters=filters, order_by=order_by or "-created_at",
+        )
+        pipeline.extend([
+            {"$lookup": {"from": "wallets", "localField": "_id",
+                         "foreignField": "user.$id", "as": "wallet_data"}},
+            {"$unwind": {"path": "$wallet_data",
+                         "preserveNullAndEmptyArrays": True}},
+            {"$project": {
+                "id": {"$toString": "$_id"},
+                "wallet_balance": {"$convert": {
+                    "input": "$wallet_data.balance",
+                    "to": "string", "onNull": None,
+                }},
+            }},
+        ])
+        return pipeline
+```
+
+Controlador solo expone `await super().list()` — composición vive en el
+pipeline declarativo del servicio.
+
+### Cambiado (Beanie)
+
+- `BaseService.list` ahora ramifica entre FindMany y aggregation pipeline
+  según `use_aggregation` o nested ordering. Backward compatible.
+- `BaseRepository.list_with_aggregation` se conserva como wrapper que
+  delega a `build_list_pipeline` + `paginate_pipeline`.
+
+## 0.3.1
 
 ### Agregado
 

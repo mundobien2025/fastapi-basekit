@@ -207,27 +207,42 @@ class BaseRepository:
         # Apply ordering if provided and not already applied
         if order_by:
             query = query.sort(order_by)
-        
+
         total = await query.count()
         items = await query.skip(count * (page - 1)).limit(count).to_list()
         return items, total
-    
-    async def list_with_aggregation(
+
+    def build_list_queryset(
+        self,
+        search: Optional[str] = None,
+        search_fields: Optional[List[str]] = None,
+        filters: Optional[dict] = None,
+        order_by: Optional[List[tuple]] = None,
+        **kwargs,
+    ) -> FindMany[Document]:
+        """Hook: returns the FindMany query used by `list` endpoints.
+
+        Beanie equivalent of SQLAlchemy `build_list_queryset`. Override at
+        repository OR service level (`BaseService.build_list_queryset`) to
+        customize filters, projections, or query options before pagination.
+        Default implementation delegates to `build_filter_query`.
+        """
+        return self.build_filter_query(
+            search=search,
+            search_fields=search_fields or [],
+            filters=filters or {},
+            order_by=order_by,
+            **kwargs,
+        )
+
+    def _build_match_stage(
         self,
         search: Optional[str],
-        search_fields: List[str],
-        filters: dict,
-        order_by: str,
-        page: int,
-        count: int,
-        **kwargs
-    ) -> tuple[List[Document], int]:
-        """List with support for nested ordering using aggregation ($facet optimized)."""
-        field_path, direction, is_nested = self._parse_order_field(order_by)
-        pipeline = []
-        
-        # 1. Match stage (same as before)
-        match_conditions = {}
+        search_fields: Optional[List[str]],
+        filters: Optional[dict],
+    ) -> Dict[str, Any]:
+        """Build a `$match` stage dict (without the `$match` wrapper)."""
+        match_conditions: Dict[str, Any] = {}
         if filters:
             for key, value in filters.items():
                 if isinstance(value, ObjectId):
@@ -236,7 +251,7 @@ class BaseRepository:
                     match_conditions[f"{key}.$id"] = value.id
                 else:
                     match_conditions[key] = value
-        
+
         if search and search_fields:
             search_conditions = [
                 {field: {"$regex": f".*{search}.*", "$options": "i"}}
@@ -244,22 +259,47 @@ class BaseRepository:
             ]
             if search_conditions:
                 if match_conditions:
-                    match_conditions = {"$and": [match_conditions, {"$or": search_conditions}]}
+                    match_conditions = {
+                        "$and": [
+                            match_conditions,
+                            {"$or": search_conditions},
+                        ]
+                    }
                 else:
                     match_conditions = {"$or": search_conditions}
-        
+        return match_conditions
+
+    def build_list_pipeline(
+        self,
+        search: Optional[str] = None,
+        search_fields: Optional[List[str]] = None,
+        filters: Optional[dict] = None,
+        order_by: Optional[str] = None,
+        **kwargs,
+    ) -> List[Dict[str, Any]]:
+        """Hook: returns the aggregation pipeline used by `list` endpoints.
+
+        Beanie equivalent of SQL subqueries / JOINs. Override at repository
+        OR service level (`BaseService.build_list_pipeline`) to add `$lookup`,
+        `$project`, `$group`, etc. Default builds `$match` + optional `$sort`
+        (with auto `$lookup` for nested-link ordering). The `$facet` pagination
+        stage is appended later by `paginate_pipeline`.
+        """
+        pipeline: List[Dict[str, Any]] = []
+
+        match_conditions = self._build_match_stage(search, search_fields, filters)
         if match_conditions:
             pipeline.append({"$match": match_conditions})
-        
-        # 2. Lookup & Sort (same as before)
-        collection_name = None
-        first_field = None
-        
+
+        if not order_by:
+            return pipeline
+
+        field_path, direction, is_nested = self._parse_order_field(order_by)
+
         if is_nested:
             parts = field_path.split(".")
             first_field = parts[0]
             collection_name = self._get_collection_name_from_field(first_field)
-            
             if collection_name:
                 pipeline.extend([
                     {
@@ -267,64 +307,104 @@ class BaseRepository:
                             "from": collection_name,
                             "localField": f"{first_field}.$id",
                             "foreignField": "_id",
-                            "as": f"{first_field}_data"
+                            "as": f"{first_field}_data",
                         }
                     },
                     {
                         "$unwind": {
                             "path": f"${first_field}_data",
-                            "preserveNullAndEmptyArrays": True
+                            "preserveNullAndEmptyArrays": True,
                         }
-                    }
+                    },
                 ])
                 remaining_path = ".".join(parts[1:]) if len(parts) > 1 else ""
-                sort_field = f"{first_field}_data.{remaining_path}" if remaining_path else f"{first_field}_data"
+                sort_field = (
+                    f"{first_field}_data.{remaining_path}"
+                    if remaining_path
+                    else f"{first_field}_data"
+                )
             else:
                 sort_field = field_path
         else:
             sort_field = field_path
-            
+
         pipeline.append({"$sort": {sort_field: direction}})
-        
-        # 3. Facet for Single Query Pagination
-        project_exclusion = {f"{first_field}_data": 0} if (is_nested and collection_name) else None
-        
-        facet_stage = {
-            "$facet": {
-                "metadata": [{"$count": "total"}],
-                "data": [
-                    {"$skip": count * (page - 1)},
-                    {"$limit": count}
-                ]
+        return pipeline
+
+    async def paginate_pipeline(
+        self,
+        pipeline: List[Dict[str, Any]],
+        page: int,
+        count: int,
+        validate: bool = True,
+    ) -> tuple[List[Any], int]:
+        """Run an aggregation pipeline with `$facet` pagination.
+
+        Args:
+            pipeline: Pipeline stages (without the final `$facet`).
+            page, count: Pagination params.
+            validate: If True, validates each row against `self.model`.
+                Set False when the pipeline projects a non-model shape (e.g.
+                joined columns) — the raw dicts are returned untouched.
+        """
+        full_pipeline = list(pipeline) + [
+            {
+                "$facet": {
+                    "metadata": [{"$count": "total"}],
+                    "data": [
+                        {"$skip": count * (page - 1)},
+                        {"$limit": count},
+                    ],
+                }
             }
-        }
-        
-        # Add projection to remove join artifacts if needed
-        if project_exclusion:
-             facet_stage["$facet"]["data"].append({"$project": project_exclusion})
-             
-        pipeline.append(facet_stage)
-        
-        # Execute Pipeline
-        results = await self.model.aggregate(pipeline).to_list()
-        
-        # Process Results
+        ]
+
+        results = await self.model.aggregate(full_pipeline).to_list()
         if not results or not results[0].get("metadata"):
             return [], 0
-            
+
         data = results[0]
         total = data["metadata"][0]["total"] if data["metadata"] else 0
         items_raw = data["data"]
-        
-        # Efficient Validation
-        items = []
+
+        if not validate:
+            return items_raw, total
+
+        items: List[Any] = []
         for raw_item in items_raw:
             try:
                 items.append(self.model.model_validate(raw_item))
             except Exception:
                 continue
-                
         return items, total
+
+    async def list_with_aggregation(
+        self,
+        search: Optional[str],
+        search_fields: List[str],
+        filters: dict,
+        order_by: str,
+        page: int,
+        count: int,
+        **kwargs,
+    ) -> tuple[List[Document], int]:
+        """Backward-compat wrapper: delegates to `build_list_pipeline` +
+        `paginate_pipeline`. Kept for callers that hit it directly.
+        """
+        pipeline = self.build_list_pipeline(
+            search=search,
+            search_fields=search_fields,
+            filters=filters,
+            order_by=order_by,
+            **kwargs,
+        )
+        # Strip join artifacts when default sort-lookup added them
+        field_path, _, is_nested = self._parse_order_field(order_by) if order_by else ("", 0, False)
+        if is_nested:
+            first_field = field_path.split(".")[0]
+            if self._get_collection_name_from_field(first_field):
+                pipeline.append({"$project": {f"{first_field}_data": 0}})
+        return await self.paginate_pipeline(pipeline, page, count, validate=True)
 
     async def get_by_id(
         self,

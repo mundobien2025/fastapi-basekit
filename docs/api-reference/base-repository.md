@@ -70,4 +70,33 @@ def build_list_queryset(self, **kwargs):
 - `fastapi_basekit.aio.sqlmodel.repository.base.BaseRepository`
 - `fastapi_basekit.aio.beanie.repository.base.BeanieBaseRepository`
 
+## Beanie — hooks de extensión (0.3.2+)
+
+Beanie expone dos hooks paralelos al `build_list_queryset` de SQLAlchemy
++ un runner de aggregation con paginación atómica:
+
+```python
+class UserRepository(BeanieBaseRepository):
+    model = User
+
+    # FindMany path — equivalente directo de build_list_queryset SQL
+    def build_list_queryset(self, search=None, search_fields=None,
+                            filters=None, order_by=None, **kwargs):
+        return self.build_filter_query(
+            search=search, search_fields=search_fields or [],
+            filters=filters or {}, order_by=order_by, **kwargs,
+        )
+
+    # Aggregation path — para subqueries cross-collection
+    def build_list_pipeline(self, search=None, search_fields=None,
+                            filters=None, order_by=None, **kwargs):
+        # default: $match + $sort (con auto-$lookup en nested order)
+        # override para añadir $lookup/$project/$group
+        ...
+```
+
+`paginate_pipeline(pipeline, page, count, validate=True)` envuelve el
+pipeline con `$facet` (`data` + `metadata.total` en una sola query).
+`validate=False` cuando el `$project` produce shape distinta del modelo.
+
 [:octicons-arrow-right-24: Patrón](../user-guide/repositories.md){ .md-button .md-button--primary }

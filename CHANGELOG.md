@@ -5,6 +5,79 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.2] - 2026-05-01
+
+### Agregado (Beanie)
+
+- **`BaseRepository.build_list_queryset` y `build_list_pipeline`**
+  (`fastapi_basekit/aio/beanie/repository/base.py`).
+  Hooks de extensión equivalentes al `build_list_queryset` de SQLAlchemy
+  para componer queries en endpoints `list`. Default delega a
+  `build_filter_query` / pipeline básico (`$match` + `$sort`). Subclases
+  override para añadir `$lookup`, `$project`, `$group`, etc. — i.e.
+  subqueries / JOINs sin tocar controlador ni servicio CRUD.
+
+- **`BaseRepository.paginate_pipeline(pipeline, page, count, validate=True)`**
+  Ejecuta un pipeline arbitrario envuelto en `$facet` (paginación + total
+  en una sola query). `validate=False` cuando el `$project` produce una
+  forma plana distinta del modelo (joined columns).
+
+- **`BaseService.use_aggregation: bool = False`** y
+  **`aggregation_validate: bool = True`**.
+  Flag de servicio para forzar la ruta de aggregation pipeline (sin
+  depender de `order_by` anidado). Cuando `aggregation_validate=False`,
+  los dicts crudos del pipeline se devuelven sin validar contra el modelo
+  (útil cuando el `$project` aplana subqueries).
+
+- **`BaseService.build_list_queryset` y `build_list_pipeline`**
+  (`fastapi_basekit/aio/beanie/service/base.py`). Hooks a nivel servicio
+  que delegan en el repositorio. Override en el servicio para añadir
+  lookups/proyecciones por endpoint sin contaminar el repo.
+
+### Cambiado (Beanie)
+
+- `BaseService.list` ahora ramifica entre `FindMany` y aggregation
+  pipeline según `use_aggregation` o `order_by` anidado. La lógica previa
+  se preserva como ruta default; subclases que ya funcionaban no
+  necesitan cambios.
+
+- `BaseRepository.list_with_aggregation` se conserva como wrapper
+  retrocompatible que delega a `build_list_pipeline` + `paginate_pipeline`.
+
+### Patrón de uso
+
+```python
+class AdminUserService(BaseService):
+    repository: UserRepository
+    use_aggregation = True
+    aggregation_validate = False
+
+    def build_list_pipeline(self, search=None, search_fields=None,
+                            filters=None, order_by=None, **kwargs):
+        pipeline = self.repository.build_list_pipeline(
+            search=search, search_fields=search_fields,
+            filters=filters, order_by=order_by or "-created_at",
+        )
+        pipeline.extend([
+            {"$lookup": {"from": "wallets", "localField": "_id",
+                         "foreignField": "user.$id", "as": "wallet_data"}},
+            {"$unwind": {"path": "$wallet_data",
+                         "preserveNullAndEmptyArrays": True}},
+            {"$project": {
+                "id": {"$toString": "$_id"},
+                "wallet_balance": {"$convert": {
+                    "input": "$wallet_data.balance",
+                    "to": "string", "onNull": None,
+                }},
+                # ... resto del project
+            }},
+        ])
+        return pipeline
+```
+
+El controlador solo expone `super().list()` — toda la composición vive
+en el pipeline declarativo del servicio.
+
 ## [0.3.1] - 2026-04-29
 
 ### Agregado

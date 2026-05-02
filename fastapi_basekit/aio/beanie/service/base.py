@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
+from beanie import Document
+from beanie.odm.queries.find import FindMany
 from fastapi import Request
 from pydantic import BaseModel
 
@@ -20,6 +22,8 @@ class BaseService:
     kwargs_query: Dict[str, Union[str, int]] = {}
     action: str = ""
     order_by: Optional[List[tuple]] = None
+    use_aggregation: bool = False
+    aggregation_validate: bool = True
 
     def __init__(
         self, repository: BaseRepository, request: Optional[Request] = None
@@ -69,61 +73,108 @@ class BaseService:
             raise NotFoundException(f"id={id} no encontrado")
         return obj
 
+    def build_list_queryset(
+        self,
+        search: Optional[str] = None,
+        search_fields: Optional[List[str]] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        order_by: Optional[List[tuple]] = None,
+        **kwargs,
+    ) -> FindMany[Document]:
+        """Service-level hook over `repository.build_list_queryset`.
+
+        Override here to compose query options across repositories or to
+        decorate the FindMany before pagination.
+        """
+        return self.repository.build_list_queryset(
+            search=search,
+            search_fields=search_fields or self.search_fields,
+            filters=filters,
+            order_by=order_by,
+            **kwargs,
+        )
+
+    def build_list_pipeline(
+        self,
+        search: Optional[str] = None,
+        search_fields: Optional[List[str]] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        order_by: Optional[str] = None,
+        **kwargs,
+    ) -> List[Dict[str, Any]]:
+        """Service-level hook over `repository.build_list_pipeline`.
+
+        Override here to add `$lookup`, `$project`, `$group`, etc. for
+        cross-collection joins (subquery-like). Set `use_aggregation = True`
+        on the service to force the pipeline path even without nested order.
+        Set `aggregation_validate = False` if the projection produces a
+        non-model shape (joined columns / flattened rows).
+        """
+        return self.repository.build_list_pipeline(
+            search=search,
+            search_fields=search_fields or self.search_fields,
+            filters=filters,
+            order_by=order_by,
+            **kwargs,
+        )
+
     async def list(
         self,
         search: Optional[str] = None,
         page: int = 1,
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
-        order_by: Optional[str] = None,  # NEW: Dynamic ordering (e.g., "-created_at" or "tool__name")
+        order_by: Optional[str] = None,  # Dynamic ordering (e.g., "-created_at" or "tool__name")
     ):
         kwargs = self.get_kwargs_query()
         applied_filters = self.get_filters(filters)
-        
-        # Determine which ordering to use
+
+        # Resolve ordering
         if order_by:
-            # Dynamic ordering from parameter (takes precedence)
             order_str = order_by
         else:
-            # Fall back to service-level ordering
             default_order = self.get_order()
             if default_order:
-                # Convert list of tuples to string format
-                # e.g., [("created_at", -1)] -> "-created_at"
                 field, direction = default_order[0]
                 order_str = f"{'-' if direction == -1 else ''}{field}"
             else:
                 order_str = None
-        
-        # Check if we need aggregation (nested field with __ or .)
-        if order_str and ("__" in order_str or "." in order_str):
-            # Use aggregation pipeline for nested ordering
-            return await self.repository.list_with_aggregation(
+
+        nested_order = bool(order_str and ("__" in order_str or "." in order_str))
+        use_pipeline = self.use_aggregation or nested_order
+
+        if use_pipeline:
+            pipeline = self.build_list_pipeline(
                 search=search,
                 search_fields=self.search_fields,
                 filters=applied_filters,
                 order_by=order_str,
+                **kwargs,
+            )
+            return await self.repository.paginate_pipeline(
+                pipeline,
                 page=page,
                 count=count,
-                **kwargs,
+                validate=self.aggregation_validate,
             )
-        else:
-            # Use standard query for simple ordering
-            order_list = None
-            if order_str:
-                # Parse the order string
-                direction = -1 if order_str.startswith("-") else 1
-                field = order_str.lstrip("-")
-                order_list = [(field, direction)]
-            
-            query = self.repository.build_filter_query(
-                search=search,
-                search_fields=self.search_fields,
-                filters=applied_filters,
-                order_by=order_list,
-                **kwargs,
-            )
-            return await self.repository.paginate(query, page, count, order_by=order_list)
+
+        # FindMany path
+        order_list = None
+        if order_str:
+            direction = -1 if order_str.startswith("-") else 1
+            field = order_str.lstrip("-")
+            order_list = [(field, direction)]
+
+        query = self.build_list_queryset(
+            search=search,
+            search_fields=self.search_fields,
+            filters=applied_filters,
+            order_by=order_list,
+            **kwargs,
+        )
+        return await self.repository.paginate(
+            query, page, count, order_by=order_list
+        )
 
     async def create(
         self, payload: BaseModel, check_fields: Optional[List[str]] = None
