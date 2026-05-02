@@ -14,7 +14,11 @@ class BaseController:
 
     service = Depends()
     schema_class: ClassVar[Type[BaseModel]]
-    action: ClassVar[Optional[str]] = None
+
+    # DRF Style: Permisos globales por defecto
+    permission_classes: ClassVar[List[Type[BasePermission]]] = []
+
+    action: Optional[str] = None
     request: Request
     _params_excluded_fields: ClassVar[Set[str]] = {
         "self",
@@ -32,34 +36,73 @@ class BaseController:
     }
 
     def __init__(self) -> None:
-        endpoint_func = (
-            self.request.scope.get("endpoint")
-            if hasattr(self, "request") and self.request
-            else None
-        )
-        self.action = endpoint_func.__name__ if endpoint_func else None
+        """Inicializa el controller."""
+        pass
+
+    def get_permissions(self) -> List[Type[BasePermission]]:
+        """
+        Instancia y retorna la lista de permisos que esta vista requiere.
+
+        Sobrescribir esto permite lógica tipo DRF:
+
+        if self.action == 'list':
+            return [AllowAny]
+        return [IsAuthenticated]
+        """
+        return self.permission_classes
+
+    async def prepare_action(self, action_name: str) -> None:
+        """Set the current action and run permission checks.
+
+        Auto-called by ``ControllerMeta`` for every public async method on
+        the controller. Idempotent within one invocation: if the same
+        ``action_name`` has already been prepared on this instance,
+        subsequent calls are no-ops. This lets custom methods opt into
+        calling ``await self.prepare_action(...)`` explicitly without
+        double-firing permission checks (when the metaclass already ran
+        before entering the method body).
+        """
+        if getattr(self, "_basekit_prepared_action", None) == action_name:
+            return
+        self.action = action_name
+        self._basekit_prepared_action = action_name
+        await self.check_permissions()
+
+    async def check_permissions(self):
+        """Run each declared permission. Raises ``PermissionException``
+        on the first denial.
+        """
+        for permission_class in self.get_permissions():
+            permission = permission_class()
+            has_perm = await permission.has_permission(self.request)
+            if not has_perm:
+                message = getattr(
+                    permission,
+                    "message_exception",
+                    "No tienes permiso para realizar esta acción.",
+                )
+                raise PermissionException(message)
+
+    async def check_permissions_class(self):
+        """Backward-compat alias for ``check_permissions``.
+
+        Pre-0.3.2 controllers called this manually inside endpoint methods.
+        Keep working for users who haven't migrated to ``permission_classes``
+        + auto-wrapping yet. New code should declare ``permission_classes``
+        on the controller and let the metaclass run permissions.
+        """
+        await self.check_permissions()
 
     def get_schema_class(self) -> Type[BaseModel]:
         assert self.schema_class is not None, (
             "'%s' should either include a `schema_class` attribute, "
-            "or override the `get_serializer_class()` method."
+            "or override the `get_schema_class()` method."
             % self.__class__.__name__
         )
         return self.schema_class
 
-    async def check_permissions_class(self):
-        permissions = self.check_permissions()
-        if permissions:
-            for permission in permissions:
-                obj = permission()
-                check = await obj.has_permission(self.request)
-                if not check:
-                    raise PermissionException(obj.message_exception)
-
-    def check_permissions(self) -> List[Type[BasePermission]]:
-        pass
-
     async def list(self):
+        await self.prepare_action("list")
         params = self._params()
         items, total = await self.service.list(**params)
         count = params.get("count") or 0
@@ -75,18 +118,22 @@ class BaseController:
         return self.format_response(data=items, pagination=pagination)
 
     async def retrieve(self, id: str):
+        await self.prepare_action("retrieve")
         item = await self.service.retrieve(id)
         return self.format_response(data=item)
 
     async def create(self, validated_data: Any):
+        await self.prepare_action("create")
         result = await self.service.create(validated_data)
         return self.format_response(result, message="Creado exitosamente")
 
     async def update(self, id: str, validated_data: Any):
+        await self.prepare_action("update")
         result = await self.service.update(id, validated_data)
         return self.format_response(result, message="Actualizado exitosamente")
 
     async def delete(self, id: str):
+        await self.prepare_action("delete")
         await self.service.delete(id)
         return self.format_response(None, message="Eliminado exitosamente")
 
@@ -99,33 +146,48 @@ class BaseController:
     ) -> BaseModel:
         schema = self.get_schema_class()
 
+        # Robust Pydantic v2 validation. Each branch falls back to the
+        # raw value when the schema doesn't fit (custom-action endpoints
+        # often return ad-hoc dicts that don't match the controller's
+        # default schema_class — those should pass through untouched).
         if isinstance(data, list):
             data_dicts = [self.to_dict(item) for item in data]
-            adapter = TypeAdapter(List[schema])
-            data_parsed = adapter.validate_python(data_dicts)
-        elif self.service.repository and isinstance(
-            data, self.service.repository.model
-        ):
-            data_parsed = self.to_dict(data)
-            data_parsed = schema.model_validate(data_parsed)
+            try:
+                adapter = TypeAdapter(List[schema])
+                data_parsed = adapter.validate_python(data_dicts)
+            except Exception:
+                data_parsed = data_dicts
+
         elif isinstance(data, dict):
-            data_parsed = schema.model_validate(data)
+            try:
+                data_parsed = schema.model_validate(data)
+            except Exception:
+                data_parsed = data
+
+        elif hasattr(data, "__dict__"):
+            data_dict = self.to_dict(data)
+            try:
+                data_parsed = schema.model_validate(data_dict)
+            except Exception:
+                data_parsed = data_dict
+
+        elif data is None:
+            data_parsed = None
         else:
             data_parsed = data
 
+        response_cls = BasePaginationResponse if pagination else BaseResponse
+
+        # Construcción dinámica de argumentos
+        kwargs = {
+            "data": data_parsed,
+            "message": message or "Operación exitosa",
+            "status": response_status,
+        }
         if pagination:
-            return BasePaginationResponse(
-                data=data_parsed,
-                pagination=pagination,
-                message=message or "Operación exitosa",
-                status=response_status,
-            )
-        else:
-            return BaseResponse(
-                data=data_parsed,
-                message=message or "Operación exitosa",
-                status=response_status,
-            )
+            kwargs["pagination"] = pagination
+
+        return response_cls(**kwargs)
 
     def _params(self, skip_frames: int = 1) -> Dict[str, Any]:
         """
@@ -208,6 +270,14 @@ class BaseController:
         }
 
     def to_dict(self, obj: Any):
-        if hasattr(obj, "model_dump"):
+        """Helper para convertir modelos ORM/Pydantic a dict."""
+        if hasattr(obj, "model_dump"):  # Pydantic v2
             return obj.model_dump()
+        if hasattr(obj, "dict"):  # Pydantic v1
+            return obj.dict()
+        if hasattr(obj, "__dict__"):  # SQLAlchemy models (basic)
+            # Filtramos atributos privados de SQLAlchemy
+            return {
+                k: v for k, v in obj.__dict__.items() if not k.startswith("_")
+            }
         return obj

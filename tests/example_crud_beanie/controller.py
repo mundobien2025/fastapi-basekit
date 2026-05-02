@@ -49,7 +49,6 @@ class ListBeanieUsers(BeanieBaseController):
         - Filtro por estado (is_active)
         - Filtro por edad mínima (age_min)
         """
-        await self.check_permissions_class()
         return await self.list()
 
 
@@ -62,7 +61,6 @@ class GetBeanieUser(BeanieBaseController):
 
     async def __call__(self, id: str):
         """Obtiene un usuario específico por su ID."""
-        await self.check_permissions_class()
         return await self.retrieve(id)
 
 
@@ -78,7 +76,6 @@ class CreateBeanieUser(BeanieBaseController):
         Crea un nuevo usuario en MongoDB.
         Valida que el email sea único.
         """
-        await self.check_permissions_class()
         return await self.create(data)
 
 
@@ -91,7 +88,6 @@ class UpdateBeanieUser(BeanieBaseController):
 
     async def __call__(self, id: str, data: UserBeanieUpdateSchema):
         """Actualiza un usuario existente por su ID."""
-        await self.check_permissions_class()
         return await self.update(id, data)
 
 
@@ -104,5 +100,4 @@ class DeleteBeanieUser(BeanieBaseController):
 
     async def __call__(self, id: str):
         """Elimina un usuario."""
-        await self.check_permissions_class()
         return await self.delete(id)

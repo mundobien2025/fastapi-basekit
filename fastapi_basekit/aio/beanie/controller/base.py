@@ -18,6 +18,7 @@ class BeanieBaseController(BaseController):
 
     async def list(self):
         """Lista documentos con paginación usando Beanie."""
+        await self.prepare_action("list")
         params = self._params(skip_frames=2)
         items, total = await self.service.list(**params)
         count = params.get("count") or 0
@@ -39,6 +40,7 @@ class BeanieBaseController(BaseController):
         check_fields: Optional[List[str]] = None,
     ):
         """Crea un nuevo documento con validación de campos únicos."""
+        await self.prepare_action("create")
         result = await self.service.create(validated_data, check_fields)
         return self.format_response(result, message="Creado exitosamente")
 

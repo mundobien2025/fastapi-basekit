@@ -5,6 +5,52 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.3] - 2026-05-02
+
+### Agregado
+
+- **`BaseController.prepare_action(action_name)`**
+  (`fastapi_basekit/aio/controller/base.py`).
+  Punto único del lifecycle de cada acción: setea `self.action` y corre
+  `check_permissions()`. Idempotente por instancia — invocaciones
+  repetidas con el mismo `action_name` no re-disparan checks. Llamado
+  automáticamente al inicio de cada CRUD estándar (`list`, `retrieve`,
+  `create`, `update`, `delete`) en el base + variantes SQLAlchemy /
+  SQLModel / Beanie. Métodos custom deben llamarlo manualmente si quieren
+  el flujo automático.
+
+- **`permission_classes: List[Type[BasePermission]]`** y
+  **`get_permissions()`** estilo DRF en `BaseController`. Override
+  `get_permissions()` para despachar permisos por `self.action`:
+  ```python
+  def get_permissions(self):
+      if self.action == "list":
+          return [AllowAny]
+      return [IsAuthenticated]
+  ```
+
+- **`check_permissions_class()`** retro-compat. Alias del nuevo
+  `check_permissions()` para controladores pre-0.3.3 que llamaban manual
+  el chequeo desde cada endpoint.
+
+### Cambiado
+
+- **`format_response` ahora permisivo**: cuando el `data` (dict / objeto)
+  no satisface el `schema_class` del controlador, devuelve el valor crudo
+  en vez de levantar `ValidationError`. Útil para endpoints custom que
+  retornan dicts ad-hoc sin definir un schema dedicado.
+
+### Tests
+
+- 134 tests passing across the three ORMs (Beanie, SQLAlchemy, SQLModel).
+- Suite previously broken (`test_controller_auto_permissions.py` — 17 fails)
+  ahora 100% green tras corrección de bugs en los tests:
+  - `service = service` shadowing en class body dentro de funciones async
+  - `HTTPXAsyncClient(app=app)` deprecated en httpx ≥0.27 → `ASGITransport`
+  - Fixtures con `@app.get` sobre clases sin `__call__` → reemplazadas
+    por el router canónico `example_crud.controller.router` con `@cbv`
+  - Status code esperado en POST: 200 → 201
+
 ## [0.3.2] - 2026-05-01
 
 ### Agregado (Beanie)

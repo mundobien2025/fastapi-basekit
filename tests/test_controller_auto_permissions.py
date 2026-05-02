@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import FastAPI, Request, Depends
 from fastapi.testclient import TestClient
+from httpx import ASGITransport
 from httpx import AsyncClient as HTTPXAsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -143,11 +144,11 @@ class TestControllerAutoPermissions:
     @pytest.mark.asyncio
     async def test_prepare_action_sets_action(self, repository, mock_request):
         """Test: prepare_action() configura correctamente la acción."""
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
 
         controller = TestController()
         controller.request = mock_request
@@ -167,11 +168,11 @@ class TestControllerAutoPermissions:
         """Test: prepare_action() se ejecuta automáticamente."""
         mock_request.query_params = {"page": "1", "count": "10"}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
 
         controller = TestController()
         controller.request = mock_request
@@ -202,11 +203,11 @@ class TestControllerAutoPermissions:
         mock_request.scope = {"endpoint": endpoint_mock}
         mock_request.query_params = {}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = [MockPermission]
 
         controller = TestController()
@@ -233,7 +234,7 @@ class TestControllerAutoPermissions:
         mock_request.scope = {"endpoint": endpoint_mock}
         mock_request.query_params = {}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class DeniedPermission(BasePermission):
             message_exception = "Acceso denegado"
@@ -243,7 +244,7 @@ class TestControllerAutoPermissions:
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = [DeniedPermission]
 
         controller = TestController()
@@ -262,11 +263,11 @@ class TestControllerAutoPermissions:
         endpoint_mock.__name__ = "custom_action"
         mock_request.scope = {"endpoint": endpoint_mock}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = [IsAuthenticated]
 
             async def custom_action(self):
@@ -301,28 +302,26 @@ class TestControllerWithFastAPITestClient:
 
     @pytest.fixture
     def app(self, async_session):
-        """Crea una app FastAPI para tests."""
+        """FastAPI app wired to the canonical example_crud router.
+
+        Uses the same controllers/services the rest of the suite exercises
+        (with proper ``__call__`` methods) so we test real request flow,
+        not synthetic class-based endpoints that never had a body.
+        """
+        from example_crud import controller as example_controller
+
         app = FastAPI()
 
         def get_user_service(request: Request):
             repository = UserRepository(db=async_session)
             return UserService(repository=repository, request=request)
 
-        @app.get("/users/")
-        class ListUsers(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
-        @app.get("/users/{id}")
-        class GetUser(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
-        @app.post("/users/")
-        class CreateUser(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
+        # Override the example router's dependency to bind it to our test
+        # session, avoiding `request.state.db` plumbing.
+        app.dependency_overrides[example_controller.get_user_service] = (
+            get_user_service
+        )
+        app.include_router(example_controller.router)
         return app
 
     @pytest.mark.asyncio
@@ -405,7 +404,7 @@ class TestControllerWithFastAPITestClient:
                 response = client.post("/users/", json=user_data)
 
             assert call_count["count"] > 0
-            assert response.status_code == 200
+            assert response.status_code == 201
             assert "data" in response.json()
 
     @pytest.mark.asyncio
@@ -441,7 +440,7 @@ class TestControllerWithFastAPITestClient:
                     "email": "new@example.com",
                 }
                 response = client.post("/users/", json=user_data)
-                assert response.status_code == 200
+                assert response.status_code == 201
 
             # Verificar que check_permissions se llamó para cada endpoint
             assert call_count["count"] >= 3
@@ -458,11 +457,11 @@ class TestControllerCustomPermissions:
         mock_request.scope = {"endpoint": MagicMock(__name__="list")}
         mock_request.query_params = {}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = [IsAuthenticated]
 
             def get_permissions(self):
@@ -490,11 +489,11 @@ class TestControllerCustomPermissions:
         endpoint_mock.__name__ = "list"
         mock_request.scope = {"endpoint": endpoint_mock}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = [IsAuthenticated]
 
         controller = TestController()
@@ -510,11 +509,11 @@ class TestControllerCustomPermissions:
         self, repository, mock_request
     ):
         """Test: Múltiples métodos deben llamar prepare_action."""
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
 
             async def method1(self):
                 await self.prepare_action("method1")
@@ -556,11 +555,11 @@ class TestControllerCustomPermissions:
         mock_request.scope = {"endpoint": endpoint_mock}
         mock_request.query_params = {"page": "1", "count": "10"}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = [IsAuthenticated]
 
         controller = TestController()
@@ -589,11 +588,11 @@ class TestControllerCustomPermissions:
         mock_request.scope = {"endpoint": endpoint_mock}
         mock_request.query_params = {}
 
-        service = UserService(repository=repository, request=mock_request)
+        svc = UserService(repository=repository, request=mock_request)
 
         class TestController(SQLAlchemyBaseController):
             schema_class = UserSchema
-            service = service
+            service = svc
             permission_classes = []  # Sin permisos
 
         controller = TestController()
@@ -618,44 +617,30 @@ class TestControllerRealAPIRequests:
 
     @pytest.fixture
     async def app(self, async_session):
-        """Crea una app FastAPI para tests async."""
+        """FastAPI app wired to the canonical example_crud router.
+
+        Same rationale as ``TestControllerWithFastAPITestClient.app`` —
+        uses the example router (with proper ``__call__`` handlers) and
+        binds the service factory to the test session.
+        """
+        from example_crud import controller as example_controller
+
         app = FastAPI()
 
         def get_user_service(request: Request):
             repository = UserRepository(db=async_session)
             return UserService(repository=repository, request=request)
 
-        @app.get("/users/")
-        class ListUsers(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
-        @app.get("/users/{id}")
-        class GetUser(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
-        @app.post("/users/")
-        class CreateUser(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
-        @app.put("/users/{id}")
-        class UpdateUser(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
-        @app.delete("/users/{id}")
-        class DeleteUser(SQLAlchemyBaseController):
-            schema_class = UserSchema
-            service = Depends(get_user_service)
-
+        app.dependency_overrides[example_controller.get_user_service] = (
+            get_user_service
+        )
+        app.include_router(example_controller.router)
         return app
 
     @pytest.mark.asyncio
     async def test_real_http_get_list(self, app, sample_users):
         """Test: Request HTTP GET real a /users/."""
-        async with HTTPXAsyncClient(app=app, base_url="http://test") as client:
+        async with HTTPXAsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/users/?page=1&count=10")
 
             assert response.status_code == 200
@@ -669,7 +654,7 @@ class TestControllerRealAPIRequests:
         """Test: Request HTTP GET real a /users/{id}."""
         user_id = sample_users[0].id
 
-        async with HTTPXAsyncClient(app=app, base_url="http://test") as client:
+        async with HTTPXAsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get(f"/users/{user_id}")
 
             assert response.status_code == 200
@@ -687,10 +672,10 @@ class TestControllerRealAPIRequests:
             "is_active": True,
         }
 
-        async with HTTPXAsyncClient(app=app, base_url="http://test") as client:
+        async with HTTPXAsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/users/", json=user_data)
 
-            assert response.status_code == 200
+            assert response.status_code == 201
             data = response.json()
             assert "data" in data
             assert data["data"]["name"] == "Test User"
@@ -702,7 +687,7 @@ class TestControllerRealAPIRequests:
         user_id = sample_users[0].id
         update_data = {"name": "Updated Name"}
 
-        async with HTTPXAsyncClient(app=app, base_url="http://test") as client:
+        async with HTTPXAsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.put(f"/users/{user_id}", json=update_data)
 
             assert response.status_code == 200
@@ -715,7 +700,7 @@ class TestControllerRealAPIRequests:
         """Test: Request HTTP DELETE real a /users/{id}."""
         user_id = sample_users[0].id
 
-        async with HTTPXAsyncClient(app=app, base_url="http://test") as client:
+        async with HTTPXAsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.delete(f"/users/{user_id}")
 
             assert response.status_code == 200
@@ -740,7 +725,7 @@ class TestControllerRealAPIRequests:
             tracked_check_permissions,
         ):
             async with HTTPXAsyncClient(
-                app=app, base_url="http://test"
+                transport=ASGITransport(app=app), base_url="http://test"
             ) as client:
                 # GET list
                 await client.get("/users/?page=1&count=10")

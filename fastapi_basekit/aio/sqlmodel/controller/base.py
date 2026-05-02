@@ -49,6 +49,7 @@ class SQLModelBaseController(BaseController):
             joins: Lista de relaciones para eager loading.
             order_by: Expresión de ordenamiento (ej: ``"-created_at"``).
         """
+        await self.prepare_action("list")
         params = self._params(skip_frames=2)
         service_params = {
             **params,
@@ -73,6 +74,7 @@ class SQLModelBaseController(BaseController):
             id: ID del registro.
             joins: Lista de relaciones para eager loading.
         """
+        await self.prepare_action("retrieve")
         item = await self.service.retrieve(id, joins=joins)
         return self.format_response(data=item)
 
@@ -88,6 +90,7 @@ class SQLModelBaseController(BaseController):
             validated_data: Datos validados para crear.
             check_fields: Campos a verificar por duplicados antes de crear.
         """
+        await self.prepare_action("create")
         result = await self.service.create(validated_data, check_fields)
         return self.format_response(result, message="Creado exitosamente")
 

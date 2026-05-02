@@ -2,7 +2,30 @@
 
 Ver el archivo raw en el repo: [CHANGELOG.md](https://github.com/mundobien2025/fastapi-basekit/blob/main/CHANGELOG.md)
 
-## 0.3.2 — current
+## 0.3.3 — current
+
+### Agregado
+
+- **`BaseController.prepare_action(action_name)`** — lifecycle hook que
+  setea `self.action` y corre `check_permissions()`. Auto-invocado por
+  cada CRUD estándar (`list`, `retrieve`, `create`, `update`, `delete`)
+  en BaseController + variantes SQLAlchemy / SQLModel / Beanie.
+  Idempotente: re-invocaciones con el mismo action_name son no-ops.
+- **`permission_classes`** estilo DRF + override `get_permissions()`
+  para dispatch por acción.
+- **`check_permissions_class()`** retro-compat alias.
+
+### Cambiado
+
+- `format_response` permisivo: si el `data` no satisface el schema,
+  devuelve el valor crudo en vez de levantar `ValidationError`.
+
+### Tests
+
+- 134 passing across Beanie, SQLAlchemy, SQLModel. Suite
+  `test_controller_auto_permissions.py` rescatada de 17 fails crónicos.
+
+## 0.3.2
 
 ### Agregado (Beanie)
 

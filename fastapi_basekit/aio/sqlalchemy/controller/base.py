@@ -48,6 +48,7 @@ class SQLAlchemyBaseController(BaseController):
             joins: Lista de relaciones a hacer JOIN eager loading
             order_by: Expresión de ordenamiento (ej: User.created_at.desc())
         """
+        await self.prepare_action("list")
         params = self._params(skip_frames=2)
         service_params = {
             **params,
@@ -73,6 +74,7 @@ class SQLAlchemyBaseController(BaseController):
             id: ID del registro
             joins: Lista de relaciones a hacer JOIN eager loading
         """
+        await self.prepare_action("retrieve")
         item = await self.service.retrieve(id, joins=joins)
         return self.format_response(data=item)
 
@@ -89,6 +91,7 @@ class SQLAlchemyBaseController(BaseController):
             validated_data: Datos validados para crear
             check_fields: Campos a verificar por duplicados antes de crear
         """
+        await self.prepare_action("create")
         result = await self.service.create(validated_data, check_fields)
         return self.format_response(result, message="Creado exitosamente")
 
