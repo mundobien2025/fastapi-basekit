@@ -93,8 +93,6 @@ pip install fastapi-basekit[all]          # todo
 
 PRs bienvenidos. Setup local en [docs/contributing](https://mundobien2025.github.io/fastapi-basekit/contributing).
 
-Mantenedores: [`RELEASING.md`](./RELEASING.md) tiene release flow, CI/CD, mike y troubleshooting.
-
 ## Licencia
 
 [MIT](./LICENSE) — © Jerson Moreno

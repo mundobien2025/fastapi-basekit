@@ -154,5 +154,7 @@ Full guide with fixture templates and the hard rules:
 ## Versioning + release
 
 Semver. Bumps in `pyproject.toml` + `plugin.json` + `marketplace.json` +
-`CHANGELOG.md`. Use `make release V=X.Y.Z` to automate. See
-[`RELEASING.md`](RELEASING.md) for the maintainer flow.
+`CHANGELOG.md`. Use `make release V=X.Y.Z` to automate. The maintainer
+release flow (PyPI publish + docs versioning + tag dispatch) is
+documented in `RELEASING.md` — internal-only doc, not shipped publicly.
+Contributors don't need to read it for normal PR work.

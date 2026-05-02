@@ -1,8 +1,5 @@
 # Guía de contribución
 
-!!! info "Mantenedores"
-    Para release flow, CI/CD, mike y troubleshooting ver [`RELEASING.md`](https://github.com/mundobien2025/fastapi-basekit/blob/main/RELEASING.md) en el repo.
-
 ## Setup local
 
 ```bash
