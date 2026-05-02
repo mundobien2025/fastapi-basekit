@@ -18,10 +18,13 @@ sqlalchemy[asyncio]>=2.0.43
 # SQLModel
 sqlmodel>=0.0.30
 
-# Beanie (MongoDB)
-beanie>=2.0.0
+# Beanie (MongoDB) — pinned set known to work together
+# beanie 2.x + motor 3.7 + pymongo 4.15 + mongomock-motor 0.0.36
+# Bumping mongomock-motor below 0.0.36 breaks list_collection_names()
+beanie>=2.0.0,<3.0.0
 motor>=3.3.0
-mongomock-motor>=0.0.21
+pymongo>=4.9,<5.0
+mongomock-motor>=0.0.36
 
 # Common
 email-validator>=2.1.0
