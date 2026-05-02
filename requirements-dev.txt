@@ -18,10 +18,11 @@ sqlalchemy[asyncio]>=2.0.43
 # SQLModel
 sqlmodel>=0.0.30
 
-# Beanie (MongoDB) — pinned set known to work together
-# beanie 2.x + motor 3.7 + pymongo 4.15 + mongomock-motor 0.0.36
-# Bumping mongomock-motor below 0.0.36 breaks list_collection_names()
-beanie>=2.0.0,<3.0.0
+# Beanie (MongoDB) — pinned set known to work with mongomock-motor.
+# beanie 2.1.0 calls list_collection_names(authorizedCollections=True)
+# which mongomock 4.3.0 doesn't support — pin to 2.0.x until both
+# packages catch up (mongomock issue tracked in mongomock/mongomock#967).
+beanie>=2.0.0,<2.1.0
 motor>=3.3.0
 pymongo>=4.9,<5.0
 mongomock-motor>=0.0.36
