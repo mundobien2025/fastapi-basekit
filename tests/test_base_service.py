@@ -47,7 +47,24 @@ class FakeRepository:
             if all(obj.get(k) == v for k, v in (filters or {}).items())
         ]
 
-    async def paginate(self, query, page, count):
+    def build_list_queryset(
+        self,
+        search=None,
+        search_fields=None,
+        filters=None,
+        order_by=None,
+        **kwargs,
+    ):
+        # Synchronous wrapper compatible with the new BaseService.list contract.
+        return self.build_filter_query(
+            search=search,
+            search_fields=search_fields or [],
+            filters=filters or {},
+            order_by=order_by,
+            **kwargs,
+        )
+
+    async def paginate(self, query, page, count, order_by=None):
         # Si query es una coroutine, esperarla primero
         if hasattr(query, "__await__"):
             query = await query
