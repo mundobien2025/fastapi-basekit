@@ -98,6 +98,41 @@ The `commit-msg` hook rejects messages that don't match the spec.
 
 ---
 
+## Tests
+
+```bash
+pytest tests/                                     # full suite (134 tests)
+pytest tests/test_beanie_aggregation_hooks.py     # one file
+pytest tests/ -k "queryset_override"              # by name pattern
+pytest tests/ --cov=fastapi_basekit               # with coverage
+```
+
+Tests are required for `feat:` and `fix:` PRs. The suite covers all
+three ORMs (SQLAlchemy, SQLModel, Beanie) using real in-memory engines
+(SQLite for SQL, mongomock-motor for Beanie) — not mocks.
+
+Patterns to follow when adding tests:
+
+- **SQL ORMs**: use the SQLite-in-memory fixture pattern with
+  `StaticPool` (see `test_crud_controller.py` for SQLAlchemy,
+  `test_crud_sqlmodel_repository_service.py` for SQLModel).
+- **Beanie**: use `mongomock_motor.AsyncMongoMockClient` + `init_beanie`
+  (see `test_crud_beanie_controller.py`). For aggregation pipelines,
+  bypass Beanie's `aggregate()` wrapper and call the raw pymongo
+  collection (see `test_beanie_aggregation_integration.py` for the
+  workaround and rationale).
+- **Override hooks**: cover `build_list_queryset` and
+  `build_list_pipeline` overrides with real DB, not mocks (see
+  `test_sql_queryset_override.py`).
+- **Pure logic**: unit tests with `unittest.mock.patch` are fine when
+  the behavior is algorithmic (pipeline shape, dispatch flags). See
+  `test_beanie_aggregation_hooks.py`.
+
+Full guide with fixture templates and the hard rules:
+[docs/contributing.md#tests](https://mundobien2025.github.io/fastapi-basekit/contributing/#tests).
+
+---
+
 ## Branch naming
 
 - `feat/<short-description>` — new features
