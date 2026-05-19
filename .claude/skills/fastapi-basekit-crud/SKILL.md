@@ -20,6 +20,67 @@ tools: Read, Edit, Write, Bash, Glob, Grep
 
 ---
 
+## Core rule — every function has a home (no orphan helpers)
+
+**A controller, service, or repository file must NOT contain a loose
+auxiliary/helper function** (a module-level `def _foo(...)` or a nested
+helper). Every kind of logic has exactly ONE home. This holds for every
+project built on fastapi-basekit, no exceptions.
+
+| Logic | Home | NOT |
+|-------|------|-----|
+| HTTP routing, status codes, response wrapping | Controller method (`@cbv` class) | — |
+| Business rules, orchestration, validation | Service **method** | a module-level `def` in the service file |
+| Queries, persistence | Repository **method** | a module-level `def` in the repo file |
+| Model → response serialization | Schema (`BaseSchema` + `from_attributes`, `@computed_field`) | a `_to_response()` in the controller |
+| Dependency wiring (service/repo factories) | `app/services/dependency.py` | a `get_*` factory in the controller |
+| Reusable project-local helper (hashing, formatting, parsing) | `app/utils/` | inline in any layer |
+| Reusable across projects | `fastapi-basekit` | copy-pasted per project |
+| Domain error types | a `DomainError` base / `exceptions/` | raised ad-hoc per call site |
+
+If you are about to write `def _helper(...)` at module level inside an
+endpoint / service / repository file: **STOP.** It belongs in one of the
+homes above. A loose helper is a smell that one layer is doing another
+layer's job.
+
+**Worked example — the anti-pattern:**
+
+```python
+# app/api/v1/endpoints/.../organizations.py   ← WRONG: helper in controller
+def _to_response(tenant) -> OrganizationResponseSchema:
+    payload = {c.name: getattr(tenant, c.name) for c in tenant.__table__.columns}
+    payload["subdomain_url"] = subdomain_url(tenant.slug)
+    return OrganizationResponseSchema.model_validate(payload)
+```
+
+Two layers leak: manual column extraction (the schema's job — and it dumps
+every column, internal ones included) and a derived field built by hand.
+The schema owns both:
+
+```python
+# app/schemas/organization.py
+from pydantic import computed_field
+
+class OrganizationResponseSchema(BaseSchema):   # BaseSchema → from_attributes=True
+    slug: str
+    name: str
+    # ...only declared fields — no leak of internal columns...
+
+    @computed_field
+    @property
+    def subdomain_url(self) -> str:
+        return subdomain_url(self.slug)
+```
+
+The controller is then one line — `from_attributes` reads the declared
+fields straight off the ORM object, no dict, no helper:
+
+```python
+return self.format_response(OrganizationResponseSchema.model_validate(tenant))
+```
+
+---
+
 ## 0. Before writing anything — read first
 
 ```bash
@@ -1140,3 +1201,117 @@ dict against the right list schema.
 | `preserveNullAndEmptyArrays: True` en `$unwind` de joins opcionales | Pierdes filas con LEFT JOIN ausente si no lo pones |
 | `$facet` para paginación atómica → usa `paginate_pipeline` del repo | Una sola query devuelve `data` + `total`. No re-cuentes |
 | `use_aggregation = True` solo en servicios que SIEMPRE necesitan pipeline | Aggregation es más caro que FindMany — no lo prendas si no hace falta |
+
+---
+
+## 30. List endpoints with filters — NEVER reimplement basekit
+
+**Hard rule:** if a list endpoint needs filters (`?status=active&owner_id=...&from=...&to=...`), do NOT write a custom service method (`list_things_with_filters`, `list_xyz`, etc.) and do NOT write your own pagination block in the controller. Basekit already covers it end to end.
+
+### What basekit does for free
+
+`BeanieBaseController.list()` / `SQLAlchemyBaseController.list()`:
+
+1. `prepare_action("list")` → permission checks.
+2. `params = self._params(skip_frames=2)` → frame introspection. `_params` reads `self.request.query_params` and packs every non-standard query param (anything that's NOT `page`, `count`, `search`, `order_by`) into a `filters` dict.
+3. `service.list(**params)` → service receives `filters={...}` + pagination.
+4. `service.list` invokes `self.get_filters(filters)` → service translates raw query params to ORM/Mongo shape.
+5. `build_list_queryset` / `build_list_pipeline` → repo composes the query.
+6. `paginate` → returns `(items, total)` with `skip`/`limit` applied.
+7. Controller wraps response via `format_response(data=items, pagination={...})`.
+
+### Correct controller pattern (Beanie)
+
+```python
+@cbv(router)
+class ThingController(BeanieBaseController):
+    service: ThingService = Depends(get_thing_service)
+    user: Users = Depends(get_dependency_service)
+
+    def get_schema_class(self):
+        return ThingResponseSchema
+
+    @router.get("/", response_model=BasePaginationResponse[ThingResponseSchema])
+    async def list_things(
+        self,
+        page: int = Query(1, ge=1),
+        count: int = Query(25, ge=1, le=200),
+        owner_id: Optional[PydanticObjectId] = Query(None),
+        status: Optional[str] = Query(None),
+        category: Optional[str] = Query(None),
+        date_from: Optional[datetime] = Query(None, alias="from"),
+        date_to: Optional[datetime] = Query(None, alias="to"),
+    ):
+        return await super().list()
+```
+
+Body is **one line**: `return await super().list()`. Query params declared only so FastAPI renders them in OpenAPI; basekit picks them up from the frame.
+
+### Correct service pattern (translate raw → ORM/Mongo shape)
+
+```python
+class ThingService(BaseService):
+    repository: ThingRepository
+    order_by = [("created_at", -1)]   # default ordering — class-level
+
+    def __init__(self, request=None, repository=None):
+        super().__init__(repository or ThingRepository(), request)
+
+    def get_filters(self, filters=None) -> dict:
+        raw = filters or {}
+        out: dict = {}
+
+        # Auto-handled: simple equality keys (basekit recognizes `<field>` and `<field>_id`)
+        for key in ("status", "category"):
+            if raw.get(key):
+                out[key] = raw[key]
+        if raw.get("owner_id"):
+            out["owner.$id"] = ObjectId(str(raw["owner_id"]))   # raw Mongo path
+
+        # Range queries — wrap in $and because basekit's `field == dict`
+        # comparison breaks for {"$gte": ..., "$lte": ...}
+        date_from = raw.get("from") or raw.get("date_from")
+        date_to = raw.get("to") or raw.get("date_to")
+        range_q = {}
+        if date_from:
+            range_q["$gte"] = (
+                datetime.fromisoformat(date_from)
+                if isinstance(date_from, str) else date_from
+            )
+        if date_to:
+            range_q["$lte"] = (
+                datetime.fromisoformat(date_to)
+                if isinstance(date_to, str) else date_to
+            )
+        if range_q:
+            out.setdefault("$and", []).append({"created_at": range_q})
+
+        return out
+```
+
+### What basekit's `build_filter_query` (Beanie) accepts in the filters dict
+
+| Filter shape | Routed as |
+|--------------|-----------|
+| `{"name": "foo"}` | `Model.name == "foo"` (equality via basekit `hasattr` path) |
+| `{"<field>_id": "<oid>"}` | Auto-resolves to `<Field>` Link → `<field>.$id == ObjectId(...)` |
+| `{"<field>.$id": ObjectId}` | Raw Mongo path (key contains `.`) — passed straight to `find()` |
+| `{"$and": [...]}`, `{"$or": [...]}` | Raw operator (key starts with `$`) — passed straight |
+| `{"<field>": {"$gte": dt}}` | **BREAKS** — basekit tries `field == dict`. Wrap range queries in `$and`. |
+
+### Anti-patterns rejected on review
+
+- `service.list_xyz_with_filters(...)` custom method when basekit's `list()` already covers it.
+- `(total + count - 1) // count` pagination math copy-pasted into the controller. Basekit already builds that response.
+- Repo method `list_with_filters(field_a=, field_b=, ..., skip=, limit=)`. Use `build_list_queryset` (or default `find`) + `get_filters` translation.
+- Body of `list()` calling `service.method(...)` and `format_response(...)` manually. Body should be `return await super().list()`.
+
+### When basekit truly doesn't cover the case
+
+Stop and ask the user before writing a workaround. Real cases that need composition (not bypass):
+
+- Cross-collection join → §29 (`build_list_pipeline` with `$lookup`).
+- Search across joined fields → service-level `build_list_pipeline` override.
+- Output shape ≠ model shape → `aggregation_validate = False` + per-action schema in `get_schema_class()`.
+
+If the case isn't one of those, basekit covers it.

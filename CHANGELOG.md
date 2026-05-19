@@ -5,6 +5,26 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.4] - 2026-05-18
+
+Release de plugin/skill — sin cambios en el código de la librería
+(`pyproject.toml` permanece en 0.3.3).
+
+### Agregado
+
+- **Skill `fastapi-basekit-crud` — regla "Core rule — every function has a
+  home (no orphan helpers)"**. Controllers, services y repositories no
+  llevan funciones auxiliares sueltas; cada tipo de lógica tiene un hogar
+  único: serialización → schema (`BaseSchema` + `@computed_field`),
+  factories → `dependency.py`, helpers locales → `app/utils/`, reusables
+  → la librería, errores de dominio → un `DomainError` base. Incluye un
+  ejemplo trabajado (`_to_response` mal vs bien).
+- **Skill `fastapi-basekit-crud` — §30 "List endpoints with filters —
+  NEVER reimplement basekit"**. Documenta el flujo completo de `list()`
+  (params → `get_filters` → `build_list_queryset` / `build_list_pipeline`
+  → paginación), el patrón correcto de controller y service, qué acepta
+  el `filters` dict, y los anti-patrones rechazados en review.
+
 ## [0.3.3] - 2026-05-02
 
 ### Agregado
