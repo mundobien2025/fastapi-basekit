@@ -5,6 +5,39 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.5] - 2026-05-20
+
+Release de plugin/skill — sin cambios en el código de la librería
+(`pyproject.toml` permanece en 0.3.3).
+
+### Agregado
+
+- **Nueva skill `fastapi-basekit-sentry`** — codifica el patrón de
+  observabilidad Sentry/GlitchTip implementado en
+  `eventsvileads_backend`. Contempla:
+  - `app/utils/observability.py` con `init_sentry`,
+    `capture_exception` y `_scrub_event` (before_send hook que
+    filtra `authorization`, `cookie`, `x-api-key`, `stripe-signature`
+    + body keys `password`, `secret`, `token`, `api_key`,
+    `refresh_token`, `access_token`, `credit_card`, `card_number`,
+    `cvv`).
+  - Captura por excepción desde `app/utils/exception_handlers.py`
+    (cero middleware nuevo, cero overhead en responses 2xx) con
+    nivel `warning` para 4xx y `error` para 5xx.
+  - `init_sentry()` llamado en `app/main.py` ANTES de
+    `create_application()` para que las integraciones
+    (`Starlette`, `FastAPI`, `Sqlalchemy`, `Redis`) parchen las libs
+    antes de que se instancien.
+  - Settings (`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`,
+    `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_PROFILES_SAMPLE_RATE`,
+    `SENTRY_SEND_PII`) con `send_default_pii=False` por default
+    (PII discipline).
+  - Pin de dependencia `sentry-sdk[fastapi]>=2.10,<3.0`.
+  - GlitchTip-compatible (mismo DSN, mismo formato — self-host gratis).
+  - No-op silencioso si SDK no instalado o DSN vacío.
+  Incluye checklist de verificación, pitfalls comunes y guía de
+  cuándo desviarse del patrón.
+
 ## [0.3.4] - 2026-05-18
 
 Release de plugin/skill — sin cambios en el código de la librería
