@@ -5,6 +5,37 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.0] - 2026-06-09
+
+Mejoras de controller/repository + helpers de cableado reutilizables.
+
+### Agregado
+
+- **`register_exception_handlers(app)`** — cablea el set completo de handlers
+  `excepción → BaseResponse` en una sola llamada (antes cada proyecto copiaba
+  el mapeo). Suma handler de SQLAlchemy `IntegrityError` y un handler de
+  `RequestValidationError` que devuelve el envelope sin relanzar.
+- **`simplify_openapi(app)`** — limpia los `operationId`/`summary` generados
+  por controllers `@cbv` (quita el prefijo de clase `UserController.`), con
+  `summary_overrides` opcional por operación.
+- **Filtros con operadores** en `BaseRepository`: sufijo `campo__op` con
+  `gte/gt/lte/lt/ne/in/like/ilike`. El operador por defecto (`eq`) conserva la
+  semántica `IN` para valores de lista; no rompe los paths de relación
+  (`user__role__code`).
+
+### Corregido
+
+- **`action` ya no se filtra como query param espurio** en cada ruta `@cbv`:
+  se declara `ClassVar` para que `fastapi-restful` no lo promueva. `prepare_action`
+  sigue asignando `self.action` en runtime.
+- `_params()` ahora respeta `_params_excluded_fields` (estaba definido pero sin
+  usar) y el set incluye `action`.
+- `prepare_action` propaga la acción canónica (`list`/`retrieve`/...) a
+  `service.action` (antes el service la derivaba del nombre de la función del
+  endpoint, p. ej. `list_users`, poco fiable para `get_kwargs_query`).
+- `BasePaginationResponse.pagination` ahora tiene default `None` (en Pydantic v2
+  era un campo requerido).
+
 ## [0.3.5] - 2026-05-20
 
 Release de plugin/skill — sin cambios en el código de la librería
