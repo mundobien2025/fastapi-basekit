@@ -18,7 +18,11 @@ class BaseController:
     # DRF Style: Permisos globales por defecto
     permission_classes: ClassVar[List[Type[BasePermission]]] = []
 
-    action: Optional[str] = None
+    # ClassVar so cbv (fastapi-restful) does NOT promote it to a query param.
+    # A plain `Optional[str]` annotation here leaks a spurious `action` query
+    # parameter onto every mounted endpoint. `prepare_action` still assigns
+    # `self.action` (instance attr) at runtime, which works fine.
+    action: ClassVar[Optional[str]] = None
     request: Request
     _params_excluded_fields: ClassVar[Set[str]] = {
         "self",
@@ -26,6 +30,7 @@ class BaseController:
         "count",
         "search",
         "order_by",
+        "action",
         "__class__",
         "args",
         "kwargs",
@@ -66,6 +71,17 @@ class BaseController:
             return
         self.action = action_name
         self._basekit_prepared_action = action_name
+        # Propagate the canonical CRUD action ("list"/"retrieve"/...) to the
+        # service so `get_kwargs_query` / `get_filters` can branch on it. The
+        # service's own constructor derives `action` from the endpoint
+        # function name (e.g. "list_users"), which is unreliable for that
+        # purpose; the controller knows the canonical action.
+        service = getattr(self, "service", None)
+        if service is not None:
+            try:
+                service.action = action_name
+            except Exception:
+                pass
         await self.check_permissions()
 
     async def check_permissions(self):
@@ -257,7 +273,10 @@ class BaseController:
                 search = final_value
             elif param_name == "order_by":
                 order_by = final_value
-            elif param_name not in standard_params:
+            elif (
+                param_name not in standard_params
+                and param_name not in self._params_excluded_fields
+            ):
                 # Es un filtro
                 filters[param_name] = final_value
 

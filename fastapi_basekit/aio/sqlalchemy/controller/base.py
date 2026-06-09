@@ -24,6 +24,7 @@ class SQLAlchemyBaseController(BaseController):
         "use_or",
         "joins",
         "order_by",
+        "action",
         "__class__",
         "args",
         "kwargs",

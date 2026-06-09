@@ -109,3 +109,89 @@ async def value_exception_handler(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=response.model_dump(mode="json"),
     )
+
+
+async def request_validation_handler(
+    request: Request, exc: RequestValidationError
+):
+    """FastAPI request validation → envelope unificado (no relanza).
+
+    Equivalente a `validation_exception_handler` pero devuelve la respuesta
+    directamente, sin depender de que otro handler capture la excepción
+    relanzada. Cuerpo idéntico al que produciría `ValidationException`.
+    """
+    response = BaseResponse(
+        status="VALIDATION_ERROR",
+        message="Error de validación",
+        data=exc.errors(),
+    )
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=response.model_dump(mode="json"),
+    )
+
+
+async def integrity_error_handler(request: Request, exc: Exception):
+    """SQLAlchemy IntegrityError → envelope de integridad (HTTP 400)."""
+    detail = getattr(exc, "orig", None)
+    response = BaseResponse(
+        status="DATABASE_INTEGRITY_ERROR",
+        message="Registro ya existe o viola una restricción de integridad",
+        data={"detail": str(detail) if detail is not None else str(exc)},
+    )
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=response.model_dump(mode="json"),
+    )
+
+
+def register_exception_handlers(
+    app,
+    *,
+    sqlalchemy: bool = True,
+    mongo: bool = True,
+) -> None:
+    """Registra el conjunto completo de handlers sobre una app FastAPI.
+
+    Un solo punto de cableado para que cada proyecto NO copie-pegue el
+    mapeo de excepciones → ``BaseResponse``. Todas las subclases de
+    ``APIException`` (NotFound, Permission, JWT, Validation, Integrity,
+    Global...) las atiende ``api_exception_handler`` vía resolución por MRO.
+
+    Args:
+        app: instancia FastAPI.
+        sqlalchemy: registra el handler de ``IntegrityError`` (requiere
+            SQLAlchemy instalado).
+        mongo: registra handlers de Mongo/Beanie si están disponibles.
+    """
+    app.add_exception_handler(APIException, api_exception_handler)
+    app.add_exception_handler(
+        RequestValidationError, request_validation_handler
+    )
+    app.add_exception_handler(ValidationError, value_exception_handler)
+    app.add_exception_handler(ValueError, value_exception_handler)
+
+    if sqlalchemy:
+        try:  # pragma: no cover - dependencia opcional
+            from sqlalchemy.exc import IntegrityError
+
+            app.add_exception_handler(
+                IntegrityError, integrity_error_handler
+            )
+        except ImportError:
+            pass
+
+    if mongo:
+        # Solo registra si las clases reales (no los fallbacks) existen.
+        if DuplicateKeyError.__module__ != __name__:
+            app.add_exception_handler(
+                DuplicateKeyError, duplicate_key_exception_handler
+            )
+        if DocumentNotFound.__module__ != __name__:
+            app.add_exception_handler(
+                DocumentNotFound, document_not_found_handler
+            )
+
+    # Catch-all al final; las subclases de APIException ya tienen prioridad
+    # por especificidad de tipo.
+    app.add_exception_handler(Exception, global_exception_handler)

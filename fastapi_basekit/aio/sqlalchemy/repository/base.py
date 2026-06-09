@@ -131,7 +131,13 @@ class BaseRepository:
         joins_to_apply = {}
 
         for filter_path, value in filters.items():
-            attr, field_joins = self._resolve_field_path(filter_path)
+            # Detect an optional trailing operator suffix (e.g.
+            # "age__gte", "created_at__lte", "name__ilike", "id__in").
+            # The remaining path is resolved normally, so relationship
+            # traversal ("user__role__code") keeps working — only a final
+            # token that matches a known operator is treated as one.
+            resolve_path, op = self._split_operator(filter_path)
+            attr, field_joins = self._resolve_field_path(resolve_path)
 
             if attr is None:
                 continue
@@ -156,9 +162,52 @@ class BaseRepository:
             )
 
             if not is_relationship and is_column:
-                resolved_filters[filter_path] = (attr, processed_value)
+                resolved_filters[filter_path] = (attr, processed_value, op)
 
         return resolved_filters, joins_to_apply
+
+    # Operadores de filtro soportados como sufijo "campo__op".
+    FILTER_OPERATORS = frozenset(
+        {"eq", "ne", "gt", "gte", "lt", "lte", "in", "like", "ilike"}
+    )
+
+    def _split_operator(self, filter_path: str) -> Tuple[str, str]:
+        """Separa un sufijo de operador del path de filtro.
+
+        "age__gte" → ("age", "gte"); "user__role__code" → (..., "eq").
+        Solo se interpreta como operador si el último token coincide con
+        ``FILTER_OPERATORS`` y queda al menos un token de campo delante.
+        """
+        if "__" in filter_path:
+            head, _, last = filter_path.rpartition("__")
+            if head and last in self.FILTER_OPERATORS:
+                return head, last
+        return filter_path, "eq"
+
+    @staticmethod
+    def _condition_for(field: Any, value: Any, op: str) -> Any:
+        """Construye la condición SQLAlchemy para un operador dado."""
+        if op == "ne":
+            return field != value
+        if op == "gt":
+            return field > value
+        if op == "gte":
+            return field >= value
+        if op == "lt":
+            return field < value
+        if op == "lte":
+            return field <= value
+        if op == "in":
+            seq = value if isinstance(value, (list, tuple, set)) else [value]
+            return field.in_(list(seq))
+        if op == "like":
+            return field.like(f"%{value}%")
+        if op == "ilike":
+            return field.ilike(f"%{value}%")
+        # op == "eq" (default): conserva la semántica IN para listas.
+        if isinstance(value, (list, tuple)) and not isinstance(value, str):
+            return field.in_(value)
+        return field == value
 
     def _resolve_order_by(
         self,
@@ -292,14 +341,13 @@ class BaseRepository:
 
         # Modo avanzado: usar resolved_filters si está disponible
         if resolved_filters is not None:
-            for _, (field, processed_value) in resolved_filters.items():
-                # Aplicar la lógica de IN o ==
-                if isinstance(
-                    processed_value, (list, tuple)
-                ) and not isinstance(processed_value, str):
-                    conditions.append(field.in_(processed_value))
-                else:
-                    conditions.append(field == processed_value)
+            for _, resolved in resolved_filters.items():
+                # Tupla (field, value) legacy o (field, value, op) con operador.
+                field, processed_value = resolved[0], resolved[1]
+                op = resolved[2] if len(resolved) > 2 else "eq"
+                conditions.append(
+                    self._condition_for(field, processed_value, op)
+                )
         # Modo legacy: compatibilidad con código existente
         elif filters is not None:
             for fn, value in filters.items():
@@ -442,8 +490,10 @@ class BaseRepository:
             if not resolved_filters:
                 return None
 
-            # Obtener el atributo resuelto
-            _, (field, processed_value) = next(iter(resolved_filters.items()))
+            # Obtener el atributo resuelto (puede traer operador como 3er elem)
+            _, resolved = next(iter(resolved_filters.items()))
+            field, processed_value = resolved[0], resolved[1]
+            op = resolved[2] if len(resolved) > 2 else "eq"
 
             # Construir query con JOINs de filtrado
             query = select(self.model)
@@ -453,7 +503,7 @@ class BaseRepository:
                 query = query.join(relation_attr)
 
             # Aplicar condición
-            query = query.where(field == processed_value)
+            query = query.where(self._condition_for(field, processed_value, op))
 
             # Aplicar joins de carga
             query = self._apply_joins(query, joins)

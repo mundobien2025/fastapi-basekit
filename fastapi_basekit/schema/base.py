@@ -20,6 +20,6 @@ class BasePaginationResponse(BaseModel, Generic[T]):
     data: List[T]
     message: str = "Operación exitosa"
     status: str = "success"
-    pagination: Optional[Dict[str, Any]]
+    pagination: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)
