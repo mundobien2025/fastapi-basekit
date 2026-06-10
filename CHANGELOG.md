@@ -5,6 +5,17 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.1] - 2026-06-10
+
+### Corregido
+
+- **`action` ahora es filtrable.** Se quitó `"action"` de
+  `_params_excluded_fields` (controllers `aio` y `aio/sqlalchemy`). El leak del
+  `?action=` espurio ya lo evita el `ClassVar` de `BaseController.action`
+  (0.4.0), así que excluirlo del set de filtros era redundante y rompía filtrar
+  por una columna `action` declarada como query param (ej. un endpoint de
+  audit-logs con `?action=...`). Test de regresión inversa agregado.
+
 ## [0.4.0] - 2026-06-09
 
 Mejoras de controller/repository + helpers de cableado reutilizables.

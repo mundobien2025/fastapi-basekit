@@ -30,7 +30,6 @@ class BaseController:
         "count",
         "search",
         "order_by",
-        "action",
         "__class__",
         "args",
         "kwargs",

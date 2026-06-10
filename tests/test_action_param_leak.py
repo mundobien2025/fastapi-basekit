@@ -33,3 +33,19 @@ def test_declared_query_filters_still_present():
     get_list = spec["paths"]["/users/"]["get"]
     names = {p["name"] for p in get_list.get("parameters", [])}
     assert {"page", "count", "search", "is_active", "age_min"} <= names
+
+
+def test_action_is_filterable_not_excluded():
+    """Regresión inversa: `action` NO debe estar en `_params_excluded_fields`.
+
+    El ClassVar ya evita el `?action=` espurio (test de arriba); excluir
+    `action` del set de filtros rompía filtrar por una columna `action`
+    declarada como query param (ej. audit-logs `?action=...`). v0.4.1.
+    """
+    from fastapi_basekit.aio.sqlalchemy.controller.base import (
+        SQLAlchemyBaseController,
+    )
+    from fastapi_basekit.aio.controller.base import BaseController
+
+    assert "action" not in SQLAlchemyBaseController._params_excluded_fields
+    assert "action" not in BaseController._params_excluded_fields
