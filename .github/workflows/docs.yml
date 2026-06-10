@@ -54,4 +54,5 @@ jobs:
         run: mike deploy --push dev
 
       - name: URL
-        run: echo "Dev: https://mundobien2025.github.io/fastapi-basekit/dev/"
+        run: |
+          echo "Dev: https://mundobien2025.github.io/fastapi-basekit/dev/"
