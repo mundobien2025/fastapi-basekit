@@ -2,8 +2,10 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import Request
 from pydantic import BaseModel
+from sqlalchemy import select
 from ..repository.base import BaseRepository
 from ....exceptions.api_exceptions import (
+    APIException,
     NotFoundException,
     DatabaseIntegrityException,
 )
@@ -25,6 +27,17 @@ class BaseService:
     order_by: Optional[str] = None
     action: str | None = None
     kwargs_query: Dict[str, Any] = {}
+
+    # --- Política de borrado (ver `delete`) ---
+    #   "hard"           -> elimina físicamente (default, comportamiento histórico)
+    #   "soft"           -> marca deleted_at (requiere model con soft_delete())
+    #   "soft_mangle"    -> soft + renombra `mangle_fields` (`<valor>__del_<id>`)
+    #                       para liberar un valor único y poder recrear el registro
+    #   "hard_if_unused" -> elimina físicamente si no está referenciado, si no -> 409
+    delete_mode: str = "hard"
+    mangle_fields: List[str] = []
+    # [(Model, "fk_attr"), ...] revisados en "hard_if_unused".
+    delete_references: List[Any] = []
 
     def __init__(
         self,
@@ -184,5 +197,49 @@ class BaseService:
         updated = await self.repository.update(id, update_data)
         return updated
 
+    async def _referenced_label(self, obj: Any) -> Optional[str]:
+        """Nombre de un modelo que aún referencia a `obj` (bloquea hard delete), o None."""
+        session = self.repository.session
+        for model, fk in self.delete_references:
+            query = select(model.id).where(getattr(model, fk) == obj.id)
+            if hasattr(model, "deleted_at"):
+                query = query.where(model.deleted_at.is_(None))
+            if (await session.execute(query.limit(1))).first():
+                return model.__name__
+        return None
+
+    async def apply_delete(self, obj: Any) -> bool:
+        """Aplica la política de borrado (`delete_mode`) sobre una entidad ya cargada.
+
+        Útil cuando una subclase necesita resolver/scopear el objeto antes de borrar
+        (p. ej. tenant + region scope): hace `obj = self._get_scoped(id)` y luego
+        `await self.apply_delete(obj)`.
+        """
+        mode = self.delete_mode
+        if mode in ("soft", "soft_mangle"):
+            if not hasattr(obj, "soft_delete"):  # modelo sin soft delete -> físico
+                await self.repository.hard_delete(obj)
+                return True
+            obj.soft_delete()
+            if mode == "soft_mangle":
+                for field in self.mangle_fields:
+                    current = getattr(obj, field, None)
+                    if current is not None:
+                        setattr(obj, field, f"{current}__del_{obj.id}")
+            await self.repository.save(obj)
+        elif mode == "hard_if_unused":
+            if await self._referenced_label(obj) is not None:
+                raise APIException(
+                    message="No se puede eliminar: el registro está en uso.",
+                    status_code="IN_USE", status=409,
+                )
+            await self.repository.hard_delete(obj)
+        else:  # "hard"
+            await self.repository.hard_delete(obj)
+        return True
+
     async def delete(self, id: str) -> bool:
-        return await self.repository.delete(id)
+        obj = await self.repository.get(id)
+        if not obj:
+            raise NotFoundException(message=f"id={id} no encontrado")
+        return await self.apply_delete(obj)

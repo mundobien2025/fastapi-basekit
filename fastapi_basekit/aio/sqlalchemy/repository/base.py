@@ -784,3 +784,14 @@ class BaseRepository:
         await db.delete(record)
         await db.flush()
         return True
+
+    async def save(self, obj: Any) -> Any:
+        """Persiste una entidad nueva o mutada (add + flush)."""
+        self.session.add(obj)
+        await self.session.flush()
+        return obj
+
+    async def hard_delete(self, obj: Any) -> None:
+        """Elimina físicamente la fila (sin soft delete)."""
+        await self.session.delete(obj)
+        await self.session.flush()

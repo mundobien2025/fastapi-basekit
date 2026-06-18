@@ -5,6 +5,26 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.2] - 2026-06-18
+
+### Agregado
+
+- **Política de borrado configurable en `BaseService`.** Nuevo `delete_mode` de
+  clase con cuatro modos:
+  - `"hard"` (default, comportamiento histórico) — elimina físicamente.
+  - `"soft"` — marca `deleted_at` (requiere modelo con `soft_delete()`).
+  - `"soft_mangle"` — soft + renombra `mangle_fields` (`<valor>__del_<id>`) para
+    liberar un valor único y poder recrear el registro (evita choque del unique
+    al borrar+recrear el mismo email/cédula/nombre).
+  - `"hard_if_unused"` — elimina físicamente si no está referenciado; si lo está
+    (según `delete_references = [(Model, "fk_attr"), ...]`) levanta 409.
+  - `BaseService.apply_delete(obj)` aplica la política sobre una entidad ya
+    cargada (para subclases que scopean el objeto antes de borrar); `delete(id)`
+    la usa por defecto.
+- **`BaseRepository.save(obj)` y `BaseRepository.hard_delete(obj)`** para
+  persistir entidades mutadas y eliminar físicamente sin tocar la sesión desde
+  el servicio.
+
 ## [0.4.1] - 2026-06-10
 
 ### Corregido
