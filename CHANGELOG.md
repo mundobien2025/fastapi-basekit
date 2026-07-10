@@ -5,6 +5,28 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.3] - 2026-07-10
+
+### Agregado
+
+- **`BaseRepository.paginate_keyset` (Beanie).** Paginación por cursor (keyset)
+  como alternativa O(1)/página a `paginate`: filtra por `cursor_field` y trae
+  `limit + 1` para reportar `has_more` sin `count()` ni `skip()`. Para listados
+  que escalan (historiales de chat, feeds, tablas append-only) donde la
+  paginación offset degrada con la profundidad. Aditivo: `paginate` no cambia.
+
+### Cambiado
+
+- **`BaseService` (Beanie): defaults mutables ahora son por instancia.**
+  `search_fields`, `duplicate_check_fields` y `kwargs_query` se copian en
+  `__init__` (`list(...)` / `dict(...)`). Mutarlos en runtime ya no se filtra al
+  atributo de clase (contaminación cross-request en el mismo proceso). El
+  override por subclass se preserva intacto.
+- **`BaseRepository.paginate_pipeline` ya no descarta filas en silencio.** Una
+  fila que falla `model_validate` se loguea (antes: `except: continue` mudo, que
+  devolvía menos ítems que el `limit` sin aviso). Se sigue omitiendo la fila
+  corrupta para no romper el listado completo.
+
 ## [0.4.2] - 2026-06-18
 
 ### Agregado

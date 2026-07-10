@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional, Type, Union
 from typing import get_args, get_origin
 import re
@@ -7,6 +8,8 @@ from pydantic import BaseModel
 from beanie import Document, Link
 from beanie.odm.queries.find import FindMany
 from beanie.operators import Or, RegEx
+
+logger = logging.getLogger(__name__)
 
 
 class BaseRepository:
@@ -212,6 +215,44 @@ class BaseRepository:
         items = await query.skip(count * (page - 1)).limit(count).to_list()
         return items, total
 
+    async def paginate_keyset(
+        self,
+        query: FindMany[Document],
+        limit: int,
+        cursor_field: str,
+        cursor_value: Optional[Any] = None,
+        ascending: bool = False,
+    ) -> tuple[List[Document], bool]:
+        """Keyset (cursor) pagination — O(1) por página, sin `skip` ni `count`.
+
+        Alternativa a `paginate` para listados que escalan: en vez de contar
+        toda la colección y saltar `count*(page-1)` documentos (coste que crece
+        con la profundidad), filtra por un cursor sobre `cursor_field` y trae
+        `limit + 1` para saber si quedan más — sin un `count()`.
+
+        Args:
+            query: FindMany ya filtrado (los filtros base del listado).
+            limit: tamaño de página.
+            cursor_field: campo Mongo indexado del cursor (ej. "_id",
+                "created_at", "timestamp"). Debe existir un índice que lo cubra.
+            cursor_value: valor del último item de la página previa. None =
+                primera página.
+            ascending: True = orden ascendente (`> cursor`); False = descendente
+                (`< cursor`), útil para "más recientes primero".
+
+        Returns:
+            (items, has_more). El caller deriva el próximo cursor del último
+            item devuelto (`getattr(items[-1], cursor_field)`).
+        """
+        limit = max(1, int(limit))
+        op = "$gt" if ascending else "$lt"
+        if cursor_value is not None:
+            query = query.find({cursor_field: {op: cursor_value}})
+        query = query.sort((cursor_field, 1 if ascending else -1))
+        docs = await query.limit(limit + 1).to_list()
+        has_more = len(docs) > limit
+        return docs[:limit], has_more
+
     def build_list_queryset(
         self,
         search: Optional[str] = None,
@@ -371,11 +412,31 @@ class BaseRepository:
             return items_raw, total
 
         items: List[Any] = []
+        dropped = 0
         for raw_item in items_raw:
             try:
                 items.append(self.model.model_validate(raw_item))
-            except Exception:
-                continue
+            except Exception as exc:
+                # No tragar en silencio: una fila que no valida se pierde de la
+                # respuesta sin aviso (menos items que el limit, total inflado).
+                # Se loguea para que sea diagnosticable; la fila igual se omite
+                # para no romper el listado completo por un doc corrupto.
+                dropped += 1
+                logger.warning(
+                    "paginate_pipeline: fila descartada por fallo de "
+                    "validación contra %s: %s",
+                    getattr(self.model, "__name__", self.model),
+                    exc,
+                )
+        if dropped:
+            logger.warning(
+                "paginate_pipeline: %d/%d filas descartadas en %s "
+                "(total reportado=%d)",
+                dropped,
+                len(items_raw),
+                getattr(self.model, "__name__", self.model),
+                total,
+            )
         return items, total
 
     async def list_with_aggregation(

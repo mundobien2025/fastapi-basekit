@@ -30,6 +30,14 @@ class BaseService:
     ):
         self.repository = repository
         self.request = request
+        # Copia por instancia de los defaults mutables (heredados como
+        # atributos de CLASE, compartidos por todo el proceso). Sin esto, una
+        # mutación en runtime (`self.search_fields.append(...)`) se filtraría a
+        # la clase y contaminaría otras requests. Respeta el override del
+        # subclass: `list(self.search_fields)` lee su atributo de clase.
+        self.search_fields = list(self.search_fields)
+        self.duplicate_check_fields = list(self.duplicate_check_fields)
+        self.kwargs_query = dict(self.kwargs_query)
         endpoint_func = (
             self.request.scope.get("endpoint") if self.request else None
         )
