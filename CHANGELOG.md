@@ -5,18 +5,6 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
-## [0.4.4] - 2026-07-10
-
-### Corregido
-
-- **`simplify_openapi`: `summary_overrides` funciona con fastapi-restful nuevo.**
-  El operationId se deriva ahora de `endpoint.__name__` (nombre real del método,
-  independiente de versión) en vez de parsear `route.name`, que solo cubría el
-  prefijo de clase cbv con punto (`Clase.metodo`) y no el guión bajo
-  (`Clase_metodo`) que emiten las versiones nuevas — con ese formato los
-  overrides no matcheaban. Nuevo test blinda que los operationIds queden como el
-  nombre del método.
-
 ## [0.4.3] - 2026-07-10
 
 ### Agregado

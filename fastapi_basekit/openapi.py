@@ -53,31 +53,12 @@ def simplify_openapi(
     """
     overrides = summary_overrides or {}
 
-    def _method_name(route: APIRoute) -> str:
-        """Nombre real del método de ruta ("list_users"), independiente de la
-        versión de fastapi-restful — que emite el prefijo de clase cbv ya como
-        punto ("UserController.list_users") ya como guión bajo
-        ("UserController_list_users"). `endpoint.__name__` no depende de ese
-        formato; fallback al parseo del prefijo con punto si no hay endpoint."""
-        name = getattr(getattr(route, "endpoint", None), "__name__", None)
-        if name:
-            return name
-        match = _CBV_DOT_PREFIX.match(route.name)
-        return match.group(1) if match else route.name
-
-    # (path, http_method) → nombre de método limpio. Reescribimos el operationId
-    # directamente en el schema GENERADO en vez de setear `route.operation_id`:
-    # las versiones nuevas de FastAPI ignoran ese atributo seteado post-hoc y
-    # regeneran el operationId largo por defecto, dejando `summary_overrides`
-    # sin matchear. Reescribir el dict final es robusto entre versiones.
-    route_method: Dict[tuple, str] = {}
+    # operationId = nombre del método de ruta SIN el prefijo de clase cbv
+    # ("UserController.list_users" → "list_users"). Idempotente.
     for route in app.routes:
         if isinstance(route, APIRoute):
-            clean = _method_name(route)
-            route.operation_id = clean  # best-effort para consumidores que lo lean
-            path_key = getattr(route, "path_format", route.path)
-            for http_method in (route.methods or set()):
-                route_method[(path_key, http_method.lower())] = clean
+            match = _CBV_DOT_PREFIX.match(route.name)
+            route.operation_id = match.group(1) if match else route.name
 
     def custom_openapi() -> Dict[str, Any]:
         if app.openapi_schema:
@@ -91,16 +72,13 @@ def simplify_openapi(
             tags=app.openapi_tags,
         )
 
-        for path, path_item in schema.get("paths", {}).items():
+        for path_item in schema.get("paths", {}).values():
             for method, operation in path_item.items():
                 if method not in _HTTP_METHODS:
                     continue
-                clean = route_method.get((path, method))
-                if clean:
-                    operation["operationId"] = clean
-                op_key = clean or operation.get("operationId", "")
-                if op_key in overrides:
-                    operation["summary"] = overrides[op_key]
+                op_id = operation.get("operationId", "")
+                if op_id in overrides:
+                    operation["summary"] = overrides[op_id]
                 elif operation.get("summary"):
                     operation["summary"] = _clean_label(operation["summary"])
 

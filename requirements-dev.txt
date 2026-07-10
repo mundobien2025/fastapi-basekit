@@ -8,6 +8,13 @@ trio>=0.27.0
 # HTTP test client (ASGI transport)
 httpx>=0.27.0
 
+# FastAPI — pinned to the supported line. fastapi 0.13x reestructuró el ruteo
+# de include_router (rutas lazy vía `_IncludedRouter`), lo que rompe el cleanup
+# de operationIds de `simplify_openapi` (itera `app.routes` buscando APIRoute y
+# ya no las encuentra planas). Basekit se valida contra 0.116.x (lo que corren
+# los consumidores); soportar 0.13x es un trabajo de compat aparte.
+fastapi==0.116.1
+
 # CBV decorator used by example controllers
 fastapi-restful>=0.6.0
 
