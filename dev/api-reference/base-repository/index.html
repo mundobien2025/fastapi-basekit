@@ -3123,7 +3123,18 @@ Establece <code>model</code> en la subclase (modelo ORM de SQLAlchemy).</p>
 <span class="normal"><a href="#__codelineno-0-783">783</a></span>
 <span class="normal"><a href="#__codelineno-0-784">784</a></span>
 <span class="normal"><a href="#__codelineno-0-785">785</a></span>
-<span class="normal"><a href="#__codelineno-0-786">786</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseRepository</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-786">786</a></span>
+<span class="normal"><a href="#__codelineno-0-787">787</a></span>
+<span class="normal"><a href="#__codelineno-0-788">788</a></span>
+<span class="normal"><a href="#__codelineno-0-789">789</a></span>
+<span class="normal"><a href="#__codelineno-0-790">790</a></span>
+<span class="normal"><a href="#__codelineno-0-791">791</a></span>
+<span class="normal"><a href="#__codelineno-0-792">792</a></span>
+<span class="normal"><a href="#__codelineno-0-793">793</a></span>
+<span class="normal"><a href="#__codelineno-0-794">794</a></span>
+<span class="normal"><a href="#__codelineno-0-795">795</a></span>
+<span class="normal"><a href="#__codelineno-0-796">796</a></span>
+<span class="normal"><a href="#__codelineno-0-797">797</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseRepository</span><span class="p">:</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="sd">    Repositorio base para SQLAlchemy Async.</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13"></a>
@@ -3900,6 +3911,17 @@ Establece <code>model</code> en la subclase (modelo ORM de SQLAlchemy).</p>
 <a id="__codelineno-0-784" name="__codelineno-0-784"></a>        <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
 <a id="__codelineno-0-785" name="__codelineno-0-785"></a>        <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 <a id="__codelineno-0-786" name="__codelineno-0-786"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-787" name="__codelineno-0-787"></a>
+<a id="__codelineno-0-788" name="__codelineno-0-788"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-789" name="__codelineno-0-789"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Persiste una entidad nueva o mutada (add + flush).&quot;&quot;&quot;</span>
+<a id="__codelineno-0-790" name="__codelineno-0-790"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<a id="__codelineno-0-791" name="__codelineno-0-791"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+<a id="__codelineno-0-792" name="__codelineno-0-792"></a>        <span class="k">return</span> <span class="n">obj</span>
+<a id="__codelineno-0-793" name="__codelineno-0-793"></a>
+<a id="__codelineno-0-794" name="__codelineno-0-794"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">hard_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-795" name="__codelineno-0-795"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Elimina físicamente la fila (sin soft delete).&quot;&quot;&quot;</span>
+<a id="__codelineno-0-796" name="__codelineno-0-796"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<a id="__codelineno-0-797" name="__codelineno-0-797"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
