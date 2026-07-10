@@ -53,12 +53,20 @@ def simplify_openapi(
     """
     overrides = summary_overrides or {}
 
-    # operationId = nombre del método de ruta SIN el prefijo de clase cbv
-    # ("UserController.list_users" → "list_users"). Idempotente.
+    # operationId = nombre del método de ruta SIN el prefijo de clase cbv.
+    # Fuente robusta: `endpoint.__name__` es el nombre real del método
+    # ("list_users") independiente de la versión de fastapi-restful, que emite
+    # el prefijo de clase ya como punto ("UserController.list_users") ya como
+    # guión bajo ("UserController_list_users"). Parsear `route.name` solo cubría
+    # la forma con punto y rompía el match de `summary_overrides` con las
+    # versiones nuevas. Fallback al parseo por si el endpoint no expone nombre.
     for route in app.routes:
         if isinstance(route, APIRoute):
-            match = _CBV_DOT_PREFIX.match(route.name)
-            route.operation_id = match.group(1) if match else route.name
+            method_name = getattr(getattr(route, "endpoint", None), "__name__", None)
+            if not method_name:
+                match = _CBV_DOT_PREFIX.match(route.name)
+                method_name = match.group(1) if match else route.name
+            route.operation_id = method_name
 
     def custom_openapi() -> Dict[str, Any]:
         if app.openapi_schema:
