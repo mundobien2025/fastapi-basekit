@@ -49,7 +49,7 @@ class SQLAlchemyBaseController(BaseController):
             order_by: Expresión de ordenamiento (ej: User.created_at.desc())
         """
         await self.prepare_action("list")
-        params = self._params(skip_frames=2)
+        params = self._params()
         service_params = {
             **params,
             "use_or": use_or,

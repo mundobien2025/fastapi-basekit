@@ -5,6 +5,59 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.0] - 2026-07-12
+
+### ⚠️ BREAKING
+
+- **`JWTService` ahora FALLA si falta `JWT_SECRET`.** Antes caía a una clave
+  pública por defecto (`secret_dev_key`) y firmaba tokens de producción con un
+  secreto conocido por todo el mundo — cualquiera podía forjar tokens de
+  cualquier usuario. Ahora `JWTService()` lanza `RuntimeError` si `JWT_SECRET`
+  no está seteado. **Migración:** setea `JWT_SECRET` (≥32 bytes aleatorios) en
+  todos los entornos. Solo para desarrollo local podés setear
+  `JWT_ALLOW_INSECURE_DEV_SECRET=1` para conservar el comportamiento anterior.
+
+### Agregado
+
+- **Tipos completos: `Generic[ModelT]` + `py.typed` (PEP 561)** en repos y
+  services de los 3 ORMs (SQLAlchemy, SQLModel, Beanie). Parametrizá
+  `class UserRepository(BaseRepository[User])` y el CRUD queda tipado
+  (`get`/`create`/`update`/`list`). **Opcional**: subclasear sin el parámetro
+  genérico funciona igual (cero cambio en runtime). El marcador `py.typed` hace
+  que los tipos inline lleguen a mypy/Pylance/IDE de los consumidores.
+- **`Service.post_process_list(items)`** — hook para enriquecer los items de una
+  página YA paginada (contador, campo derivado, +1 `await`) sin reescribir la
+  paginación ni overridear `list()`. Default no-op.
+- **Lectura por id unificada entre ORMs**: `get(id)` **y** `get_by_id(id)`
+  funcionan en los 3 repos (aliases) — código portable entre backends.
+- **Operadores de filtro en SQLModel** (`__gte`/`__lte`/`__in`/`__ne`/`__like`/
+  `__ilike`) — portados desde el repo SQLAlchemy (antes SQLModel los descartaba
+  en silencio y devolvía todo).
+- **Handler de `DomainError`** en `register_exception_handlers` — un
+  `DomainError` que escapa del endpoint ahora se mapea a su `STATUS_CODE_MAP`
+  (antes caía al 500 genérico).
+- **`fastapi_basekit/py.typed`** empaquetado (PEP 561).
+- **Doc `docs/pagination-extension-points.md`** — referencia autoritativa de los
+  puntos de extensión de listado/paginación (destilada de proyectos reales).
+
+### Cambiado
+
+- **`BaseController._params` sin introspección de stack-frames.** Reconstruye los
+  parámetros leyendo `request.query_params` y coaccionándolos a los tipos
+  DECLARADOS en la firma del endpoint (`request.scope["endpoint"]`), de forma
+  determinista y **cacheada por endpoint** (~148x menos cómputo que recomputar la
+  firma). Arregla listados vacíos/errores intermitentes en controllers cbv
+  causados por el `skip_frames` mágico. Se conserva el parámetro `skip_frames`
+  (deprecado, ignorado) para back-compat con mixins que overridean `_params`.
+- **Coerción de query params por tipo completo**: además de bool/int/float, los
+  tipos ricos (`date`, `datetime`, `UUID`, `Decimal`, `Enum`) se coaccionan con
+  `pydantic.TypeAdapter` — el mismo motor que FastAPI — para que un filtro por
+  fecha/uuid reciba el objeto tipado y no el string.
+- **Fix mutable-default por instancia portado a los services SQLAlchemy y
+  SQLModel** (antes solo estaba en Beanie): mutar `self.search_fields` ya no
+  contamina la clase ni otras requests.
+- **Extras usan `psycopg2-binary`** en vez de `psycopg2` (evita build de fuente).
+
 ## [0.4.3] - 2026-07-10
 
 ### Agregado

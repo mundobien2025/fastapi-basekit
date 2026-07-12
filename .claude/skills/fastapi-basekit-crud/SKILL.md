@@ -81,6 +81,30 @@ return self.format_response(OrganizationResponseSchema.model_validate(tenant))
 
 ---
 
+## Core rule #2 — the pagination loop is NOT rewritten
+
+A list endpoint is almost always ONE line: `return await super().list()`. The
+`count`/`skip`/`offset`/`limit`/`$facet` live in the repo base (`list_paginated`
+SQL, `paginate`/`paginate_pipeline` Beanie) and are never copied. To customize a
+listing, override the HOOK — never reimplement the loop:
+
+| Necesito… | Hook |
+|-----------|------|
+| Scope por user/tenant, rename de filtro, filtro simple | `Service.get_filters` |
+| Rango de fechas / `EXISTS` / columnas computadas / scoping duro | `Repo.build_list_queryset` (SQL) · `build_list_pipeline` (Beanie) |
+| Orden por defecto | `Service.order_by` / `get_order` |
+| Joins/eager por acción | `Service.get_kwargs_query` + `self.action` |
+| Enriquecer los items de la página | `Service.post_process_list` |
+| `$lookup` + shape plano | `use_aggregation=True` + `build_list_pipeline` |
+| Schema/modelo distinto por acción | `get_schema_class` + `self.action` |
+| Scroll infinito | `paginate_keyset` (método+endpoint aparte) |
+
+Si escribes `func.count(`, `.offset(`, `.skip(`, `.limit(` o armas
+`{items,total,page,count}` a mano en un listado → hook equivocado, reescríbelo.
+Referencia completa: `docs/pagination-extension-points.md` de fastapi-basekit.
+
+---
+
 ## 0. Before writing anything — read first
 
 ```bash

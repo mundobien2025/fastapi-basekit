@@ -1,24 +1,27 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generic, List, Optional, Tuple
 
 from fastapi import Request
 from pydantic import BaseModel
 
-from ..repository.base import BaseRepository
+from ..repository.base import BaseRepository, ModelT
 from ....exceptions.api_exceptions import (
     NotFoundException,
     DatabaseIntegrityException,
 )
 
 
-class BaseService:
-    """Servicio base para SQLModel AsyncSession.
+class BaseService(Generic[ModelT]):
+    """Servicio base para SQLModel AsyncSession, parametrizado por el modelo.
 
     Idéntico en contrato al servicio de SQLAlchemy pero referencia el
     repositorio SQLModel.  Proporciona CRUD, paginación, búsqueda y
-    verificación de duplicados.
+    verificación de duplicados. Declara el modelo vía el genérico::
+
+        class UserService(BaseService[User]):
+            repository: UserRepository
     """
 
-    repository: BaseRepository
+    repository: BaseRepository[ModelT]
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
     order_by: Optional[str] = None
@@ -33,6 +36,14 @@ class BaseService:
     ):
         self.repository = repository
         self.request = request
+
+        # Copia por instancia de los defaults mutables (heredados como
+        # atributos de CLASE, compartidos por el proceso). Sin esto, mutar
+        # `self.search_fields.append(...)` en runtime contamina la clase y
+        # otras requests. Respeta el override del subclass.
+        self.search_fields = list(self.search_fields)
+        self.duplicate_check_fields = list(self.duplicate_check_fields)
+        self.kwargs_query = dict(self.kwargs_query)
 
         if self.repository:
             self.repository.service = self
@@ -79,7 +90,7 @@ class BaseService:
 
     async def retrieve(
         self, id: str, joins: Optional[List[str]] = None
-    ) -> Any:
+    ) -> ModelT:
         kwargs = self.get_kwargs_query()
         if joins is None:
             joins = kwargs.get("joins")
@@ -100,7 +111,7 @@ class BaseService:
         use_or: Optional[bool] = None,
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
-    ) -> tuple[List[Any], int]:
+    ) -> Tuple[List[ModelT], int]:
         if search is not None:
             self.params["search"] = search
         if page is not None:
@@ -127,7 +138,7 @@ class BaseService:
         if order_by is None:
             final_order_by = kwargs.get("order_by", self.params["order_by"])
 
-        return await self.repository.list_paginated(
+        items, total = await self.repository.list_paginated(
             page=self.params["page"],
             count=self.params["count"],
             filters=applied_filters,
@@ -137,12 +148,24 @@ class BaseService:
             search=self.params["search"],
             search_fields=self.params["search_fields"],
         )
+        items = await self.post_process_list(items)
+        return items, total
+
+    async def post_process_list(self, items: List[ModelT]) -> List[ModelT]:
+        """Hook: transforma/enriquece los items DE UNA PÁGINA ya paginada.
+
+        El método para "hacer algo custom con los resultados" SIN reescribir la
+        paginación ni overridear `list()`. Corre después de `list_paginated`,
+        sobre los items de la página actual. Default: sin cambios. NO cambies
+        `total` ni filtres items acá (usa `get_filters`/`build_list_queryset`).
+        """
+        return items
 
     async def create(
         self,
         payload: BaseModel | Dict[str, Any],
         check_fields: Optional[List[str]] = None,
-    ) -> Any:
+    ) -> ModelT:
         data = (
             payload.model_dump() if isinstance(payload, BaseModel) else payload
         )
@@ -161,7 +184,9 @@ class BaseService:
                     )
         return await self.repository.create(data)
 
-    async def update(self, id: str, data: BaseModel | Dict[str, Any]) -> Any:
+    async def update(
+        self, id: str, data: BaseModel | Dict[str, Any]
+    ) -> ModelT:
         update_data = (
             data.model_dump(exclude_unset=True)
             if isinstance(data, BaseModel)

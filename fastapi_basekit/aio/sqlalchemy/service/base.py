@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generic, List, Optional, Tuple
 
 from fastapi import Request
 from pydantic import BaseModel
 from sqlalchemy import select
-from ..repository.base import BaseRepository
+from ..repository.base import BaseRepository, ModelT
 from ....exceptions.api_exceptions import (
     APIException,
     NotFoundException,
@@ -11,8 +11,16 @@ from ....exceptions.api_exceptions import (
 )
 
 
-class BaseService:
-    """Servicio base para SQLAlchemy AsyncSession.
+class BaseService(Generic[ModelT]):
+    """Servicio base para SQLAlchemy AsyncSession, parametrizado por el modelo.
+
+    Declara el modelo vía el genérico para tipar el CRUD::
+
+        class UserService(BaseService[User]):
+            repository: UserRepository
+
+    Así ``retrieve``/``create``/``update`` devuelven ``User`` y ``list`` un
+    ``tuple[list[User], int]``.
 
     Regla del proyecto: los servicios NO deben llamar `session.flush()`,
     `session.commit()` ni `session.refresh()`. El flush vive en
@@ -21,7 +29,7 @@ class BaseService:
     `fastapi_basekit.aio.sqlalchemy.make_session_lifecycle`.
     """
 
-    repository: BaseRepository
+    repository: BaseRepository[ModelT]
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
     order_by: Optional[str] = None
@@ -47,6 +55,17 @@ class BaseService:
     ):
         self.repository = repository
         self.request = request
+
+        # Copia por instancia de los defaults mutables (heredados como
+        # atributos de CLASE, compartidos por todo el proceso). Sin esto, una
+        # mutación en runtime (`self.search_fields.append(...)`) se filtraría a
+        # la clase y contaminaría otras requests. Respeta el override del
+        # subclass: `list(self.search_fields)` lee su atributo de clase.
+        self.search_fields = list(self.search_fields)
+        self.duplicate_check_fields = list(self.duplicate_check_fields)
+        self.kwargs_query = dict(self.kwargs_query)
+        self.mangle_fields = list(self.mangle_fields)
+        self.delete_references = list(self.delete_references)
 
         # Vincular el servicio al repositorio principal
         if self.repository:
@@ -97,7 +116,7 @@ class BaseService:
 
     async def retrieve(
         self, id: str, joins: Optional[List[str]] = None
-    ) -> Any:
+    ) -> ModelT:
         # Permite que el servicio defina joins u otros kwargs por acción
         kwargs = self.get_kwargs_query()
         if joins is None:
@@ -119,7 +138,7 @@ class BaseService:
         use_or: Optional[bool] = None,
         joins: Optional[List[str]] = None,
         order_by: Optional[Any] = None,
-    ) -> tuple[List[Any], int]:
+    ) -> Tuple[List[ModelT], int]:
         # Actualiza self.params con los argumentos
         # proporcionados (si no son None)
         if search is not None:
@@ -153,7 +172,7 @@ class BaseService:
         if order_by is None:
             final_order_by = kwargs.get("order_by", self.params["order_by"])
 
-        return await self.repository.list_paginated(
+        items, total = await self.repository.list_paginated(
             page=self.params["page"],
             count=self.params["count"],
             filters=applied_filters,
@@ -163,12 +182,31 @@ class BaseService:
             search=self.params["search"],
             search_fields=self.params["search_fields"],
         )
+        items = await self.post_process_list(items)
+        return items, total
+
+    async def post_process_list(self, items: List[ModelT]) -> List[ModelT]:
+        """Hook: transforma/enriquece los items DE UNA PÁGINA ya paginada.
+
+        El método para "hacer algo custom con los resultados" SIN reescribir la
+        paginación ni overridear `list()`. Corre después de `list_paginated`,
+        sobre los items de la página actual. Default: sin cambios. Ejemplo::
+
+            async def post_process_list(self, items):
+                for r in items:
+                    r.display_url = build_url(r.slug)
+                return items
+
+        NO cambies `total` ni filtres items acá (usa `get_filters`/
+        `build_list_queryset` para filtrar, si no el total queda mal).
+        """
+        return items
 
     async def create(
         self,
         payload: BaseModel | Dict[str, Any],
         check_fields: Optional[List[str]] = None,
-    ) -> Any:
+    ) -> ModelT:
         data = (
             payload.model_dump() if isinstance(payload, BaseModel) else payload
         )
@@ -188,7 +226,7 @@ class BaseService:
         created = await self.repository.create(data)
         return created
 
-    async def update(self, id: str, data: BaseModel | Dict[str, Any]) -> Any:
+    async def update(self, id: str, data: BaseModel | Dict[str, Any]) -> ModelT:
         update_data = (
             data.model_dump(exclude_unset=True)
             if isinstance(data, BaseModel)

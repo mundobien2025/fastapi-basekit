@@ -1,4 +1,15 @@
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from sqlmodel import select
@@ -8,10 +19,14 @@ from sqlalchemy.orm import Relationship, joinedload, selectinload
 
 from ....exceptions.api_exceptions import NotFoundException
 
+#: Tipo del modelo SQLModel que gestiona el repositorio. Parametrízalo al
+#: declarar la subclase — ``class UserRepository(BaseRepository[User])``.
+ModelT = TypeVar("ModelT")
 
-class BaseRepository:
+
+class BaseRepository(Generic[ModelT]):
     """
-    Repositorio base para SQLModel Async.
+    Repositorio base para SQLModel Async, parametrizado por el modelo.
 
     Idéntico en contrato al de SQLAlchemy pero usa:
     - ``sqlmodel.ext.asyncio.session.AsyncSession``
@@ -19,10 +34,13 @@ class BaseRepository:
       directamente, sin necesidad de ``.scalars()``)
     - ``session.execute()`` para queries de agregación (count, etc.)
 
-    Establece ``model`` en la subclase (modelo SQLModel con ``table=True``).
+    Declara el modelo vía el genérico Y el atributo::
+
+        class UserRepository(BaseRepository[User]):
+            model = User
     """
 
-    model: Type[Any]
+    model: Type[ModelT]
     service: Optional[Any] = None
 
     def __init__(self, db: AsyncSession):
@@ -114,7 +132,12 @@ class BaseRepository:
         joins_to_apply = {}
 
         for filter_path, value in filters.items():
-            attr, field_joins = self._resolve_field_path(filter_path)
+            # Sufijo de operador opcional ("age__gte", "id__in", ...). El resto
+            # del path se resuelve normal, así la navegación de relaciones
+            # ("user__role__code") sigue funcionando — solo un último token que
+            # coincida con un operador conocido se trata como operador.
+            resolve_path, op = self._split_operator(filter_path)
+            attr, field_joins = self._resolve_field_path(resolve_path)
 
             if attr is None:
                 continue
@@ -137,9 +160,50 @@ class BaseRepository:
             )
 
             if not is_relationship and is_column:
-                resolved_filters[filter_path] = (attr, processed_value)
+                resolved_filters[filter_path] = (attr, processed_value, op)
 
         return resolved_filters, joins_to_apply
+
+    # Operadores de filtro soportados como sufijo "campo__op" (portado desde el
+    # repo SQLAlchemy — antes SQLModel los descartaba en silencio).
+    FILTER_OPERATORS = frozenset(
+        {"eq", "ne", "gt", "gte", "lt", "lte", "in", "like", "ilike"}
+    )
+
+    def _split_operator(self, filter_path: str) -> Tuple[str, str]:
+        """Separa un sufijo de operador del path. "age__gte" → ("age","gte");
+        "user__role__code" → (..., "eq"). Solo si el último token está en
+        ``FILTER_OPERATORS`` y queda campo delante."""
+        if "__" in filter_path:
+            head, _, last = filter_path.rpartition("__")
+            if head and last in self.FILTER_OPERATORS:
+                return head, last
+        return filter_path, "eq"
+
+    @staticmethod
+    def _condition_for(field: Any, value: Any, op: str) -> Any:
+        """Construye la condición para un operador dado."""
+        if op == "ne":
+            return field != value
+        if op == "gt":
+            return field > value
+        if op == "gte":
+            return field >= value
+        if op == "lt":
+            return field < value
+        if op == "lte":
+            return field <= value
+        if op == "in":
+            seq = value if isinstance(value, (list, tuple, set)) else [value]
+            return field.in_(list(seq))
+        if op == "like":
+            return field.like(f"%{value}%")
+        if op == "ilike":
+            return field.ilike(f"%{value}%")
+        # op == "eq" (default): conserva la semántica IN para listas.
+        if isinstance(value, (list, tuple)) and not isinstance(value, str):
+            return field.in_(value)
+        return field == value
 
     def _resolve_order_by(
         self,
@@ -201,13 +265,13 @@ class BaseRepository:
         conditions: List[Any] = []
 
         if resolved_filters is not None:
-            for _, (field, processed_value) in resolved_filters.items():
-                if isinstance(
-                    processed_value, (list, tuple)
-                ) and not isinstance(processed_value, str):
-                    conditions.append(field.in_(processed_value))
-                else:
-                    conditions.append(field == processed_value)
+            for _, resolved in resolved_filters.items():
+                # Tupla (field, value) legacy o (field, value, op) con operador.
+                field, processed_value = resolved[0], resolved[1]
+                op = resolved[2] if len(resolved) > 2 else "eq"
+                conditions.append(
+                    self._condition_for(field, processed_value, op)
+                )
         elif filters is not None:
             for fn, value in filters.items():
                 field = self._get_field(fn)
@@ -261,7 +325,7 @@ class BaseRepository:
     # CRUD
     # -------------------------------------------------------------------------
 
-    async def create(self, obj_in: Any | Dict) -> Any:
+    async def create(self, obj_in: Union[ModelT, Dict[str, Any]]) -> ModelT:
         """Crea un nuevo registro en la base de datos."""
         db = self.session
         if isinstance(obj_in, dict):
@@ -301,13 +365,19 @@ class BaseRepository:
 
         return record
 
-    async def get(self, record_id: Union[str, UUID]) -> Optional[Any]:
+    async def get(self, record_id: Union[str, UUID]) -> Optional[ModelT]:
         """Obtiene un registro por su ID."""
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
         return await self.session.get(self.model, record_id)
 
-    async def get_by_field(self, field_name: str, value: Any) -> Optional[Any]:
+    async def get_by_id(self, record_id: Union[str, UUID]) -> Optional[ModelT]:
+        """Alias de `get(id)` — nombre unificado con el repo Beanie."""
+        return await self.get(record_id)
+
+    async def get_by_field(
+        self, field_name: str, value: Any
+    ) -> Optional[ModelT]:
         """Obtiene un registro por un campo específico."""
         field = self._get_field(field_name)
         return await self._get_one(conditions=[field == value])
@@ -316,7 +386,7 @@ class BaseRepository:
         self,
         record_id: Union[str, UUID],
         joins: Optional[List[str]] = None,
-    ) -> Optional[Any]:
+    ) -> Optional[ModelT]:
         """Obtiene un registro por ID y carga relaciones dinámicamente."""
         return await self._get_one(
             conditions=[self.model.id == record_id], joins=joins
@@ -474,10 +544,14 @@ class BaseRepository:
     def build_list_queryset(
         self,
         **kwargs: Any,
-    ) -> Select[Tuple[Any]]:
+    ) -> Select[Tuple[ModelT]]:
         """
         Construye el query inicial para listado.
         Retorna un objeto Select sobre el modelo SQLModel.
+
+        Hook de scoping row-level (multi-tenant): sobrescríbelo para restringir
+        QUÉ filas ve cada usuario ANTES de la paginación (igual que en el repo
+        SQLAlchemy).
         """
         return select(self.model)
 
@@ -492,7 +566,16 @@ class BaseRepository:
         search: Optional[str] = None,
         search_fields: Optional[List[str]] = None,
         **kwargs: Any,
-    ) -> tuple[List[Any], int]:
+    ) -> Tuple[List[ModelT], int]:
+        """MOTOR DE PAGINACIÓN — NO LO REIMPLEMENTES.
+
+        Único loop de paginación (count + offset/limit). Para personalizar un
+        listado, override el HOOK correcto, no copies esto:
+        - query base / joins / scoping / columnas → `build_list_queryset`
+        - filtros por usuario/acción              → `Service.get_filters`
+        - orden por defecto                       → `Service.order_by`
+        - enriquecer items de la página           → `Service.post_process_list`
+        """
         # 1. Construir query base
         query_kwargs = {
             "filters": filters,
@@ -552,8 +635,8 @@ class BaseRepository:
         self,
         record_id: Union[str, UUID],
         update_data: Dict[str, Any],
-    ) -> Any:
-        """Actualiza un registro por ID con los campos provistos."""
+    ) -> ModelT:
+        """Actualiza un registro por ID con los campos provistos (omite None)."""
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
         db = self.session

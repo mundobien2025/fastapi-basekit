@@ -64,6 +64,45 @@ def build_list_queryset(self, **kwargs):
     return select(self.model).where(self.model.deleted_at.is_(None))
 ```
 
+### Row-level scoping / multi-tenant
+
+Este es **el** seam para restringir QUÉ filas ve cada usuario (multi-tenant,
+permisos por empresa, ownership). Va acá, **no** en un override de
+`Service.list`: `list_paginated` llama `self.build_list_queryset()` como base y
+luego aplica search + paginación encima, así que el alcance queda
+**enforced en la DB**, aplica a toda lista sin importar quién llame, y no
+duplica lógica ni rompe la paginación.
+
+El contexto del request está disponible vía `self.service.request`:
+
+```python
+from sqlalchemy import exists, select
+
+def build_list_queryset(self, **kwargs):
+    query = select(self.model)
+    req = getattr(self.service, "request", None)
+    user = getattr(req.state, "user", None) if req else None
+    roles = getattr(req.state, "user_role_codes", []) if req else []
+
+    # Staff global ve todo; el resto solo su empresa + las permitidas
+    if not any(r in {"admin_global"} for r in roles) and user and user.company_id:
+        query = query.where(
+            (self.model.company_id == user.company_id)
+            | exists(
+                select(1).where(
+                    CompanyPermissions.company_id == user.company_id,
+                    CompanyPermissions.permitted_company_id == self.model.id,
+                )
+            )
+        )
+    return query
+```
+
+Ojo: **permiso ≠ alcance**. El permiso (middleware / `endpoint_permissions`)
+decide si el usuario ENTRA al endpoint; `build_list_queryset` decide QUÉ filas
+ve. Son capas independientes — no metas el scoping de filas en la capa de
+permisos ni al revés.
+
 ## Variantes
 
 - `fastapi_basekit.aio.sqlalchemy.repository.base.BaseRepository`

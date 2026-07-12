@@ -19,7 +19,7 @@ class BeanieBaseController(BaseController):
     async def list(self):
         """Lista documentos con paginación usando Beanie."""
         await self.prepare_action("list")
-        params = self._params(skip_frames=2)
+        params = self._params()
         items, total = await self.service.list(**params)
         count = params.get("count") or 0
         page = params.get("page") or 1

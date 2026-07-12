@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generic, List, Optional, Tuple, Union
 
 from beanie import Document
 from beanie.odm.queries.find import FindMany
@@ -6,17 +6,25 @@ from fastapi import Request
 from pydantic import BaseModel
 
 
-from ...beanie.repository.base import BaseRepository
+from ...beanie.repository.base import BaseRepository, ModelT
 from ....exceptions.api_exceptions import (
     NotFoundException,
     DatabaseIntegrityException,
 )
 
 
-class BaseService:
-    """Servicio base específico para Beanie ODM (async)."""
+class BaseService(Generic[ModelT]):
+    """Servicio base específico para Beanie ODM (async), parametrizado.
 
-    repository: BaseRepository
+    Declara el modelo vía el genérico para tipar el CRUD::
+
+        class UserService(BaseService[User]):
+            repository: UserRepository
+
+    Así ``retrieve``/``create``/``update`` devuelven ``User``.
+    """
+
+    repository: BaseRepository[ModelT]
     search_fields: List[str] = []
     duplicate_check_fields: List[str] = []
     kwargs_query: Dict[str, Union[str, int]] = {}
@@ -74,7 +82,7 @@ class BaseService:
         filters = filters or {}
         return filters
 
-    async def retrieve(self, id: str):
+    async def retrieve(self, id: str) -> ModelT:
         kwargs = self.get_kwargs_query()
         obj = await self.repository.get_by_id(id, **kwargs)
         if not obj:
@@ -133,7 +141,7 @@ class BaseService:
         count: int = 25,
         filters: Optional[Dict[str, Any]] = None,
         order_by: Optional[str] = None,  # Dynamic ordering (e.g., "-created_at" or "tool__name")
-    ):
+    ) -> Tuple[List[ModelT], int]:
         kwargs = self.get_kwargs_query()
         applied_filters = self.get_filters(filters)
 
@@ -159,34 +167,60 @@ class BaseService:
                 order_by=order_str,
                 **kwargs,
             )
-            return await self.repository.paginate_pipeline(
+            items, total = await self.repository.paginate_pipeline(
                 pipeline,
                 page=page,
                 count=count,
                 validate=self.aggregation_validate,
             )
+        else:
+            # FindMany path
+            order_list = None
+            if order_str:
+                direction = -1 if order_str.startswith("-") else 1
+                field = order_str.lstrip("-")
+                order_list = [(field, direction)]
 
-        # FindMany path
-        order_list = None
-        if order_str:
-            direction = -1 if order_str.startswith("-") else 1
-            field = order_str.lstrip("-")
-            order_list = [(field, direction)]
+            query = self.build_list_queryset(
+                search=search,
+                search_fields=self.search_fields,
+                filters=applied_filters,
+                order_by=order_list,
+                **kwargs,
+            )
+            items, total = await self.repository.paginate(
+                query, page, count, order_by=order_list
+            )
 
-        query = self.build_list_queryset(
-            search=search,
-            search_fields=self.search_fields,
-            filters=applied_filters,
-            order_by=order_list,
-            **kwargs,
-        )
-        return await self.repository.paginate(
-            query, page, count, order_by=order_list
-        )
+        items = await self.post_process_list(items)
+        return items, total
+
+    async def post_process_list(self, items: List[ModelT]) -> List[ModelT]:
+        """Hook: transforma/enriquece los items DE UNA PÁGINA ya paginada.
+
+        Este es el método para "hacer algo custom con los resultados" SIN
+        reescribir la paginación ni overridear `list()`. Corre después de
+        `paginate`/`paginate_pipeline`, sobre los items de la página actual
+        (no toda la colección), así que es seguro para un enrich con un `await`
+        extra por página (agrega un contador, resuelve un campo derivado, etc.).
+
+        Default: devuelve los items sin cambios. Ejemplo::
+
+            async def post_process_list(self, items):
+                ids = [c.id for c in items]
+                counts = await self.conv_repo.count_by_customer_ids(ids)
+                for c in items:
+                    c.conversation_count = counts.get(c.id, 0)
+                return items
+
+        NO cambies el `total` acá (es el de la query completa). NO filtres items
+        (eso va en `get_filters`/`build_list_*`, o el total quedaría mal).
+        """
+        return items
 
     async def create(
         self, payload: BaseModel, check_fields: Optional[List[str]] = None
-    ) -> Any:
+    ) -> ModelT:
         data = (
             payload.model_dump() if not isinstance(payload, dict) else payload
         )
@@ -205,7 +239,7 @@ class BaseService:
             else created
         )
 
-    async def update(self, id: str, data: BaseModel) -> Any:
+    async def update(self, id: str, data: BaseModel) -> ModelT:
         kwargs = self.get_kwargs_query()
         obj = await self.repository.get_by_id(id, **kwargs)
         if not obj:

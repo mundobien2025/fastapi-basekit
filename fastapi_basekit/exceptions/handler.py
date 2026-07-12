@@ -28,6 +28,7 @@ from .api_exceptions import (
     DatabaseIntegrityException,
     ValidationException,
 )
+from .domain import DomainError
 
 
 async def api_exception_handler(request: Request, exc: APIException):
@@ -35,6 +36,19 @@ async def api_exception_handler(request: Request, exc: APIException):
         status=exc.status_code, message=exc.message, data=exc.data
     )
     return JSONResponse(status_code=exc.status, content=response.model_dump())
+
+
+async def domain_error_handler(request: Request, exc: DomainError):
+    """Mapea un ``DomainError`` que escapó del endpoint a su status HTTP.
+
+    Sin esto, un ``DomainError`` no atrapado caía al catch-all 500 genérico
+    (perdiendo el `STATUS_CODE_MAP` declarado en el dominio). Ahora se traduce
+    a `exc.http_status()` con el mismo envelope `BaseResponse` que el resto.
+    """
+    response = BaseResponse(status=exc.code, message=exc.message, data=None)
+    return JSONResponse(
+        status_code=exc.http_status(), content=response.model_dump()
+    )
 
 
 async def validation_exception_handler(
@@ -165,6 +179,7 @@ def register_exception_handlers(
         mongo: registra handlers de Mongo/Beanie si están disponibles.
     """
     app.add_exception_handler(APIException, api_exception_handler)
+    app.add_exception_handler(DomainError, domain_error_handler)
     app.add_exception_handler(
         RequestValidationError, request_validation_handler
     )

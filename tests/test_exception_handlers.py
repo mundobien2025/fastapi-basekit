@@ -7,6 +7,11 @@ from pydantic import BaseModel
 
 from fastapi_basekit.exceptions import register_exception_handlers
 from fastapi_basekit.exceptions.api_exceptions import NotFoundException
+from fastapi_basekit.exceptions.domain import DomainError
+
+
+class InsufficientFundsError(DomainError):
+    STATUS_CODE_MAP = {"INSUFFICIENT_FUNDS": 402}
 
 
 @pytest.fixture
@@ -24,6 +29,15 @@ def client():
     @app.get("/boom-value")
     async def boom_value():
         raise ValueError("campo malo")
+
+    @app.get("/boom-domain")
+    async def boom_domain():
+        raise InsufficientFundsError("INSUFFICIENT_FUNDS", "saldo insuficiente")
+
+    @app.get("/boom-domain-default")
+    async def boom_domain_default():
+        # code sin mapeo → DEFAULT_STATUS (400)
+        raise DomainError("SOMETHING", "algo pasó")
 
     @app.post("/echo")
     async def echo(body: Body):
@@ -53,3 +67,19 @@ def test_value_error_maps_to_envelope(client):
     r = client.get("/boom-value")
     assert r.status_code == 400
     assert r.json()["status"] == "VALUE_ERROR"
+
+
+def test_domain_error_maps_to_declared_status(client):
+    """DomainError que escapa del endpoint → su STATUS_CODE_MAP, no 500."""
+    r = client.get("/boom-domain")
+    assert r.status_code == 402
+    body = r.json()
+    assert body["status"] == "INSUFFICIENT_FUNDS"
+    assert body["message"] == "saldo insuficiente"
+    assert set(body) == {"data", "message", "status"}
+
+
+def test_domain_error_default_status(client):
+    r = client.get("/boom-domain-default")
+    assert r.status_code == 400  # DEFAULT_STATUS
+    assert r.json()["status"] == "SOMETHING"

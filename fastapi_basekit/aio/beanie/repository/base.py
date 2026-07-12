@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from typing import get_args, get_origin
 import re
 
@@ -11,10 +11,31 @@ from beanie.operators import Or, RegEx
 
 logger = logging.getLogger(__name__)
 
+#: Tipo del Document Beanie que gestiona el repositorio. Parametrízalo al
+#: declarar la subclase — ``class UserRepository(BaseRepository[User])`` — para
+#: que ``get_by_id``/``create``/``update``/``list_all`` devuelvan el Document
+#: tipado (autocompletado + mypy para consumidores e IAs).
+ModelT = TypeVar("ModelT", bound=Document)
 
-class BaseRepository:
-    model: Type[Document]
-    
+
+class BaseRepository(Generic[ModelT]):
+    """Repositorio base para Beanie ODM (MongoDB), parametrizado por el modelo.
+
+    OJO — las firmas difieren del repo SQLAlchemy (misma clase, distinto ORM):
+      - get por id:  `get_by_id(id)`   (SQL usa `get(id)`)
+      - update:      `update(obj, data)` — el 1er arg es el **Document**, no el
+                     id (SQL usa `update(id, dict)`). Fetch primero con
+                     `get_by_id`, luego `update(obj, data)`.
+      - delete:      `delete(obj)` — recibe el Document (SQL usa `delete(id)`).
+      - create:      `create(obj | dict)`.
+    Listado: `build_list_queryset(...)`→FindMany + `paginate(...)`, o
+    `build_list_pipeline(...)` + `paginate_pipeline(...)` para joins (`$lookup`).
+    Preferí llamar el SERVICE (API unificada) en vez del repo directo; llamar
+    `get_by_id` directo bypassea el scoping de `get_filters()`.
+    """
+
+    model: Type[ModelT]
+
     def _parse_order_field(self, order_by: str) -> tuple[str, int, bool]:
         """Parse order_by string into components.
         
@@ -207,6 +228,17 @@ class BaseRepository:
     async def paginate(
         self, query: FindMany[Document], page: int, count: int, order_by: Optional[List[tuple]] = None
     ) -> tuple[List[Document], int]:
+        """MOTOR DE PAGINACIÓN (FindMany) — NO LO REIMPLEMENTES.
+
+        Único loop de paginación offset (count + skip/limit). Para personalizar
+        el listado, override el HOOK correcto, no copies skip/limit/count:
+        - query/filtros/scoping/orden → `build_list_queryset` (o `build_filter_query`)
+        - join `$lookup` / shape plano → `use_aggregation=True` + `build_list_pipeline`
+        - filtros por usuario/acción   → `Service.get_filters`
+        - orden por defecto            → `Service.get_order`
+        - enriquecer items de la página→ `Service.post_process_list`
+        - scroll infinito / cursor     → `paginate_keyset` (método+endpoint aparte)
+        """
         # Apply ordering if provided and not already applied
         if order_by:
             query = query.sort(order_by)
@@ -379,7 +411,13 @@ class BaseRepository:
         count: int,
         validate: bool = True,
     ) -> tuple[List[Any], int]:
-        """Run an aggregation pipeline with `$facet` pagination.
+        """MOTOR DE PAGINACIÓN (aggregation `$facet`) — NO LO REIMPLEMENTES.
+
+        Ejecuta el pipeline con paginación `$facet`. Para un listado agregado
+        NO copies este `$facet`/skip/limit: override `Service.build_list_pipeline`
+        (agrega `$lookup`/`$project`/`$group`) y activa `use_aggregation=True`;
+        este método le pone la paginación. Si la proyección no es el modelo,
+        `aggregation_validate=False`.
 
         Args:
             pipeline: Pipeline stages (without the final `$facet`).
@@ -471,7 +509,7 @@ class BaseRepository:
         self,
         obj_id: Union[str, ObjectId],
         **kwargs,
-    ) -> Optional[Document]:
+    ) -> Optional[ModelT]:
         if not isinstance(obj_id, ObjectId):
             obj_id = ObjectId(obj_id)
         return await self.model.find_one(
@@ -479,12 +517,19 @@ class BaseRepository:
             **self._get_query_kwargs(**kwargs),
         )
 
+    async def get(
+        self, obj_id: Union[str, ObjectId], **kwargs
+    ) -> Optional[ModelT]:
+        """Alias de `get_by_id(id)` — nombre unificado con los repos SQL
+        (`get`) para que las lecturas por id sean portables entre ORMs."""
+        return await self.get_by_id(obj_id, **kwargs)
+
     async def get_by_field(
         self,
         field_name: str,
         value: Any,
         **kwargs,
-    ) -> Optional[Document]:
+    ) -> Optional[ModelT]:
         if not hasattr(self.model, field_name):
             raise AttributeError(
                 f"{self.model.__name__} no tiene el campo '{field_name}'"
@@ -498,7 +543,7 @@ class BaseRepository:
         self,
         filters: Dict[str, Any],
         **kwargs,
-    ) -> Optional[Document]:
+    ) -> Optional[ModelT]:
         exprs = [
             getattr(self.model, f) == v
             for f, v in filters.items()
@@ -513,21 +558,27 @@ class BaseRepository:
     async def list_all(
         self,
         **kwargs,
-    ) -> List[Document]:
+    ) -> List[ModelT]:
         query = self.model.find_all(**self._get_query_kwargs(**kwargs))
         return await query.to_list()
 
-    async def create(self, obj: Union[Document, Dict[str, Any]]) -> Document:
+    async def create(self, obj: Union[ModelT, Dict[str, Any]]) -> ModelT:
         if isinstance(obj, dict):
             obj = self.model(**obj)
         await obj.insert()
         return obj
 
-    async def update(self, obj: Document, data: Dict[str, Any]) -> Document:
+    async def update(self, obj: ModelT, data: Dict[str, Any]) -> ModelT:
+        """Actualiza un Document Beanie ya cargado.
+
+        Divergencia con SQL: acá el 1er arg es el **Document** (no el id) y SÍ
+        setea ``None``. El repo SQLAlchemy usa ``update(id, dict)`` y omite
+        ``None``. Ver la tabla en el CLAUDE.md de la lib.
+        """
         for key, value in data.items():
             setattr(obj, key, value)
         await obj.save()
         return obj
 
-    async def delete(self, obj: Document) -> None:
+    async def delete(self, obj: ModelT) -> None:
         await obj.delete()

@@ -7,5 +7,4 @@ dist/
 *.egg-info/
 site/
 .vscode/settings.json
-CLAUDE.md
 RELEASING.md

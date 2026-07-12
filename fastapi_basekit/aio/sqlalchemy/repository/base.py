@@ -1,4 +1,15 @@
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from sqlalchemy import Select, and_, or_, select, func
@@ -7,15 +18,29 @@ from sqlalchemy.orm import Relationship, joinedload, selectinload
 
 from ....exceptions.api_exceptions import NotFoundException
 
-class BaseRepository:
+#: Tipo del modelo ORM que gestiona el repositorio. Parametrízalo al declarar
+#: la subclase — ``class UserRepository(BaseRepository[User])`` — para que
+#: ``get``/``create``/``update``/``list_paginated`` devuelvan ``User`` tipado
+#: (autocompletado + mypy para consumidores e IAs).
+ModelT = TypeVar("ModelT")
+
+
+class BaseRepository(Generic[ModelT]):
     """
-    Repositorio base para SQLAlchemy Async.
+    Repositorio base para SQLAlchemy Async, parametrizado por el modelo.
 
     Define operaciones CRUD, acceso por filtros y carga de relaciones (joins).
-    Establece `model` en la subclase (modelo ORM de SQLAlchemy).
+    Declara el modelo en la subclase vía el parámetro genérico Y el atributo
+    de clase::
+
+        class UserRepository(BaseRepository[User]):
+            model = User
+
+    A partir de ahí ``repo.get(id)`` es ``Optional[User]``, ``repo.create(...)``
+    es ``User``, etc.
     """
 
-    model: Type[Any]
+    model: Type[ModelT]
     service: Optional[Any] = None
 
     def __init__(self, db: AsyncSession):
@@ -402,7 +427,7 @@ class BaseRepository:
 
         return or_(*exprs), search_joins
 
-    async def create(self, obj_in: Any | Dict) -> Any:
+    async def create(self, obj_in: Union[ModelT, Dict[str, Any]]) -> ModelT:
         """Crea un nuevo registro en la base de datos."""
         db = self.session
         if isinstance(obj_in, dict):
@@ -448,13 +473,20 @@ class BaseRepository:
 
         return record
 
-    async def get(self, record_id: Union[str, UUID]) -> Optional[Any]:
+    async def get(self, record_id: Union[str, UUID]) -> Optional[ModelT]:
         """Obtiene un registro por su ID."""
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
         return await self.session.get(self.model, record_id)
 
-    async def get_by_field(self, field_name: str, value: Any) -> Optional[Any]:
+    async def get_by_id(self, record_id: Union[str, UUID]) -> Optional[ModelT]:
+        """Alias de `get(id)` — nombre unificado con el repo Beanie
+        (`get_by_id`) para que las lecturas por id sean portables entre ORMs."""
+        return await self.get(record_id)
+
+    async def get_by_field(
+        self, field_name: str, value: Any
+    ) -> Optional[ModelT]:
         """Obtiene un registro por un campo específico."""
         field = self._get_field(field_name)
         return await self._get_one(conditions=[field == value])
@@ -463,7 +495,7 @@ class BaseRepository:
         self,
         record_id: Union[str, UUID],
         joins: Optional[List[str]] = None,
-    ) -> Optional[Any]:
+    ) -> Optional[ModelT]:
         """Obtiene un registro por ID y carga relaciones dinámicamente."""
         return await self._get_one(
             conditions=[self.model.id == record_id], joins=joins
@@ -663,10 +695,20 @@ class BaseRepository:
     def build_list_queryset(
         self,
         **kwargs: Any,
-    ) -> Select[Tuple[Any]]:
+    ) -> Select[Tuple[ModelT]]:
         """
         Construye el query inicial para listado.
         Debe retornar un objeto Select.
+
+        Hook de scoping row-level (multi-tenant): sobrescríbelo para restringir
+        QUÉ filas ve cada usuario ANTES de la paginación::
+
+            def build_list_queryset(self, **kwargs):
+                q = select(self.model)
+                user = getattr(self.service.request.state, "user", None)
+                if user:
+                    q = q.where(self.model.company_id == user.company_id)
+                return q
         """
         return select(self.model)
 
@@ -681,8 +723,23 @@ class BaseRepository:
         search: Optional[str] = None,
         search_fields: Optional[List[str]] = None,
         **kwargs: Any,
-    ) -> tuple[List[Any], int]:
-        
+    ) -> Tuple[List[ModelT], int]:
+        """MOTOR DE PAGINACIÓN — NO LO REIMPLEMENTES.
+
+        Este es el único loop de paginación (count + offset/limit + hidratación
+        de columnas). Copiarlo/reescribirlo en un service o controller es EL
+        anti-patrón #1 de esta lib. Para personalizar un listado, override el
+        HOOK correcto y deja que este método pagine:
+
+        - query base / joins / scoping / columnas / rangos → `build_list_queryset`
+        - filtros que dependen del usuario/acción            → `Service.get_filters`
+        - orden por defecto                                  → `Service.order_by` / `get_order`
+        - joins por acción                                   → `Service.get_kwargs_query` + `self.action`
+        - enriquecer los items de la página                 → `Service.post_process_list`
+
+        Si ves `func.count(` o `.offset(` dentro de un método `list_*` propio,
+        estás reescribiendo esto — casi siempre es el hook equivocado.
+        """
         # 1. Construir query base
         query_kwargs = {
             "filters": filters,
@@ -751,8 +808,14 @@ class BaseRepository:
         self,
         record_id: Union[str, UUID],
         update_data: Dict[str, Any],
-    ) -> Any:
-        """Actualiza un registro por ID con los campos provistos."""
+    ) -> ModelT:
+        """Actualiza un registro por ID con los campos provistos.
+
+        NOTA de divergencia entre ORMs: la firma SQL es ``update(id, dict)`` y
+        OMITE valores ``None`` (no puede setear una columna a NULL por acá). El
+        repo Beanie usa ``update(obj, dict)`` (recibe el Document) y sí setea
+        ``None``. Ver la tabla en el CLAUDE.md de la lib.
+        """
         if not self.model:
             raise ValueError("El modelo no está definido en el repositorio")
         db = self.session
@@ -785,13 +848,13 @@ class BaseRepository:
         await db.flush()
         return True
 
-    async def save(self, obj: Any) -> Any:
+    async def save(self, obj: ModelT) -> ModelT:
         """Persiste una entidad nueva o mutada (add + flush)."""
         self.session.add(obj)
         await self.session.flush()
         return obj
 
-    async def hard_delete(self, obj: Any) -> None:
+    async def hard_delete(self, obj: ModelT) -> None:
         """Elimina físicamente la fila (sin soft delete)."""
         await self.session.delete(obj)
         await self.session.flush()
