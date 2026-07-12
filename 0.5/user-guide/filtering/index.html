@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://mundobien2025.github.io/fastapi-basekit/0.5/user-guide/filtering/">
       
       
-        <link rel="prev" href="../pagination/">
+        <link rel="prev" href="../../pagination-extension-points/">
       
       
         <link rel="next" href="../ordering/">
@@ -99,7 +99,7 @@
             
             
   <a href="https://github.com/mundobien2025/fastapi-basekit" target="_blank" rel="noopener">
-    Dale star al repo si te ayuda &nbsp;·&nbsp; <strong>v0.3.x</strong> ya disponible
+    Dale star al repo si te ayuda &nbsp;·&nbsp; <strong>v0.5.x</strong> ya disponible
   </a>
 
           </div>
@@ -673,6 +673,8 @@
       
         
       
+        
+      
     
     
     
@@ -837,6 +839,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pagination-extension-points/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Puntos de Extensión (Listados)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -946,6 +976,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operadores-de-filtro-sufijo-campo__op-sqlalchemy-y-sqlmodel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operadores de filtro (sufijo campo__op) — SQLAlchemy y SQLModel
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1962,6 +2003,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#operadores-de-filtro-sufijo-campo__op-sqlalchemy-y-sqlmodel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operadores de filtro (sufijo campo__op) — SQLAlchemy y SQLModel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtros-in" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2156,36 +2208,52 @@ escriba el filtro nested:</p>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 </code></pre></div>
 <p>Resultado: cada <code>list()</code> filtra por <code>user.$id == authenticated_user.id</code>.</p>
+<h2 id="operadores-de-filtro-sufijo-campo__op-sqlalchemy-y-sqlmodel">Operadores de filtro (sufijo <code>campo__op</code>) — SQLAlchemy y SQLModel</h2>
+<p>Además de la igualdad, podés usar operadores como sufijo del campo. <strong>Desde
+0.5.0 funcionan en SQLAlchemy Y SQLModel</strong> (antes SQLModel los descartaba en
+silencio y devolvía todo):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;age__gte&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">})</span>       <span class="c1"># age &gt;= 18</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;age__lt&quot;</span><span class="p">:</span> <span class="mi">65</span><span class="p">})</span>        <span class="c1"># age &lt; 65</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;status__in&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">]})</span>  <span class="c1"># status IN (...)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name__ilike&quot;</span><span class="p">:</span> <span class="s2">&quot;an&quot;</span><span class="p">})</span>  <span class="c1"># ILIKE %an%</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name__ne&quot;</span><span class="p">:</span> <span class="s2">&quot;Ana&quot;</span><span class="p">})</span>    <span class="c1"># != Ana</span>
+</code></pre></div>
+<p>Operadores: <code>eq</code> (default), <code>ne</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>, <code>in</code>, <code>like</code>,
+<code>ilike</code>. La sintaxis <code>__</code> sin un operador conocido al final navega relaciones
+(<code>user__role__code</code>), no es un operador. <strong>Beanie no tiene sufijos de operador</strong>
+— usá un dict Mongo (<code>{"$gte": ...}</code>) dentro de <code>build_list_pipeline</code>.</p>
+<p>Desde HTTP, declará el query param con su tipo y basekit lo coacciona (incluye
+<code>date</code>/<code>datetime</code>/<code>UUID</code>/<code>Decimal</code> vía pydantic, no solo bool/int).</p>
 <h2 id="filtros-in">Filtros IN</h2>
 <p>Pasa lista al filter dict:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">]})</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># → WHERE status IN (&#39;active&#39;, &#39;pending&#39;)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">]})</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># → WHERE status IN (&#39;active&#39;, &#39;pending&#39;)</span>
 </code></pre></div>
 <p>Desde HTTP, repite el param:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">?status=active&amp;status=pending</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="err">?status=active&amp;status=pending</span>
 </code></pre></div></p>
 <h2 id="filtros-or">Filtros OR</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">use_or</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># → WHERE status=&#39;active&#39; OR category_id=&#39;...&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">use_or</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># → WHERE status=&#39;active&#39; OR category_id=&#39;...&#39;</span>
 </code></pre></div>
 <h2 id="filtros-forzados-del-service">Filtros forzados (del service)</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_platform_admin</span><span class="p">:</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;company_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">return</span> <span class="n">filters</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">is_platform_admin</span><span class="p">:</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;company_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="k">return</span> <span class="n">filters</span>
 </code></pre></div>
 <p>Este filtro NO se puede sobreescribir por query string.</p>
 <h2 id="filtros-enum">Filtros enum</h2>
 <p>Pydantic <code>Enum</code> se serializa a su <code>.value</code> automáticamente:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ThingStatus</span><span class="o">.</span><span class="n">active</span><span class="p">})</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># → WHERE status = &#39;active&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">ThingStatus</span><span class="o">.</span><span class="n">active</span><span class="p">})</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># → WHERE status = &#39;active&#39;</span>
 </code></pre></div>
 <h2 id="soft-delete-filtros">Soft delete + filtros</h2>
 <p>Soft-delete NO se aplica automáticamente. Override <code>build_list_queryset</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">deleted_at</span><span class="o">.</span><span class="n">is_</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">deleted_at</span><span class="o">.</span><span class="n">is_</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
 </code></pre></div>
 
 
@@ -2224,7 +2292,7 @@ escriba el filtro nested:</p>
       <nav class="md-footer__inner md-grid" aria-label="Pie" >
         
           
-          <a href="../pagination/" class="md-footer__link md-footer__link--prev" aria-label="Anterior: Paginación">
+          <a href="../../pagination-extension-points/" class="md-footer__link md-footer__link--prev" aria-label="Anterior: Puntos de Extensión (Listados)">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2234,7 +2302,7 @@ escriba el filtro nested:</p>
                 Anterior
               </span>
               <div class="md-ellipsis">
-                Paginación
+                Puntos de Extensión (Listados)
               </div>
             </div>
           </a>
