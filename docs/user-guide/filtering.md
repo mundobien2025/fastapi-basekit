@@ -70,6 +70,28 @@ class ConversationService(BaseService):
 
 Resultado: cada `list()` filtra por `user.$id == authenticated_user.id`.
 
+## Operadores de filtro (sufijo `campo__op`) — SQLAlchemy y SQLModel
+
+Además de la igualdad, podés usar operadores como sufijo del campo. **Desde
+0.5.0 funcionan en SQLAlchemy Y SQLModel** (antes SQLModel los descartaba en
+silencio y devolvía todo):
+
+```python
+await repo.list_paginated(filters={"age__gte": 18})       # age >= 18
+await repo.list_paginated(filters={"age__lt": 65})        # age < 65
+await repo.list_paginated(filters={"status__in": ["a","b"]})  # status IN (...)
+await repo.list_paginated(filters={"name__ilike": "an"})  # ILIKE %an%
+await repo.list_paginated(filters={"name__ne": "Ana"})    # != Ana
+```
+
+Operadores: `eq` (default), `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `like`,
+`ilike`. La sintaxis `__` sin un operador conocido al final navega relaciones
+(`user__role__code`), no es un operador. **Beanie no tiene sufijos de operador**
+— usá un dict Mongo (`{"$gte": ...}`) dentro de `build_list_pipeline`.
+
+Desde HTTP, declará el query param con su tipo y basekit lo coacciona (incluye
+`date`/`datetime`/`UUID`/`Decimal` vía pydantic, no solo bool/int).
+
 ## Filtros IN
 
 Pasa lista al filter dict:

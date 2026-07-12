@@ -13,11 +13,25 @@ class ThingRepository(BaseRepository):
     model = Thing
 ```
 
+!!! tip "Tipos (0.5.0) — `Generic[ModelT]`, opcional"
+    Desde **0.5.0** las bases son `Generic[ModelT]` y el paquete trae `py.typed`.
+    Parametrizá para tipar el CRUD y que mypy/IDE lo infieran:
+
+    ```python
+    class ThingRepository(BaseRepository[Thing]):
+        model = Thing
+    # repo.get(id) → Optional[Thing], repo.create(...) → Thing, etc.
+    ```
+
+    Es **opcional**: subclasear sin el parámetro (`BaseRepository`) funciona igual
+    (cero cambio en runtime), solo perdés el autocompletado.
+
 ## API CRUD
 
 ```python
-# Por ID
+# Por ID (0.5.0: `get_by_id` es alias de `get` en los 3 ORMs — lecturas portables)
 thing = await repo.get(thing_id)
+thing = await repo.get_by_id(thing_id)
 thing = await repo.get_with_joins(thing_id, joins=["category", "tags"])
 
 # Por campo

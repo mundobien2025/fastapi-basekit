@@ -111,6 +111,7 @@ nav:
     - Services: user-guide/services.md
     - Repositories: user-guide/repositories.md
     - Paginación: user-guide/pagination.md
+    - Puntos de Extensión (Listados): pagination-extension-points.md
     - Filtrado: user-guide/filtering.md
     - Ordenamiento: user-guide/ordering.md
     - Búsqueda: user-guide/search.md
@@ -144,7 +145,7 @@ nav:
   - Changelog: changelog.md
 
 extra:
-  version_label: 0.3.x
+  version_label: 0.5.x
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/mundobien2025/fastapi-basekit

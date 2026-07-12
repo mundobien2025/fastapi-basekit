@@ -30,6 +30,16 @@ ADMIN_PASSWORD=ChangeMe2026!
 !!! warning "JWT_SECRET vs SECRET_KEY"
     `JWTService()` (de la lib) lee `JWT_SECRET` del entorno — NO `SECRET_KEY`. Pon ambos en `.env` o vas a debugear 30 min por qué falla decode_token.
 
+!!! danger "BREAKING en 0.5.0 — `JWT_SECRET` es OBLIGATORIO"
+    Desde **0.5.0**, `JWTService()` **lanza `RuntimeError` si `JWT_SECRET` no está
+    seteado**. Antes caía a una clave pública por defecto (`secret_dev_key`) y
+    firmaba tokens con un secreto conocido por todo el mundo — cualquiera podía
+    forjar tokens. Seteá `JWT_SECRET` (≥32 bytes aleatorios) en TODOS los
+    entornos. Solo para desarrollo local podés setear
+    `JWT_ALLOW_INSECURE_DEV_SECRET=1` para conservar el comportamiento anterior.
+    Además: `JWT_EXPIRE_SECONDS` no-numérico ahora falla con error claro, y los
+    tokens incluyen `iat`.
+
 ## Ajustes de pydantic Settings
 
 ```python

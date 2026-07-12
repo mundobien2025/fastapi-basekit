@@ -130,4 +130,28 @@ async def list_things(self):
 
 `joins` aplica `selectinload` (relación 1:N) o `joinedload` (relación N:1) automáticamente según el tipo.
 
+## Enriquecer los items de la página — `post_process_list` (0.5.0)
+
+Para agregar un campo derivado o un contador a cada fila DESPUÉS de paginar, sin
+reescribir la paginación ni overridear `list()`:
+
+```python
+class ThingService(BaseService):
+    async def post_process_list(self, items):
+        ids = [t.id for t in items]
+        counts = await self.child_repo.count_by_parent_ids(ids)
+        for t in items:
+            t.child_count = counts.get(t.id, 0)
+        return items
+```
+
+Corre sobre los items de la página actual; no cambia `total` ni filtra (para
+filtrar usá `get_filters`/`build_list_queryset`).
+
+!!! danger "El motor de paginación NO se reescribe"
+    El `count`/`skip`/`offset`/`limit`/`$facet` vive en el repo base
+    (`list_paginated` SQL, `paginate`/`paginate_pipeline` Beanie) y no se copia.
+    Toda personalización baja por un hook. Mapa completo caso→hook:
+    **[Puntos de Extensión (Listados)](../pagination-extension-points.md)**.
+
 [:octicons-arrow-right-24: Filtros avanzados](filtering.md){ .md-button .md-button--primary }
