@@ -2252,7 +2252,7 @@ y operadores OR en filtros, características específicas de SQL.</p>
 <a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">            order_by: Expresión de ordenamiento (ej: User.created_at.desc())</span>
 <a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">(</span><span class="n">skip_frames</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
 <a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">service_params</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-0-54" name="__codelineno-0-54"></a>            <span class="o">**</span><span class="n">params</span><span class="p">,</span>
 <a id="__codelineno-0-55" name="__codelineno-0-55"></a>            <span class="s2">&quot;use_or&quot;</span><span class="p">:</span> <span class="n">use_or</span><span class="p">,</span>
@@ -2454,7 +2454,7 @@ y operadores OR en filtros, características específicas de SQL.</p>
 <a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        order_by: Expresión de ordenamiento (ej: User.created_at.desc())</span>
 <a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">(</span><span class="n">skip_frames</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
 <a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="n">service_params</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="o">**</span><span class="n">params</span><span class="p">,</span>
 <a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="s2">&quot;use_or&quot;</span><span class="p">:</span> <span class="n">use_or</span><span class="p">,</span>
