@@ -163,6 +163,40 @@ async def test_filter_scalar_field(data):
     assert {e.name for e in rows} == {"Ana", "Ciro"}
 
 
+@pytest.mark.asyncio
+async def test_mongo_style_scoping_keys_pass_through(data):
+    """`user.$id` / `$or` (patrón de scoping en get_filters) NO se descartan:
+    se aplican como filtro Mongo crudo. Su pérdida silenciosa sería un IDOR."""
+    repo = EmployeeRepo()
+    query = repo.build_filter_query(
+        search=None,
+        search_fields=[],
+        filters={"company.$id": data["acme"].id},
+    )
+    assert query.get_filter_query() == {"company.$id": data["acme"].id}
+
+
+@pytest.mark.asyncio
+async def test_unresolvable_filter_key_warns_before_drop(data, caplog):
+    """Una clave que no resuelve a ningún campo se descarta PERO avisa: si era
+    un filtro de scoping, su desaparición silenciosa dejaría el listado sin
+    filtrar (fuga cross-tenant). El warning hace visible la pérdida."""
+    import logging
+
+    repo = EmployeeRepo()
+    with caplog.at_level(logging.WARNING):
+        query = repo.build_filter_query(
+            search=None,
+            search_fields=[],
+            filters={"nonexistent_scope": "x"},
+        )
+    assert query.get_filter_query() in ({}, {"$and": []})
+    assert any(
+        "nonexistent_scope" in r.message and "descartado" in r.message
+        for r in caplog.records
+    )
+
+
 # ---------------------------------------------------------------------------
 # get_by_field / get_by_fields
 # ---------------------------------------------------------------------------

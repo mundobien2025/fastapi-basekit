@@ -5,6 +5,20 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.1] - 2026-07-17
+
+### Seguridad / hardening
+
+- **Visibilidad ante filtros de scoping descartados (los 3 ORMs).** Cuando un
+  filtro no resuelve a ningún campo del modelo (typo, columna/relación
+  inexistente, o clave Mongo mal escrita), el repositorio lo descarta — pero
+  ahora emite un `logger.warning`. Antes desaparecía en silencio: si esa clave
+  venía de `get_filters()` (scoping por tenant/owner), el listado quedaba SIN
+  ese filtro → fuga cross-tenant / IDOR invisible. El warning hace la pérdida
+  visible en logs/Sentry sin cambiar el resultado de las queries válidas.
+  Aplica a `beanie`, `sqlalchemy` y `sqlmodel`. (El passthrough de claves
+  Mongo `$or`/`user.$id` en Beanie ya existía desde 0.4.3.)
+
 ## [0.5.0] - 2026-07-12
 
 ### ⚠️ BREAKING

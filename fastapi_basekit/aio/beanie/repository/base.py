@@ -215,6 +215,19 @@ class BaseRepository(Generic[ModelT]):
                     exprs.append(field_attr.id == _coerce_objectid(v))
                     continue
 
+            # Clave no resoluble (typo, campo inexistente, nesting mal escrito).
+            # Se descarta — pero se AVISA: si la clave venía de `get_filters`
+            # (scoping por tenant/owner), su desaparición silenciosa deja el
+            # listado sin filtrar → fuga cross-tenant (IDOR). El warning hace
+            # visible la pérdida en logs/Sentry en vez de fallar en silencio.
+            logger.warning(
+                "build_filter_query: filtro '%s' descartado (no resuelve a "
+                "ningún campo de %s). Si era un filtro de scoping, el listado "
+                "queda SIN ese filtro.",
+                k,
+                getattr(self.model, "__name__", self.model),
+            )
+
         # Raw MongoDB filters go first so Beanie processes them as a dict condition
         query_args: list = ([raw_filters] if raw_filters else []) + exprs
         query = self.model.find(*query_args, **self._get_query_kwargs(**kwargs))

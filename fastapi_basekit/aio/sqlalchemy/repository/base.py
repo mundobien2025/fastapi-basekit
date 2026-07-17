@@ -11,12 +11,15 @@ from typing import (
     Union,
 )
 from uuid import UUID
+import logging
 
 from sqlalchemy import Select, and_, or_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Relationship, joinedload, selectinload
 
 from ....exceptions.api_exceptions import NotFoundException
+
+logger = logging.getLogger(__name__)
 
 #: Tipo del modelo ORM que gestiona el repositorio. Parametrízalo al declarar
 #: la subclase — ``class UserRepository(BaseRepository[User])`` — para que
@@ -165,6 +168,17 @@ class BaseRepository(Generic[ModelT]):
             attr, field_joins = self._resolve_field_path(resolve_path)
 
             if attr is None:
+                # Filtro no resoluble (typo, columna/relación inexistente). Se
+                # descarta — pero se AVISA: si venía de `get_filters` (scoping
+                # por tenant/owner), su desaparición silenciosa deja el listado
+                # sin filtrar → fuga cross-tenant (IDOR). El warning hace
+                # visible la pérdida en logs en vez de fallar en silencio.
+                logger.warning(
+                    "filtro '%s' descartado (no resuelve a ningún campo de %s). "
+                    "Si era un filtro de scoping, el listado queda SIN ese filtro.",
+                    filter_path,
+                    getattr(self.model, "__name__", self.model),
+                )
                 continue
 
             joins_to_apply.update(field_joins)
