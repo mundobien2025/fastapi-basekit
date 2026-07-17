@@ -79,12 +79,41 @@ class BaseController:
     # DRF Style: Permisos globales por defecto
     permission_classes: ClassVar[List[Type[BasePermission]]] = []
 
-    # ClassVar so cbv (fastapi-restful) does NOT promote it to a query param.
-    # A plain `Optional[str]` annotation here leaks a spurious `action` query
-    # parameter onto every mounted endpoint. `prepare_action` still assigns
-    # `self.action` (instance attr) at runtime, which works fine.
-    action: ClassVar[Optional[str]] = None
     request: Request
+
+    @property
+    def action(self) -> Optional[str]:
+        """Acción canónica del request actual.
+
+        Preferencia: la que fijó ``prepare_action`` (``list``/``retrieve``/…).
+        Fallback: el nombre de la función de endpoint que FastAPI está
+        ejecutando (``create``/``update``/``retrieve``/…), leído de
+        ``request.scope["endpoint"]``. Así un endpoint CUSTOM que llama
+        ``format_response`` sin ``prepare_action`` igual obtiene su acción para
+        ``get_schema_class``/``get_filters`` — antes caía a ``None`` y devolvía
+        el schema por defecto (de lista), rompiendo la validación del
+        ``response_model`` de detalle.
+
+        Es una ``property`` (no un campo anotado) a propósito: cbv
+        (fastapi-restful) NO la promueve a query param, así que no reaparece el
+        ``action`` espurio en la firma de cada endpoint.
+
+        OJO: NO reemplaza a ``prepare_action`` para permisos. El fallback solo
+        informa el schema/scoping; ``check_permissions`` sigue corriendo solo si
+        el endpoint llamó ``prepare_action`` (o delega en un CRUD base)."""
+        prepared = getattr(self, "_basekit_prepared_action", None)
+        if prepared is not None:
+            return prepared
+        request = getattr(self, "request", None)
+        scope = getattr(request, "scope", None) if request is not None else None
+        endpoint = scope.get("endpoint") if isinstance(scope, dict) else None
+        return getattr(endpoint, "__name__", None)
+
+    @action.setter
+    def action(self, value: Optional[str]) -> None:
+        """Permite fijar la acción a mano (``self.action = "list"``) — compat
+        con código pre-property. Escribe el backing attr que lee el getter."""
+        self._basekit_prepared_action = value
     _params_excluded_fields: ClassVar[Set[str]] = {
         "self",
         "page",
@@ -135,7 +164,9 @@ class BaseController:
         """
         if getattr(self, "_basekit_prepared_action", None) == action_name:
             return
-        self.action = action_name
+        # `action` es una property de solo-lectura que expone
+        # `_basekit_prepared_action` (con fallback al nombre del endpoint), así
+        # que fijamos el backing attr, no `self.action` directamente.
         self._basekit_prepared_action = action_name
         # Propagate the canonical CRUD action ("list"/"retrieve"/...) to the
         # service so `get_kwargs_query` / `get_filters` can branch on it. The

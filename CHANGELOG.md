@@ -5,6 +5,22 @@ Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.2] - 2026-07-17
+
+### Corregido
+
+- **`action` resuelve al nombre del endpoint cuando no se llamó `prepare_action`.**
+  `BaseController.action` pasó de ser un `ClassVar` (default `None`) a una
+  `@property`: usa la acción fijada por `prepare_action` y, si no la hay, cae al
+  nombre de la función de endpoint activa (`request.scope["endpoint"].__name__`).
+  Antes, un endpoint CUSTOM (create/update/… que no delega en el CRUD base y
+  llama `format_response` directo) tenía `action=None`, así que
+  `get_schema_class()` devolvía el schema por defecto (de lista) y la validación
+  del `response_model` de detalle fallaba con `ResponseValidationError`. Sigue
+  sin filtrarse como `?action=` (es property, no campo). Compat: `self.action =
+  "x"` sigue permitido vía setter. NO cambia permisos (`prepare_action` sigue
+  siendo necesario para `check_permissions`).
+
 ## [0.5.1] - 2026-07-17
 
 ### Seguridad / hardening
