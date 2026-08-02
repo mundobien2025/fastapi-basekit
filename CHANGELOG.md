@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.3 — 2026-08-01
+
+- TODO: describe changes
+
+
 Todos los cambios importantes de fastapi-basekit serán documentados aquí.
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
