@@ -5,6 +5,34 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+
+def _get_cors_headers(request: Request) -> Dict[str, str]:
+    """Extrae headers CORS del ``Origin`` del request para respuestas de error.
+
+    Cuando una respuesta se genera desde un handler que corre debajo del
+    CORSMiddleware los headers CORS se agregan automáticamente.  Pero si la
+    respuesta se genera desde ServerErrorMiddleware (por encima de CORS) o
+    desde cualquier otro camino que no pase por el middleware, los headers
+    faltan y el browser reporta un falso error CORS.  Esta función permite
+    agregarlos defensivamente desde cualquier handler.
+    """
+    origin = request.headers.get("origin")
+    if not origin:
+        return {}
+    return {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Vary": "Origin",
+    }
+
+
+def _apply_cors(request: Request, response: JSONResponse) -> JSONResponse:
+    """Agrega headers CORS defensivos a una ``JSONResponse``."""
+    headers = _get_cors_headers(request)
+    if headers:
+        response.headers.update(headers)
+    return response
+
 try:  # pragma: no cover - dependencia opcional
     from pymongo.errors import DuplicateKeyError  # type: ignore
 except ImportError:  # pragma: no cover
@@ -35,7 +63,10 @@ async def api_exception_handler(request: Request, exc: APIException):
     response = BaseResponse(
         status=exc.status_code, message=exc.message, data=exc.data
     )
-    return JSONResponse(status_code=exc.status, content=response.model_dump())
+    return _apply_cors(
+        request,
+        JSONResponse(status_code=exc.status, content=response.model_dump()),
+    )
 
 
 async def domain_error_handler(request: Request, exc: DomainError):
@@ -46,8 +77,11 @@ async def domain_error_handler(request: Request, exc: DomainError):
     a `exc.http_status()` con el mismo envelope `BaseResponse` que el resto.
     """
     response = BaseResponse(status=exc.code, message=exc.message, data=None)
-    return JSONResponse(
-        status_code=exc.http_status(), content=response.model_dump()
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=exc.http_status(), content=response.model_dump()
+        ),
     )
 
 
@@ -81,9 +115,12 @@ async def document_not_found_handler(request: Request, exc: DocumentNotFound):
         message="Documento no encontrado",
         data={"detail": str(exc)},
     )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=response.model_dump(),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=response.model_dump(),
+        ),
     )
 
 
@@ -96,9 +133,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         message="Ocurrió un error desconocido",
         data={"detail": str(exc)},
     )
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content=response.model_dump(),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=response.model_dump(),
+        ),
     )
 
 
@@ -119,9 +159,12 @@ async def value_exception_handler(
         data=str(error_details),
     )
 
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=response.model_dump(mode="json"),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=response.model_dump(mode="json"),
+        ),
     )
 
 
@@ -139,9 +182,12 @@ async def request_validation_handler(
         message="Error de validación",
         data=exc.errors(),
     )
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=response.model_dump(mode="json"),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content=response.model_dump(mode="json"),
+        ),
     )
 
 
@@ -153,9 +199,12 @@ async def integrity_error_handler(request: Request, exc: Exception):
         message="Registro ya existe o viola una restricción de integridad",
         data={"detail": str(detail) if detail is not None else str(exc)},
     )
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=response.model_dump(mode="json"),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=response.model_dump(mode="json"),
+        ),
     )
 
 

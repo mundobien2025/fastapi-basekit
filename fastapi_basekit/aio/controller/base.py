@@ -264,13 +264,33 @@ class BaseController:
         # raw value when the schema doesn't fit (custom-action endpoints
         # often return ad-hoc dicts that don't match the controller's
         # default schema_class — those should pass through untouched).
-        if isinstance(data, list):
-            data_dicts = [self.to_dict(item) for item in data]
-            try:
-                adapter = TypeAdapter(List[schema])
-                data_parsed = adapter.validate_python(data_dicts)
-            except Exception:
-                data_parsed = data_dicts
+        #
+        # Cuando un endpoint custom ya devuelve un modelo Pydantic específico
+        # (distinto a ``schema``), no lo re-casteeamos al schema por defecto:
+        # eso rompe el ``response_model`` declarado en la ruta y provoca
+        # ResponseValidationError. Se convierte a dict limpio y FastAPI se
+        # encarga de validar/serializar contra el response_model del endpoint.
+        if isinstance(data, BaseModel):
+            if isinstance(data, schema):
+                data_parsed = data
+            else:
+                data_parsed = self.to_dict(data)
+
+        elif isinstance(data, list):
+            # Si la lista contiene modelos Pydantic distintos al schema por
+            # defecto, respetarlos; de lo contrario validar normalmente.
+            if data and all(
+                isinstance(item, BaseModel) and not isinstance(item, schema)
+                for item in data
+            ):
+                data_parsed = [self.to_dict(item) for item in data]
+            else:
+                data_dicts = [self.to_dict(item) for item in data]
+                try:
+                    adapter = TypeAdapter(List[schema])
+                    data_parsed = adapter.validate_python(data_dicts)
+                except Exception:
+                    data_parsed = data_dicts
 
         elif isinstance(data, dict):
             try:

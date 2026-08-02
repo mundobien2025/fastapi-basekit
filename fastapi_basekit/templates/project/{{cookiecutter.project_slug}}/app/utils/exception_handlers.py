@@ -10,6 +10,7 @@ from fastapi_basekit.exceptions.api_exceptions import (
     DatabaseIntegrityException,
     ValidationException,
 )
+from fastapi_basekit.exceptions.handler import _apply_cors  # noqa: F401
 from fastapi_basekit.schema.base import BaseResponse
 from pydantic import ValidationError
 {% if cookiecutter.orm == "sqlalchemy" -%}
@@ -19,7 +20,10 @@ from sqlalchemy.exc import IntegrityError
 
 async def api_exception_handler(request: Request, exc: APIException):
     response = BaseResponse(status=exc.status_code, message=exc.message, data=exc.data)
-    return JSONResponse(status_code=exc.status, content=response.model_dump())
+    return _apply_cors(
+        request,
+        JSONResponse(status_code=exc.status, content=response.model_dump()),
+    )
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -28,7 +32,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def database_exception_handler(request: Request, exc: DatabaseIntegrityException):
     response = BaseResponse(status=exc.status_code, message=exc.message, data=exc.data)
-    return JSONResponse(status_code=exc.status, content=response.model_dump())
+    return _apply_cors(
+        request,
+        JSONResponse(status_code=exc.status, content=response.model_dump()),
+    )
 
 
 async def value_exception_handler(request: Request, exc: Union[ValidationError, ValueError]):
@@ -42,9 +49,12 @@ async def value_exception_handler(request: Request, exc: Union[ValidationError, 
         message="Field validation error",
         data=str(error_details),
     )
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=response.model_dump(mode="json"),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=response.model_dump(mode="json"),
+        ),
     )
 
 
@@ -65,9 +75,12 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
         message = "Database integrity error"
 
     response = BaseResponse(status="DATABASE_INTEGRITY_ERROR", message=message, data=None)
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=response.model_dump(),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=response.model_dump(),
+        ),
     )
 {% endif %}
 
@@ -78,7 +91,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         message="Unknown error",
         data={"detail": str(exc)},
     )
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content=response.model_dump(),
+    return _apply_cors(
+        request,
+        JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=response.model_dump(),
+        ),
     )

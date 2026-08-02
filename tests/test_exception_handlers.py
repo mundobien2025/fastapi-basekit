@@ -39,6 +39,10 @@ def client():
         # code sin mapeo → DEFAULT_STATUS (400)
         raise DomainError("SOMETHING", "algo pasó")
 
+    @app.get("/boom-generic")
+    async def boom_generic():
+        raise RuntimeError("error inesperado")
+
     @app.post("/echo")
     async def echo(body: Body):
         return {"n": body.n}
@@ -83,3 +87,16 @@ def test_domain_error_default_status(client):
     r = client.get("/boom-domain-default")
     assert r.status_code == 400  # DEFAULT_STATUS
     assert r.json()["status"] == "SOMETHING"
+
+
+def test_cors_headers_injected_on_error(client):
+    """Todas las respuestas de error incluyen headers CORS cuando el request
+    tiene un header ``Origin`` (defensa en profundidad)."""
+    r = client.get(
+        "/boom-generic",
+        headers={"Origin": "https://app.example.com"},
+    )
+    assert r.status_code == 500
+    assert r.headers.get("Access-Control-Allow-Origin") == "https://app.example.com"
+    assert r.headers.get("Access-Control-Allow-Credentials") == "true"
+    assert r.headers.get("Vary") == "Origin"
