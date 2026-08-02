@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2565,7 +2565,27 @@
 <span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
 <span class="normal"><a href="#__codelineno-0-437">437</a></span>
-<span class="normal"><a href="#__codelineno-0-438">438</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseController</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-438">438</a></span>
+<span class="normal"><a href="#__codelineno-0-439">439</a></span>
+<span class="normal"><a href="#__codelineno-0-440">440</a></span>
+<span class="normal"><a href="#__codelineno-0-441">441</a></span>
+<span class="normal"><a href="#__codelineno-0-442">442</a></span>
+<span class="normal"><a href="#__codelineno-0-443">443</a></span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span>
+<span class="normal"><a href="#__codelineno-0-446">446</a></span>
+<span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span>
+<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+<span class="normal"><a href="#__codelineno-0-454">454</a></span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseController</span><span class="p">:</span>
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Montar rutas CRUD genericas y captura errores de negocio.&quot;&quot;&quot;</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="n">service</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">()</span>
@@ -2759,178 +2779,198 @@
 <a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="c1"># raw value when the schema doesn&#39;t fit (custom-action endpoints</span>
 <a id="__codelineno-0-265" name="__codelineno-0-265"></a>        <span class="c1"># often return ad-hoc dicts that don&#39;t match the controller&#39;s</span>
 <a id="__codelineno-0-266" name="__codelineno-0-266"></a>        <span class="c1"># default schema_class — those should pass through untouched).</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a>            <span class="n">data_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a>                <span class="n">adapter</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">List</span><span class="p">[</span><span class="n">schema</span><span class="p">])</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">data_dicts</span><span class="p">)</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dicts</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a>        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>            <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dict</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a>        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>        <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>        <span class="n">response_cls</span> <span class="o">=</span> <span class="n">BasePaginationResponse</span> <span class="k">if</span> <span class="n">pagination</span> <span class="k">else</span> <span class="n">BaseResponse</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a>        <span class="c1">#</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a>        <span class="c1"># Cuando un endpoint custom ya devuelve un modelo Pydantic específico</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a>        <span class="c1"># (distinto a ``schema``), no lo re-casteeamos al schema por defecto:</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a>        <span class="c1"># eso rompe el ``response_model`` declarado en la ruta y provoca</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a>        <span class="c1"># ResponseValidationError. Se convierte a dict limpio y FastAPI se</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a>        <span class="c1"># encarga de validar/serializar contra el response_model del endpoint.</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>            <span class="c1"># Si la lista contiene modelos Pydantic distintos al schema por</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>            <span class="c1"># defecto, respetarlos; de lo contrario validar normalmente.</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>            <span class="k">if</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>                <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a>            <span class="p">):</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>                <span class="n">data_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>                <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>                    <span class="n">adapter</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">List</span><span class="p">[</span><span class="n">schema</span><span class="p">])</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>                    <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">data_dicts</span><span class="p">)</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>                    <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dicts</span>
 <a id="__codelineno-0-294" name="__codelineno-0-294"></a>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>        <span class="c1"># Construcción dinámica de argumentos</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a>            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>        <span class="p">}</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="k">if</span> <span class="n">pagination</span><span class="p">:</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pagination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>        <span class="k">return</span> <span class="n">response_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">        Los valores llegan como strings; se coaccionan a los tipos DECLARADOS</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="sd">        en la firma del endpoint (leída de ``request.scope[&quot;endpoint&quot;]``), de</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="sd">        forma DETERMINISTA — sin introspección de stack-frames. Un query param</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">        que no está declarado en la firma se deja como string (idéntico a lo</span>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">        que haría FastAPI si no lo tipara), evitando coacciones-adivinanza que</span>
-<a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">        romperían columnas string con valores numéricos.</span>
-<a id="__codelineno-0-315" name="__codelineno-0-315"></a>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">        Reemplaza el viejo mecanismo basado en ``inspect.currentframe()`` +</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">        ``skip_frames`` (un número mágico distinto por capa de herencia, fuente</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">        de listados vacíos difíciles de diagnosticar).</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="sd">        ``skip_frames``: DEPRECADO e IGNORADO. Se conserva solo por</span>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">        retro-compatibilidad — algunos consumidores overridean ``_params`` y</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">        llaman ``super()._params(skip_frames + 1)`` (p.ej. mixins de path</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">        params). Ya no se usa: la coerción no depende de frames. No lo pases en</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="sd">        código nuevo.</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="n">query_params</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a>            <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="k">else</span> <span class="p">{}</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a>        <span class="p">)</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a>        <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_endpoint_param_types</span><span class="p">()</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;order_by&quot;</span><span class="p">}</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a>        <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a>        <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a>        <span class="n">search</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a>        <span class="n">order_by</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a>        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a>            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_param</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">declared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a>            <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a>                <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a>                <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;search&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>                <span class="n">search</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;order_by&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>                <span class="n">order_by</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>            <span class="k">elif</span> <span class="p">(</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>                <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standard_params</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>                <span class="ow">and</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params_excluded_fields</span>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>            <span class="p">):</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>                <span class="n">filters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a>            <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
-<a id="__codelineno-0-357" name="__codelineno-0-357"></a>            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>            <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>            <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="p">}</span>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_endpoint_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapea {nombre_param: anotación} desde la firma del endpoint activo.</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>
-<a id="__codelineno-0-366" name="__codelineno-0-366"></a><span class="sd">        Lee ``request.scope[&quot;endpoint&quot;]`` (la función de ruta que FastAPI está</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a><span class="sd">        ejecutando) y delega en el cache por-endpoint. Devuelve ``{}`` si no hay</span>
-<a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="sd">        endpoint o su firma no es introspectable (los valores quedan como string).</span>
-<a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-370" name="__codelineno-0-370"></a>        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;request&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-371" name="__codelineno-0-371"></a>        <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;scope&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-372" name="__codelineno-0-372"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;endpoint&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a>        <span class="k">if</span> <span class="n">endpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>            <span class="k">return</span> <span class="p">{}</span>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a>            <span class="k">return</span> <span class="n">_endpoint_param_types_cached</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>            <span class="c1"># endpoint no hasheable (raro) → sin coerción, valores string.</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>            <span class="k">return</span> <span class="p">{}</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_coerce_param</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Coacciona un valor de query (string) al tipo declarado en la firma.</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a>
-<a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">        bool/int/float a mano; el RESTO (date, datetime, UUID, Decimal, Enum…)</span>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        vía pydantic ``TypeAdapter`` — el MISMO motor que usa FastAPI, para que</span>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">        el filtro reciba el objeto tipado (ej. un `date` real que compara contra</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">        una columna DATE) y no el string. Sin anotación, str, o si la coacción</span>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        falla → se devuelve el valor original sin romper.</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">        Nota: FastAPI ya rechaza (422) un query param tipado con valor inválido</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        antes de llegar acá, así que en la práctica la coacción siempre aplica.</span>
-<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="k">if</span> <span class="n">annotation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395"></a>            <span class="k">return</span> <span class="n">raw</span>
-<a id="__codelineno-0-396" name="__codelineno-0-396"></a>        <span class="n">target</span> <span class="o">=</span> <span class="n">_unwrap_optional</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a>            <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">}</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a>                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a>                <span class="k">return</span> <span class="n">raw</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a>                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
-<a id="__codelineno-0-407" name="__codelineno-0-407"></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-<a id="__codelineno-0-408" name="__codelineno-0-408"></a>                <span class="k">return</span> <span class="n">raw</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a>            <span class="k">return</span> <span class="n">raw</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a>        <span class="c1"># date / datetime / UUID / Decimal / Enum / etc. → pydantic (FastAPI-parity)</span>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a>        <span class="n">adapter</span> <span class="o">=</span> <span class="n">_type_adapter_for</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="k">if</span> <span class="n">adapter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a>            <span class="k">return</span> <span class="n">raw</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a>            <span class="k">return</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="k">return</span> <span class="n">raw</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="k">return</span> <span class="n">default</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper para convertir modelos ORM/Pydantic a dict.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="c1"># Filtramos atributos privados de SQLAlchemy</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>            <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="p">}</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>        <span class="k">return</span> <span class="n">obj</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>            <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dict</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>        <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a>        <span class="n">response_cls</span> <span class="o">=</span> <span class="n">BasePaginationResponse</span> <span class="k">if</span> <span class="n">pagination</span> <span class="k">else</span> <span class="n">BaseResponse</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a>        <span class="c1"># Construcción dinámica de argumentos</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a>        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>        <span class="p">}</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>        <span class="k">if</span> <span class="n">pagination</span><span class="p">:</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pagination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="k">return</span> <span class="n">response_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">        Los valores llegan como strings; se coaccionan a los tipos DECLARADOS</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        en la firma del endpoint (leída de ``request.scope[&quot;endpoint&quot;]``), de</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">        forma DETERMINISTA — sin introspección de stack-frames. Un query param</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">        que no está declarado en la firma se deja como string (idéntico a lo</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">        que haría FastAPI si no lo tipara), evitando coacciones-adivinanza que</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">        romperían columnas string con valores numéricos.</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a><span class="sd">        Reemplaza el viejo mecanismo basado en ``inspect.currentframe()`` +</span>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a><span class="sd">        ``skip_frames`` (un número mágico distinto por capa de herencia, fuente</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a><span class="sd">        de listados vacíos difíciles de diagnosticar).</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="sd">        ``skip_frames``: DEPRECADO e IGNORADO. Se conserva solo por</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="sd">        retro-compatibilidad — algunos consumidores overridean ``_params`` y</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">        llaman ``super()._params(skip_frames + 1)`` (p.ej. mixins de path</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">        params). Ya no se usa: la coerción no depende de frames. No lo pases en</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">        código nuevo.</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>        <span class="n">query_params</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>            <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="k">else</span> <span class="p">{}</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>        <span class="p">)</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_endpoint_param_types</span><span class="p">()</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;order_by&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="n">search</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="n">order_by</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_param</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">declared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>            <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>                <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>                <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;search&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>                <span class="n">search</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;order_by&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a>                <span class="n">order_by</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a>            <span class="k">elif</span> <span class="p">(</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a>                <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standard_params</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a>                <span class="ow">and</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params_excluded_fields</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>            <span class="p">):</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>                <span class="n">filters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>        <span class="k">return</span> <span class="p">{</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>            <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>            <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>            <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="p">}</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_endpoint_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapea {nombre_param: anotación} desde la firma del endpoint activo.</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        Lee ``request.scope[&quot;endpoint&quot;]`` (la función de ruta que FastAPI está</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">        ejecutando) y delega en el cache por-endpoint. Devuelve ``{}`` si no hay</span>
+<a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">        endpoint o su firma no es introspectable (los valores quedan como string).</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;request&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a>        <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;scope&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;endpoint&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="k">if</span> <span class="n">endpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a>            <span class="k">return</span> <span class="p">{}</span>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a>            <span class="k">return</span> <span class="n">_endpoint_param_types_cached</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<a id="__codelineno-0-398" name="__codelineno-0-398"></a>            <span class="c1"># endpoint no hasheable (raro) → sin coerción, valores string.</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a>            <span class="k">return</span> <span class="p">{}</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>
+<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_coerce_param</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Coacciona un valor de query (string) al tipo declarado en la firma.</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a><span class="sd">        bool/int/float a mano; el RESTO (date, datetime, UUID, Decimal, Enum…)</span>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">        vía pydantic ``TypeAdapter`` — el MISMO motor que usa FastAPI, para que</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">        el filtro reciba el objeto tipado (ej. un `date` real que compara contra</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">        una columna DATE) y no el string. Sin anotación, str, o si la coacción</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        falla → se devuelve el valor original sin romper.</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">        Nota: FastAPI ya rechaza (422) un query param tipado con valor inválido</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">        antes de llegar acá, así que en la práctica la coacción siempre aplica.</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="k">if</span> <span class="n">annotation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a>            <span class="k">return</span> <span class="n">raw</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="n">target</span> <span class="o">=</span> <span class="n">_unwrap_optional</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>                <span class="k">return</span> <span class="n">raw</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>                <span class="k">return</span> <span class="n">raw</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="k">return</span> <span class="n">raw</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="c1"># date / datetime / UUID / Decimal / Enum / etc. → pydantic (FastAPI-parity)</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="n">adapter</span> <span class="o">=</span> <span class="n">_type_adapter_for</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="k">if</span> <span class="n">adapter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="k">return</span> <span class="n">raw</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="k">return</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>            <span class="k">return</span> <span class="n">raw</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="k">return</span> <span class="n">default</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper para convertir modelos ORM/Pydantic a dict.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>            <span class="c1"># Filtramos atributos privados de SQLAlchemy</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="k">return</span> <span class="p">{</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="p">}</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>        <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3011,7 +3051,27 @@
 <span class="normal"><a href="#__codelineno-0-301">301</a></span>
 <span class="normal"><a href="#__codelineno-0-302">302</a></span>
 <span class="normal"><a href="#__codelineno-0-303">303</a></span>
-<span class="normal"><a href="#__codelineno-0-304">304</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="k">def</span><span class="w"> </span><span class="nf">format_response</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-304">304</a></span>
+<span class="normal"><a href="#__codelineno-0-305">305</a></span>
+<span class="normal"><a href="#__codelineno-0-306">306</a></span>
+<span class="normal"><a href="#__codelineno-0-307">307</a></span>
+<span class="normal"><a href="#__codelineno-0-308">308</a></span>
+<span class="normal"><a href="#__codelineno-0-309">309</a></span>
+<span class="normal"><a href="#__codelineno-0-310">310</a></span>
+<span class="normal"><a href="#__codelineno-0-311">311</a></span>
+<span class="normal"><a href="#__codelineno-0-312">312</a></span>
+<span class="normal"><a href="#__codelineno-0-313">313</a></span>
+<span class="normal"><a href="#__codelineno-0-314">314</a></span>
+<span class="normal"><a href="#__codelineno-0-315">315</a></span>
+<span class="normal"><a href="#__codelineno-0-316">316</a></span>
+<span class="normal"><a href="#__codelineno-0-317">317</a></span>
+<span class="normal"><a href="#__codelineno-0-318">318</a></span>
+<span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span>
+<span class="normal"><a href="#__codelineno-0-324">324</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="k">def</span><span class="w"> </span><span class="nf">format_response</span><span class="p">(</span>
 <a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="n">pagination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3024,44 +3084,64 @@
 <a id="__codelineno-0-264" name="__codelineno-0-264"></a>    <span class="c1"># raw value when the schema doesn&#39;t fit (custom-action endpoints</span>
 <a id="__codelineno-0-265" name="__codelineno-0-265"></a>    <span class="c1"># often return ad-hoc dicts that don&#39;t match the controller&#39;s</span>
 <a id="__codelineno-0-266" name="__codelineno-0-266"></a>    <span class="c1"># default schema_class — those should pass through untouched).</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a>        <span class="n">data_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a>            <span class="n">adapter</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">List</span><span class="p">[</span><span class="n">schema</span><span class="p">])</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">data_dicts</span><span class="p">)</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dicts</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a>    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>        <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dict</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="n">data_parsed</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="n">response_cls</span> <span class="o">=</span> <span class="n">BasePaginationResponse</span> <span class="k">if</span> <span class="n">pagination</span> <span class="k">else</span> <span class="n">BaseResponse</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="c1">#</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a>    <span class="c1"># Cuando un endpoint custom ya devuelve un modelo Pydantic específico</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a>    <span class="c1"># (distinto a ``schema``), no lo re-casteeamos al schema por defecto:</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a>    <span class="c1"># eso rompe el ``response_model`` declarado en la ruta y provoca</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a>    <span class="c1"># ResponseValidationError. Se convierte a dict limpio y FastAPI se</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a>    <span class="c1"># encarga de validar/serializar contra el response_model del endpoint.</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>        <span class="c1"># Si la lista contiene modelos Pydantic distintos al schema por</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>        <span class="c1"># defecto, respetarlos; de lo contrario validar normalmente.</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>        <span class="k">if</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>            <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a>        <span class="p">):</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>            <span class="n">data_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>                <span class="n">adapter</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">List</span><span class="p">[</span><span class="n">schema</span><span class="p">])</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">data_dicts</span><span class="p">)</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dicts</span>
 <a id="__codelineno-0-294" name="__codelineno-0-294"></a>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="c1"># Construcción dinámica de argumentos</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a>        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="p">}</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">if</span> <span class="n">pagination</span><span class="p">:</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pagination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="k">return</span> <span class="n">response_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data_dict</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="k">elif</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="n">data_parsed</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>        <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a>    <span class="n">response_cls</span> <span class="o">=</span> <span class="n">BasePaginationResponse</span> <span class="k">if</span> <span class="n">pagination</span> <span class="k">else</span> <span class="n">BaseResponse</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a>    <span class="c1"># Construcción dinámica de argumentos</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a>    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>    <span class="p">}</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>    <span class="k">if</span> <span class="n">pagination</span><span class="p">:</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pagination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>    <span class="k">return</span> <span class="n">response_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3221,29 +3301,29 @@ endpoint (there is no metaclass that does this automatically).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>fastapi_basekit/aio/controller/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-427">427</a></span>
-<span class="normal"><a href="#__codelineno-0-428">428</a></span>
-<span class="normal"><a href="#__codelineno-0-429">429</a></span>
-<span class="normal"><a href="#__codelineno-0-430">430</a></span>
-<span class="normal"><a href="#__codelineno-0-431">431</a></span>
-<span class="normal"><a href="#__codelineno-0-432">432</a></span>
-<span class="normal"><a href="#__codelineno-0-433">433</a></span>
-<span class="normal"><a href="#__codelineno-0-434">434</a></span>
-<span class="normal"><a href="#__codelineno-0-435">435</a></span>
-<span class="normal"><a href="#__codelineno-0-436">436</a></span>
-<span class="normal"><a href="#__codelineno-0-437">437</a></span>
-<span class="normal"><a href="#__codelineno-0-438">438</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper para convertir modelos ORM/Pydantic a dict.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>        <span class="c1"># Filtramos atributos privados de SQLAlchemy</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="p">}</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="k">return</span> <span class="n">obj</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span>
+<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+<span class="normal"><a href="#__codelineno-0-454">454</a></span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper para convertir modelos ORM/Pydantic a dict.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="c1"># Filtramos atributos privados de SQLAlchemy</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="k">return</span> <span class="p">{</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="p">}</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>    <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3280,27 +3360,7 @@ código nuevo.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>fastapi_basekit/aio/controller/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-306">306</a></span>
-<span class="normal"><a href="#__codelineno-0-307">307</a></span>
-<span class="normal"><a href="#__codelineno-0-308">308</a></span>
-<span class="normal"><a href="#__codelineno-0-309">309</a></span>
-<span class="normal"><a href="#__codelineno-0-310">310</a></span>
-<span class="normal"><a href="#__codelineno-0-311">311</a></span>
-<span class="normal"><a href="#__codelineno-0-312">312</a></span>
-<span class="normal"><a href="#__codelineno-0-313">313</a></span>
-<span class="normal"><a href="#__codelineno-0-314">314</a></span>
-<span class="normal"><a href="#__codelineno-0-315">315</a></span>
-<span class="normal"><a href="#__codelineno-0-316">316</a></span>
-<span class="normal"><a href="#__codelineno-0-317">317</a></span>
-<span class="normal"><a href="#__codelineno-0-318">318</a></span>
-<span class="normal"><a href="#__codelineno-0-319">319</a></span>
-<span class="normal"><a href="#__codelineno-0-320">320</a></span>
-<span class="normal"><a href="#__codelineno-0-321">321</a></span>
-<span class="normal"><a href="#__codelineno-0-322">322</a></span>
-<span class="normal"><a href="#__codelineno-0-323">323</a></span>
-<span class="normal"><a href="#__codelineno-0-324">324</a></span>
-<span class="normal"><a href="#__codelineno-0-325">325</a></span>
-<span class="normal"><a href="#__codelineno-0-326">326</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-326">326</a></span>
 <span class="normal"><a href="#__codelineno-0-327">327</a></span>
 <span class="normal"><a href="#__codelineno-0-328">328</a></span>
 <span class="normal"><a href="#__codelineno-0-329">329</a></span>
@@ -3335,62 +3395,82 @@ código nuevo.</p>
 <span class="normal"><a href="#__codelineno-0-358">358</a></span>
 <span class="normal"><a href="#__codelineno-0-359">359</a></span>
 <span class="normal"><a href="#__codelineno-0-360">360</a></span>
-<span class="normal"><a href="#__codelineno-0-361">361</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="k">def</span><span class="w"> </span><span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">    Los valores llegan como strings; se coaccionan a los tipos DECLARADOS</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="sd">    en la firma del endpoint (leída de ``request.scope[&quot;endpoint&quot;]``), de</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="sd">    forma DETERMINISTA — sin introspección de stack-frames. Un query param</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">    que no está declarado en la firma se deja como string (idéntico a lo</span>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">    que haría FastAPI si no lo tipara), evitando coacciones-adivinanza que</span>
-<a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">    romperían columnas string con valores numéricos.</span>
-<a id="__codelineno-0-315" name="__codelineno-0-315"></a>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">    Reemplaza el viejo mecanismo basado en ``inspect.currentframe()`` +</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">    ``skip_frames`` (un número mágico distinto por capa de herencia, fuente</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">    de listados vacíos difíciles de diagnosticar).</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="sd">    ``skip_frames``: DEPRECADO e IGNORADO. Se conserva solo por</span>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">    retro-compatibilidad — algunos consumidores overridean ``_params`` y</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">    llaman ``super()._params(skip_frames + 1)`` (p.ej. mixins de path</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">    params). Ya no se usa: la coerción no depende de frames. No lo pases en</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="sd">    código nuevo.</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>    <span class="n">query_params</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a>        <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="k">else</span> <span class="p">{}</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a>    <span class="p">)</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_endpoint_param_types</span><span class="p">()</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>    <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;order_by&quot;</span><span class="p">}</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a>    <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a>    <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="n">search</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="n">order_by</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a>    <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a>    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a>        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_param</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">declared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a>        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a>            <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a>            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;search&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>            <span class="n">search</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;order_by&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>            <span class="n">order_by</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="k">elif</span> <span class="p">(</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>            <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standard_params</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>            <span class="ow">and</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params_excluded_fields</span>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="p">):</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>            <span class="n">filters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>    <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a>        <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
-<a id="__codelineno-0-357" name="__codelineno-0-357"></a>        <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="p">}</span>
+<span class="normal"><a href="#__codelineno-0-361">361</a></span>
+<span class="normal"><a href="#__codelineno-0-362">362</a></span>
+<span class="normal"><a href="#__codelineno-0-363">363</a></span>
+<span class="normal"><a href="#__codelineno-0-364">364</a></span>
+<span class="normal"><a href="#__codelineno-0-365">365</a></span>
+<span class="normal"><a href="#__codelineno-0-366">366</a></span>
+<span class="normal"><a href="#__codelineno-0-367">367</a></span>
+<span class="normal"><a href="#__codelineno-0-368">368</a></span>
+<span class="normal"><a href="#__codelineno-0-369">369</a></span>
+<span class="normal"><a href="#__codelineno-0-370">370</a></span>
+<span class="normal"><a href="#__codelineno-0-371">371</a></span>
+<span class="normal"><a href="#__codelineno-0-372">372</a></span>
+<span class="normal"><a href="#__codelineno-0-373">373</a></span>
+<span class="normal"><a href="#__codelineno-0-374">374</a></span>
+<span class="normal"><a href="#__codelineno-0-375">375</a></span>
+<span class="normal"><a href="#__codelineno-0-376">376</a></span>
+<span class="normal"><a href="#__codelineno-0-377">377</a></span>
+<span class="normal"><a href="#__codelineno-0-378">378</a></span>
+<span class="normal"><a href="#__codelineno-0-379">379</a></span>
+<span class="normal"><a href="#__codelineno-0-380">380</a></span>
+<span class="normal"><a href="#__codelineno-0-381">381</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="k">def</span><span class="w"> </span><span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">    Los valores llegan como strings; se coaccionan a los tipos DECLARADOS</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">    en la firma del endpoint (leída de ``request.scope[&quot;endpoint&quot;]``), de</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">    forma DETERMINISTA — sin introspección de stack-frames. Un query param</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">    que no está declarado en la firma se deja como string (idéntico a lo</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">    que haría FastAPI si no lo tipara), evitando coacciones-adivinanza que</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">    romperían columnas string con valores numéricos.</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a><span class="sd">    Reemplaza el viejo mecanismo basado en ``inspect.currentframe()`` +</span>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a><span class="sd">    ``skip_frames`` (un número mágico distinto por capa de herencia, fuente</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a><span class="sd">    de listados vacíos difíciles de diagnosticar).</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="sd">    ``skip_frames``: DEPRECADO e IGNORADO. Se conserva solo por</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="sd">    retro-compatibilidad — algunos consumidores overridean ``_params`` y</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">    llaman ``super()._params(skip_frames + 1)`` (p.ej. mixins de path</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">    params). Ya no se usa: la coerción no depende de frames. No lo pases en</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">    código nuevo.</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="n">query_params</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="k">else</span> <span class="p">{}</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="p">)</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_endpoint_param_types</span><span class="p">()</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>    <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;order_by&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="n">search</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>    <span class="n">order_by</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>    <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_param</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">declared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>            <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;search&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>            <span class="n">search</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;order_by&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a>            <span class="n">order_by</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a>        <span class="k">elif</span> <span class="p">(</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a>            <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standard_params</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a>            <span class="ow">and</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params_excluded_fields</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>        <span class="p">):</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>            <span class="n">filters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="k">return</span> <span class="p">{</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>    <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3585,7 +3665,7 @@ código nuevo.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.path", "navigation.top", "navigation.footer", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       
