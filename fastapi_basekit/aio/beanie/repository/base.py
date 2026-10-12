@@ -2,6 +2,8 @@ import logging
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from typing import get_args, get_origin
 import re
+import unicodedata
+from functools import lru_cache
 
 from bson import ObjectId
 from pydantic import BaseModel
@@ -10,6 +12,35 @@ from beanie.odm.queries.find import FindMany
 from beanie.operators import Or, RegEx
 
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=None)
+def _accent_class(letter: str) -> str:
+    """Clase regex que matchea `letter` con y sin tilde/diéresis, y en mayúscula."""
+    variants = {letter, letter.upper()}
+    for cp in range(0x00C0, 0x0100):  # Latin-1: á é í ó ú ü ñ… (mantiene el patrón corto)
+        ch = chr(cp)
+        if unicodedata.normalize("NFD", ch)[0].lower() == letter:
+            variants.add(ch)
+    return "[" + "".join(sorted(variants)) + "]"
+
+
+def build_search_regex(term: str) -> str:
+    """Patrón regex para búsqueda de texto (usar con `options="i"`).
+
+    - Todo lo que escribe el usuario se escapa: `(`, `[`, `*`… son literales y
+      no rompen la query ni cambian el significado del patrón.
+    - Cada letra ASCII matchea también sus variantes acentuadas: `a` ↔ `á`,
+      `n` ↔ `ñ`, `o` ↔ `Ó`. Así "descripcion" encuentra "descripción".
+    """
+    parts = []
+    for ch in term:
+        base = unicodedata.normalize("NFD", ch)[0]
+        if base.isascii() and base.isalpha():
+            parts.append(_accent_class(base.lower()))
+        else:
+            parts.append(re.escape(ch))
+    return ".*" + "".join(parts) + ".*"
 
 #: Tipo del Document Beanie que gestiona el repositorio. Parametrízalo al
 #: declarar la subclase — ``class UserRepository(BaseRepository[User])`` — para
@@ -233,7 +264,7 @@ class BaseRepository(Generic[ModelT]):
                     *[
                         RegEx(
                             getattr(self.model, f),
-                            f".*{search}.*",
+                            build_search_regex(search),
                             options="i",
                         )
                         for f in search_fields
@@ -352,7 +383,7 @@ class BaseRepository(Generic[ModelT]):
 
         if search and search_fields:
             search_conditions = [
-                {field: {"$regex": f".*{search}.*", "$options": "i"}}
+                {field: {"$regex": build_search_regex(search), "$options": "i"}}
                 for field in search_fields
             ]
             if search_conditions:

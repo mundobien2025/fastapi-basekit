@@ -13,6 +13,8 @@ Covers:
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+from fastapi_basekit.aio.beanie.repository.base import build_search_regex
 from beanie import Document
 from pydantic import Field
 
@@ -97,8 +99,8 @@ class TestBuildListPipeline:
         assert len(pipeline) == 1
         match = pipeline[0]["$match"]
         assert "$or" in match
-        assert {"name": {"$regex": ".*ana.*", "$options": "i"}} in match["$or"]
-        assert {"email": {"$regex": ".*ana.*", "$options": "i"}} in match["$or"]
+        assert {"name": {"$regex": build_search_regex("ana"), "$options": "i"}} in match["$or"]
+        assert {"email": {"$regex": build_search_regex("ana"), "$options": "i"}} in match["$or"]
 
     def test_filters_plus_search_combined_with_and(self):
         repo = FakeRepo()
@@ -110,7 +112,7 @@ class TestBuildListPipeline:
         match = pipeline[0]["$match"]
         assert "$and" in match
         assert {"is_active": True} in match["$and"]
-        assert {"$or": [{"name": {"$regex": ".*ana.*", "$options": "i"}}]} in match["$and"]
+        assert {"$or": [{"name": {"$regex": build_search_regex("ana"), "$options": "i"}}]} in match["$and"]
 
     def test_simple_order_by_appends_sort_stage(self):
         repo = FakeRepo()

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.5 — 2026-10-12
+
+### Corregido
+
+- **Búsqueda Beanie: el término se escapa antes de armar la regex.** Antes se
+  interpolaba crudo en `f".*{search}.*"`: `(`, `[`, `*`, `+`… rompían la
+  consulta (error de Mongo) o cambiaban el significado del patrón. Ahora lo
+  hace `build_search_regex` (`aio/beanie/repository/base.py`), usado en
+  `build_filter_query` y `_build_match_stage`.
+
+### Agregado
+
+- **Búsqueda Beanie sin distinguir acentos.** Cada letra del término
+  matchea también sus variantes en Latin-1: `a`↔`á`, `n`↔`ñ`, `u`↔`ü`…
+  "descripcion" encuentra "descripción". SQL (`ilike`) no cambia.
+
 ## 0.5.4 — 2026-08-11
 
 ### Corregido (seguridad)
