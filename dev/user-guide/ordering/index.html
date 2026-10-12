@@ -2022,7 +2022,7 @@
 </code></pre></div>
 <h2 id="default-por-service">Default por service</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">ThingService</span><span class="p">(</span><span class="n">BaseService</span><span class="p">):</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">order_by</span> <span class="o">=</span> <span class="s2">&quot;-created_at&quot;</span>   <span class="c1"># default</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">order_by</span> <span class="o">=</span> <span class="s2">"-created_at"</span>   <span class="c1"># default</span>
 </code></pre></div>
 <p>Cliente puede overridear con <code>?order_by=name</code>.</p>
 <h2 id="ordenamiento-con-relaciones">Ordenamiento con relaciones</h2>
@@ -2037,7 +2037,7 @@
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="n">select</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">UserRoles</span><span class="o">.</span><span class="n">user_id</span><span class="p">))</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">UserRoles</span><span class="o">.</span><span class="n">role_id</span> <span class="o">==</span> <span class="n">Roles</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="o">.</span><span class="n">scalar_subquery</span><span class="p">()</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;member_count&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">"member_count"</span><span class="p">)</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="p">)</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="n">Roles</span><span class="p">,</span> <span class="n">member_count</span><span class="p">)</span>
 </code></pre></div>
@@ -2046,7 +2046,7 @@
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_paginated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="o">...</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="n">special_fields</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;member_count&quot;</span><span class="p">:</span> <span class="n">Roles</span><span class="o">.</span><span class="n">id</span><span class="p">},</span>  <span class="c1"># mapea alias a expresión</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="n">special_fields</span><span class="o">=</span><span class="p">{</span><span class="s2">"member_count"</span><span class="p">:</span> <span class="n">Roles</span><span class="o">.</span><span class="n">id</span><span class="p">},</span>  <span class="c1"># mapea alias a expresión</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="p">)</span>
 </code></pre></div>
 <h2 id="expresiones-sqlalchemy-directas">Expresiones SQLAlchemy directas</h2>

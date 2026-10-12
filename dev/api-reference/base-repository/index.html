@@ -3288,7 +3288,7 @@ es <code>User</code>, etc.</p>
 <span class="normal"><a href="#__codelineno-0-897">897</a></span>
 <span class="normal"><a href="#__codelineno-0-898">898</a></span>
 <span class="normal"><a href="#__codelineno-0-899">899</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseRepository</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]):</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="w">    </span><span class="sd">"""</span>
 <a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    Repositorio base para SQLAlchemy Async, parametrizado por el modelo.</span>
 <a id="__codelineno-0-34" name="__codelineno-0-34"></a>
 <a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    Define operaciones CRUD, acceso por filtros y carga de relaciones (joins).</span>
@@ -3300,13 +3300,13 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a>
 <a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    A partir de ahí ``repo.get(id)`` es ``Optional[User]``, ``repo.create(...)``</span>
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    es ``User``, etc.</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    """</span>
 <a id="__codelineno-0-45" name="__codelineno-0-45"></a>
 <a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="n">model</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]</span>
 <a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">service</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-0-48" name="__codelineno-0-48"></a>
 <a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">:</span> <span class="n">AsyncSession</span><span class="p">):</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Inicializa el repositorio con la sesión a reutilizar.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="w">        </span><span class="sd">"""Inicializa el repositorio con la sesión a reutilizar."""</span>
 <a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="n">db</span>
 <a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-0-53" name="__codelineno-0-53"></a>
@@ -3315,25 +3315,25 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
 <a id="__codelineno-0-57" name="__codelineno-0-57"></a>
 <a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Valida y retorna el atributo (columna) del modelo.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="w">        </span><span class="sd">"""Valida y retorna el atributo (columna) del modelo."""</span>
 <a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="n">field</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 <a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="p">:</span>
 <a id="__codelineno-0-64" name="__codelineno-0-64"></a>            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>                <span class="sa">f</span><span class="s2">&quot;El campo &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39; no existe en </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>                <span class="sa">f</span><span class="s2">"El campo '</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">' no existe en </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
 <a id="__codelineno-0-66" name="__codelineno-0-66"></a>            <span class="p">)</span>
 <a id="__codelineno-0-67" name="__codelineno-0-67"></a>        <span class="k">return</span> <span class="n">field</span>
 <a id="__codelineno-0-68" name="__codelineno-0-68"></a>
 <a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_joins</span><span class="p">(</span>
 <a id="__codelineno-0-70" name="__codelineno-0-70"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Select</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 <a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Aplica las opciones de carga (joins) dinámicamente al query.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="w">        </span><span class="sd">"""Aplica las opciones de carga (joins) dinámicamente al query."""</span>
 <a id="__codelineno-0-73" name="__codelineno-0-73"></a>        <span class="k">if</span> <span class="n">joins</span><span class="p">:</span>
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a>            <span class="k">for</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">joins</span><span class="p">:</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">relation</span><span class="p">):</span>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>                    <span class="n">relationship_attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">relation</span><span class="p">)</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">relationship_attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">&quot;uselist&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a>                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">relationship_attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">"uselist"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
 <a id="__codelineno-0-78" name="__codelineno-0-78"></a>                        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">selectinload</span><span class="p">(</span><span class="n">relationship_attr</span><span class="p">))</span>
 <a id="__codelineno-0-79" name="__codelineno-0-79"></a>                    <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-0-80" name="__codelineno-0-80"></a>                        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">joinedload</span><span class="p">(</span><span class="n">relationship_attr</span><span class="p">))</span>
@@ -3342,19 +3342,19 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_field_path</span><span class="p">(</span>
 <a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
 <a id="__codelineno-0-85" name="__codelineno-0-85"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        Resuelve una ruta de campo (ej. &#39;user__role__name&#39;) a su atributo</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="w">        </span><span class="sd">"""</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        Resuelve una ruta de campo (ej. 'user__role__name') a su atributo</span>
 <a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        de SQLAlchemy y el conjunto de JOINs necesarios para el filtrado.</span>
 <a id="__codelineno-0-89" name="__codelineno-0-89"></a>
 <a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">            path: Ruta del campo con sintaxis &#39;__&#39;</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">            path: Ruta del campo con sintaxis '__'</span>
 <a id="__codelineno-0-92" name="__codelineno-0-92"></a>
 <a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">            Tuple con:</span>
 <a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">            - attr: Atributo final (columna o relación) o None si no existe</span>
 <a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">            - joins_to_apply: Dict con las relaciones intermedias (name: attr)</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>        <span class="n">parts</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">        """</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a>        <span class="n">parts</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"__"</span><span class="p">)</span>
 <a id="__codelineno-0-99" name="__codelineno-0-99"></a>        <span class="n">current_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
 <a id="__codelineno-0-100" name="__codelineno-0-100"></a>        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current_model</span><span class="p">,</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
 <a id="__codelineno-0-101" name="__codelineno-0-101"></a>        <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3365,7 +3365,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-106" name="__codelineno-0-106"></a>        <span class="c1"># Recorrer la cadena de relaciones intermedias</span>
 <a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
 <a id="__codelineno-0-108" name="__codelineno-0-108"></a>            <span class="c1"># Chequear si el atributo actual es una relación ORM</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a>            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">&quot;entity&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">"entity"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
 <a id="__codelineno-0-110" name="__codelineno-0-110"></a>                <span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="n">Relationship</span>
 <a id="__codelineno-0-111" name="__codelineno-0-111"></a>            <span class="p">):</span>
 <a id="__codelineno-0-112" name="__codelineno-0-112"></a>                <span class="c1"># Es una relación: Añadir al diccionario de JOINs</span>
@@ -3387,18 +3387,18 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-128" name="__codelineno-0-128"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_attribute</span><span class="p">(</span>
 <a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-131" name="__codelineno-0-131"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-132" name="__codelineno-0-132"></a><span class="sd">        Resuelve los atributos finales y las relaciones para JOINs a partir</span>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a><span class="sd">        de una ruta con &#39;__&#39;.</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a><span class="sd">        de una ruta con '__'.</span>
 <a id="__codelineno-0-134" name="__codelineno-0-134"></a>
 <a id="__codelineno-0-135" name="__codelineno-0-135"></a><span class="sd">        Soporta filtrado avanzado con relaciones usando sintaxis de doble</span>
 <a id="__codelineno-0-136" name="__codelineno-0-136"></a><span class="sd">        guion bajo (__). Por ejemplo:</span>
-<a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="sd">        - Filtro simple: {&quot;status&quot;: &quot;active&quot;} → WHERE users.status = &#39;active&#39;</span>
-<a id="__codelineno-0-138" name="__codelineno-0-138"></a><span class="sd">        - Filtro con relación: {&quot;user_roles__role__code&quot;: &quot;Impulsado&quot;} →</span>
+<a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="sd">        - Filtro simple: {"status": "active"} → WHERE users.status = 'active'</span>
+<a id="__codelineno-0-138" name="__codelineno-0-138"></a><span class="sd">        - Filtro con relación: {"user_roles__role__code": "Impulsado"} →</span>
 <a id="__codelineno-0-139" name="__codelineno-0-139"></a><span class="sd">          JOINs automáticos + condición WHERE</span>
 <a id="__codelineno-0-140" name="__codelineno-0-140"></a>
 <a id="__codelineno-0-141" name="__codelineno-0-141"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-142" name="__codelineno-0-142"></a><span class="sd">            filters: Diccionario con filtros que pueden incluir rutas con &#39;__&#39;</span>
+<a id="__codelineno-0-142" name="__codelineno-0-142"></a><span class="sd">            filters: Diccionario con filtros que pueden incluir rutas con '__'</span>
 <a id="__codelineno-0-143" name="__codelineno-0-143"></a>
 <a id="__codelineno-0-144" name="__codelineno-0-144"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="sd">            Tuple con:</span>
@@ -3413,15 +3413,15 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-154" name="__codelineno-0-154"></a><span class="sd">            son omitidos, `resolved_filters` estará vacío y los métodos</span>
 <a id="__codelineno-0-155" name="__codelineno-0-155"></a><span class="sd">            que usan este resultado deben manejar este caso (retornando</span>
 <a id="__codelineno-0-156" name="__codelineno-0-156"></a><span class="sd">            lista vacía o None según corresponda).</span>
-<a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="sd">        """</span>
 <a id="__codelineno-0-158" name="__codelineno-0-158"></a>        <span class="n">resolved_filters</span> <span class="o">=</span> <span class="p">{}</span>
 <a id="__codelineno-0-159" name="__codelineno-0-159"></a>        <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="p">{}</span>
 <a id="__codelineno-0-160" name="__codelineno-0-160"></a>
 <a id="__codelineno-0-161" name="__codelineno-0-161"></a>        <span class="k">for</span> <span class="n">filter_path</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 <a id="__codelineno-0-162" name="__codelineno-0-162"></a>            <span class="c1"># Detect an optional trailing operator suffix (e.g.</span>
-<a id="__codelineno-0-163" name="__codelineno-0-163"></a>            <span class="c1"># &quot;age__gte&quot;, &quot;created_at__lte&quot;, &quot;name__ilike&quot;, &quot;id__in&quot;).</span>
+<a id="__codelineno-0-163" name="__codelineno-0-163"></a>            <span class="c1"># "age__gte", "created_at__lte", "name__ilike", "id__in").</span>
 <a id="__codelineno-0-164" name="__codelineno-0-164"></a>            <span class="c1"># The remaining path is resolved normally, so relationship</span>
-<a id="__codelineno-0-165" name="__codelineno-0-165"></a>            <span class="c1"># traversal (&quot;user__role__code&quot;) keeps working — only a final</span>
+<a id="__codelineno-0-165" name="__codelineno-0-165"></a>            <span class="c1"># traversal ("user__role__code") keeps working — only a final</span>
 <a id="__codelineno-0-166" name="__codelineno-0-166"></a>            <span class="c1"># token that matches a known operator is treated as one.</span>
 <a id="__codelineno-0-167" name="__codelineno-0-167"></a>            <span class="n">resolve_path</span><span class="p">,</span> <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_operator</span><span class="p">(</span><span class="n">filter_path</span><span class="p">)</span>
 <a id="__codelineno-0-168" name="__codelineno-0-168"></a>            <span class="n">attr</span><span class="p">,</span> <span class="n">field_joins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_field_path</span><span class="p">(</span><span class="n">resolve_path</span><span class="p">)</span>
@@ -3433,10 +3433,10 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-174" name="__codelineno-0-174"></a>                <span class="c1"># sin filtrar → fuga cross-tenant (IDOR). El warning hace</span>
 <a id="__codelineno-0-175" name="__codelineno-0-175"></a>                <span class="c1"># visible la pérdida en logs en vez de fallar en silencio.</span>
 <a id="__codelineno-0-176" name="__codelineno-0-176"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a>                    <span class="s2">&quot;filtro &#39;</span><span class="si">%s</span><span class="s2">&#39; descartado (no resuelve a ningún campo de </span><span class="si">%s</span><span class="s2">). &quot;</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a>                    <span class="s2">&quot;Si era un filtro de scoping, el listado queda SIN ese filtro.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a>                    <span class="s2">"filtro '</span><span class="si">%s</span><span class="s2">' descartado (no resuelve a ningún campo de </span><span class="si">%s</span><span class="s2">). "</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>                    <span class="s2">"Si era un filtro de scoping, el listado queda SIN ese filtro."</span><span class="p">,</span>
 <a id="__codelineno-0-179" name="__codelineno-0-179"></a>                    <span class="n">filter_path</span><span class="p">,</span>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a>                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a>                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
 <a id="__codelineno-0-181" name="__codelineno-0-181"></a>                <span class="p">)</span>
 <a id="__codelineno-0-182" name="__codelineno-0-182"></a>                <span class="k">continue</span>
 <a id="__codelineno-0-183" name="__codelineno-0-183"></a>
@@ -3447,16 +3447,16 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-188" name="__codelineno-0-188"></a>            <span class="k">if</span> <span class="p">(</span>
 <a id="__codelineno-0-189" name="__codelineno-0-189"></a>                <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
 <a id="__codelineno-0-190" name="__codelineno-0-190"></a>                <span class="ow">and</span> <span class="n">value</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a>                <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a>                <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"value"</span><span class="p">)</span>
 <a id="__codelineno-0-192" name="__codelineno-0-192"></a>            <span class="p">):</span>
 <a id="__codelineno-0-193" name="__codelineno-0-193"></a>                <span class="n">processed_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">):</span>
 <a id="__codelineno-0-195" name="__codelineno-0-195"></a>                <span class="n">processed_value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
 <a id="__codelineno-0-196" name="__codelineno-0-196"></a>
 <a id="__codelineno-0-197" name="__codelineno-0-197"></a>            <span class="c1"># Verificar que no sea una relación (solo queremos columnas para filtrar)</span>
 <a id="__codelineno-0-198" name="__codelineno-0-198"></a>            <span class="n">is_relationship</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="n">Relationship</span><span class="p">)</span>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a>            <span class="n">is_column</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a>                <span class="n">attr</span><span class="p">,</span> <span class="s2">&quot;comparator&quot;</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a>            <span class="n">is_column</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">"columns"</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a>                <span class="n">attr</span><span class="p">,</span> <span class="s2">"comparator"</span>
 <a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="p">)</span>
 <a id="__codelineno-0-202" name="__codelineno-0-202"></a>
 <a id="__codelineno-0-203" name="__codelineno-0-203"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_relationship</span> <span class="ow">and</span> <span class="n">is_column</span><span class="p">:</span>
@@ -3464,45 +3464,45 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-205" name="__codelineno-0-205"></a>
 <a id="__codelineno-0-206" name="__codelineno-0-206"></a>        <span class="k">return</span> <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span>
 <a id="__codelineno-0-207" name="__codelineno-0-207"></a>
-<a id="__codelineno-0-208" name="__codelineno-0-208"></a>    <span class="c1"># Operadores de filtro soportados como sufijo &quot;campo__op&quot;.</span>
+<a id="__codelineno-0-208" name="__codelineno-0-208"></a>    <span class="c1"># Operadores de filtro soportados como sufijo "campo__op".</span>
 <a id="__codelineno-0-209" name="__codelineno-0-209"></a>    <span class="n">FILTER_OPERATORS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
-<a id="__codelineno-0-210" name="__codelineno-0-210"></a>        <span class="p">{</span><span class="s2">&quot;eq&quot;</span><span class="p">,</span> <span class="s2">&quot;ne&quot;</span><span class="p">,</span> <span class="s2">&quot;gt&quot;</span><span class="p">,</span> <span class="s2">&quot;gte&quot;</span><span class="p">,</span> <span class="s2">&quot;lt&quot;</span><span class="p">,</span> <span class="s2">&quot;lte&quot;</span><span class="p">,</span> <span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="s2">&quot;like&quot;</span><span class="p">,</span> <span class="s2">&quot;ilike&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210"></a>        <span class="p">{</span><span class="s2">"eq"</span><span class="p">,</span> <span class="s2">"ne"</span><span class="p">,</span> <span class="s2">"gt"</span><span class="p">,</span> <span class="s2">"gte"</span><span class="p">,</span> <span class="s2">"lt"</span><span class="p">,</span> <span class="s2">"lte"</span><span class="p">,</span> <span class="s2">"in"</span><span class="p">,</span> <span class="s2">"like"</span><span class="p">,</span> <span class="s2">"ilike"</span><span class="p">}</span>
 <a id="__codelineno-0-211" name="__codelineno-0-211"></a>    <span class="p">)</span>
 <a id="__codelineno-0-212" name="__codelineno-0-212"></a>
 <a id="__codelineno-0-213" name="__codelineno-0-213"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_split_operator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Separa un sufijo de operador del path de filtro.</span>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="w">        </span><span class="sd">"""Separa un sufijo de operador del path de filtro.</span>
 <a id="__codelineno-0-215" name="__codelineno-0-215"></a>
-<a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">        &quot;age__gte&quot; → (&quot;age&quot;, &quot;gte&quot;); &quot;user__role__code&quot; → (..., &quot;eq&quot;).</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">        "age__gte" → ("age", "gte"); "user__role__code" → (..., "eq").</span>
 <a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">        Solo se interpreta como operador si el último token coincide con</span>
 <a id="__codelineno-0-218" name="__codelineno-0-218"></a><span class="sd">        ``FILTER_OPERATORS`` y queda al menos un token de campo delante.</span>
-<a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-220" name="__codelineno-0-220"></a>        <span class="k">if</span> <span class="s2">&quot;__&quot;</span> <span class="ow">in</span> <span class="n">filter_path</span><span class="p">:</span>
-<a id="__codelineno-0-221" name="__codelineno-0-221"></a>            <span class="n">head</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">last</span> <span class="o">=</span> <span class="n">filter_path</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">        """</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a>        <span class="k">if</span> <span class="s2">"__"</span> <span class="ow">in</span> <span class="n">filter_path</span><span class="p">:</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221"></a>            <span class="n">head</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">last</span> <span class="o">=</span> <span class="n">filter_path</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"__"</span><span class="p">)</span>
 <a id="__codelineno-0-222" name="__codelineno-0-222"></a>            <span class="k">if</span> <span class="n">head</span> <span class="ow">and</span> <span class="n">last</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILTER_OPERATORS</span><span class="p">:</span>
 <a id="__codelineno-0-223" name="__codelineno-0-223"></a>                <span class="k">return</span> <span class="n">head</span><span class="p">,</span> <span class="n">last</span>
-<a id="__codelineno-0-224" name="__codelineno-0-224"></a>        <span class="k">return</span> <span class="n">filter_path</span><span class="p">,</span> <span class="s2">&quot;eq&quot;</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224"></a>        <span class="k">return</span> <span class="n">filter_path</span><span class="p">,</span> <span class="s2">"eq"</span>
 <a id="__codelineno-0-225" name="__codelineno-0-225"></a>
 <a id="__codelineno-0-226" name="__codelineno-0-226"></a>    <span class="nd">@staticmethod</span>
 <a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_condition_for</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">op</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Construye la condición SQLAlchemy para un operador dado.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-229" name="__codelineno-0-229"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;ne&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="w">        </span><span class="sd">"""Construye la condición SQLAlchemy para un operador dado."""</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"ne"</span><span class="p">:</span>
 <a id="__codelineno-0-230" name="__codelineno-0-230"></a>            <span class="k">return</span> <span class="n">field</span> <span class="o">!=</span> <span class="n">value</span>
-<a id="__codelineno-0-231" name="__codelineno-0-231"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;gt&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"gt"</span><span class="p">:</span>
 <a id="__codelineno-0-232" name="__codelineno-0-232"></a>            <span class="k">return</span> <span class="n">field</span> <span class="o">&gt;</span> <span class="n">value</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;gte&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"gte"</span><span class="p">:</span>
 <a id="__codelineno-0-234" name="__codelineno-0-234"></a>            <span class="k">return</span> <span class="n">field</span> <span class="o">&gt;=</span> <span class="n">value</span>
-<a id="__codelineno-0-235" name="__codelineno-0-235"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;lt&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"lt"</span><span class="p">:</span>
 <a id="__codelineno-0-236" name="__codelineno-0-236"></a>            <span class="k">return</span> <span class="n">field</span> <span class="o">&lt;</span> <span class="n">value</span>
-<a id="__codelineno-0-237" name="__codelineno-0-237"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;lte&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"lte"</span><span class="p">:</span>
 <a id="__codelineno-0-238" name="__codelineno-0-238"></a>            <span class="k">return</span> <span class="n">field</span> <span class="o">&lt;=</span> <span class="n">value</span>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"in"</span><span class="p">:</span>
 <a id="__codelineno-0-240" name="__codelineno-0-240"></a>            <span class="n">seq</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
 <a id="__codelineno-0-241" name="__codelineno-0-241"></a>            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">seq</span><span class="p">))</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;like&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a>            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;ilike&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a>            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">ilike</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a>        <span class="c1"># op == &quot;eq&quot; (default): conserva la semántica IN para listas.</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"like"</span><span class="p">:</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a>            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="sa">f</span><span class="s2">"%</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a>        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">"ilike"</span><span class="p">:</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a>            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">ilike</span><span class="p">(</span><span class="sa">f</span><span class="s2">"%</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a>        <span class="c1"># op == "eq" (default): conserva la semántica IN para listas.</span>
 <a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 <a id="__codelineno-0-248" name="__codelineno-0-248"></a>            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 <a id="__codelineno-0-249" name="__codelineno-0-249"></a>        <span class="k">return</span> <span class="n">field</span> <span class="o">==</span> <span class="n">value</span>
@@ -3512,42 +3512,42 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-253" name="__codelineno-0-253"></a>        <span class="n">order_by</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-254" name="__codelineno-0-254"></a>        <span class="n">special_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="sd">        Resuelve ordenamiento y relaciones para JOINs.</span>
 <a id="__codelineno-0-258" name="__codelineno-0-258"></a>
 <a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="sd">        Método general que resuelve rutas de relaciones usando</span>
-<a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="sd">        sintaxis &#39;__&#39; y soporta prefijo &#39;-&#39; para orden descendente.</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="sd">        sintaxis '__' y soporta prefijo '-' para orden descendente.</span>
 <a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">        Similar a _resolve_attribute pero adaptado para order_by.</span>
 <a id="__codelineno-0-262" name="__codelineno-0-262"></a>
 <a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">        Soporta ordenamiento avanzado con relaciones usando sintaxis</span>
 <a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">        de doble guion bajo (__). Por ejemplo:</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">        - Orden simple: &quot;created_at&quot; → ORDER BY model.created_at ASC</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">        - Orden descendente: &quot;-created_at&quot; → ORDER BY model.created_at DESC</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        - Orden con relación: &quot;user__full_name&quot; →</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">        - Orden simple: "created_at" → ORDER BY model.created_at ASC</span>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">        - Orden descendente: "-created_at" → ORDER BY model.created_at DESC</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        - Orden con relación: "user__full_name" →</span>
 <a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">          JOIN users + ORDER BY users.full_name ASC</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        - Orden descendente con relación: &quot;-user__email&quot; →</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        - Orden descendente con relación: "-user__email" →</span>
 <a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">          JOIN users + ORDER BY users.email DESC</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">        - Campos especiales (aliases): &quot;borrower_name&quot; →</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">        - Campos especiales (aliases): "borrower_name" →</span>
 <a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">          ORDER BY Users.full_name ASC (si está en special_fields)</span>
 <a id="__codelineno-0-273" name="__codelineno-0-273"></a>
 <a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">        Args:</span>
 <a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">            order_by: Campo por el cual ordenar. Puede incluir:</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">                     - Campos del modelo: &quot;created_at&quot;, &quot;status&quot;, etc.</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">                     - Prefijo &#39;-&#39; para descendente: &quot;-created_at&quot;, &quot;-status&quot;</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">                     - Rutas de relaciones: &quot;user__full_name&quot;,</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">                       &quot;user__role__name&quot;</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">                     - Combinaciones: &quot;-user__email&quot;</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">                     - Campos especiales: &quot;borrower_name&quot; (si está en</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">                     - Campos del modelo: "created_at", "status", etc.</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">                     - Prefijo '-' para descendente: "-created_at", "-status"</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">                     - Rutas de relaciones: "user__full_name",</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">                       "user__role__name"</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">                     - Combinaciones: "-user__email"</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">                     - Campos especiales: "borrower_name" (si está en</span>
 <a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">                       special_fields)</span>
 <a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">                     - También puede ser una expresión SQLAlchemy</span>
 <a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">            default_order_by: Campo por defecto si order_by es None o</span>
 <a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">                             no válido.</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">                             Por defecto: &quot;created_at&quot;</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">                             Por defecto: "created_at"</span>
 <a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">            special_fields: Diccionario opcional que mapea nombres de campos</span>
 <a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">                          especiales (aliases en el query) a atributos</span>
 <a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">                          SQLAlchemy. Ejemplo:</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">                          {&quot;borrower_name&quot;: Users.full_name,</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">                           &quot;borrower_email&quot;: Users.email}</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">                          {"borrower_name": Users.full_name,</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">                           "borrower_email": Users.email}</span>
 <a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">                          Estos campos ya están disponibles en el query sin</span>
 <a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">                          necesidad de JOIN adicional.</span>
 <a id="__codelineno-0-294" name="__codelineno-0-294"></a>
@@ -3565,7 +3565,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="sd">            manejar este caso aplicando un ordenamiento por defecto.</span>
 <a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="sd">            Si order_by ya es una expresión SQLAlchemy (no string), la retorna</span>
 <a id="__codelineno-0-308" name="__codelineno-0-308"></a><span class="sd">            sin modificar.</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">        """</span>
 <a id="__codelineno-0-310" name="__codelineno-0-310"></a>        <span class="c1"># Si order_by ya es una expresión SQLAlchemy (no string), retornarla</span>
 <a id="__codelineno-0-311" name="__codelineno-0-311"></a>        <span class="c1"># directamente sin procesar</span>
 <a id="__codelineno-0-312" name="__codelineno-0-312"></a>        <span class="k">if</span> <span class="n">order_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order_by</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -3577,9 +3577,9 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-318" name="__codelineno-0-318"></a>
 <a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="n">joins_to_apply</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 <a id="__codelineno-0-320" name="__codelineno-0-320"></a>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a>        <span class="c1"># Detectar si tiene prefijo &#39;-&#39; para invertir el orden</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="n">has_minus_prefix</span> <span class="o">=</span> <span class="n">order_by</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a>        <span class="n">field_path</span> <span class="o">=</span> <span class="n">order_by</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>        <span class="c1"># Detectar si tiene prefijo '-' para invertir el orden</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="n">has_minus_prefix</span> <span class="o">=</span> <span class="n">order_by</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>        <span class="n">field_path</span> <span class="o">=</span> <span class="n">order_by</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
 <a id="__codelineno-0-324" name="__codelineno-0-324"></a>
 <a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="c1"># 1. Verificar primero si es un campo especial (alias en el query)</span>
 <a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="c1"># Estos campos ya están disponibles sin necesidad de JOIN</span>
@@ -3600,8 +3600,8 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-341" name="__codelineno-0-341"></a>
 <a id="__codelineno-0-342" name="__codelineno-0-342"></a>        <span class="c1"># 4. Verificar que el atributo final es válido para ordenar</span>
 <a id="__codelineno-0-343" name="__codelineno-0-343"></a>        <span class="n">is_relationship</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="n">Relationship</span><span class="p">)</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a>        <span class="n">is_column</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a>            <span class="n">attr</span><span class="p">,</span> <span class="s2">&quot;comparator&quot;</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a>        <span class="n">is_column</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">"columns"</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>            <span class="n">attr</span><span class="p">,</span> <span class="s2">"comparator"</span>
 <a id="__codelineno-0-346" name="__codelineno-0-346"></a>        <span class="p">)</span>
 <a id="__codelineno-0-347" name="__codelineno-0-347"></a>
 <a id="__codelineno-0-348" name="__codelineno-0-348"></a>        <span class="k">if</span> <span class="n">is_relationship</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_column</span><span class="p">:</span>
@@ -3620,7 +3620,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-362" name="__codelineno-0-362"></a>        <span class="n">resolved_filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-365" name="__codelineno-0-365"></a><span class="sd">        Construye condiciones WHERE a partir de los atributos resueltos.</span>
 <a id="__codelineno-0-366" name="__codelineno-0-366"></a>
 <a id="__codelineno-0-367" name="__codelineno-0-367"></a><span class="sd">        Soporta dos modos de uso:</span>
@@ -3634,7 +3634,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-375" name="__codelineno-0-375"></a>
 <a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">            Lista de condiciones SQLAlchemy</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        """</span>
 <a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="n">conditions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 <a id="__codelineno-0-380" name="__codelineno-0-380"></a>
 <a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="c1"># Modo avanzado: usar resolved_filters si está disponible</span>
@@ -3642,7 +3642,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-383" name="__codelineno-0-383"></a>            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">resolved</span> <span class="ow">in</span> <span class="n">resolved_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 <a id="__codelineno-0-384" name="__codelineno-0-384"></a>                <span class="c1"># Tupla (field, value) legacy o (field, value, op) con operador.</span>
 <a id="__codelineno-0-385" name="__codelineno-0-385"></a>                <span class="n">field</span><span class="p">,</span> <span class="n">processed_value</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a>                <span class="n">op</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;eq&quot;</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a>                <span class="n">op</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">"eq"</span>
 <a id="__codelineno-0-387" name="__codelineno-0-387"></a>                <span class="n">conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
 <a id="__codelineno-0-388" name="__codelineno-0-388"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">_condition_for</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">processed_value</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
 <a id="__codelineno-0-389" name="__codelineno-0-389"></a>                <span class="p">)</span>
@@ -3662,16 +3662,16 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_build_search_condition</span><span class="p">(</span>
 <a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">search_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 <a id="__codelineno-0-405" name="__codelineno-0-405"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Construye una condición OR para búsqueda textual en múltiples campos</span>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="w">        </span><span class="sd">"""Construye una condición OR para búsqueda textual en múltiples campos</span>
 <a id="__codelineno-0-407" name="__codelineno-0-407"></a>
 <a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">        Usa ilike (insensible a mayúsculas) si hay término y campos válidos.</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        Soporta rutas anidadas con &#39;__&#39;.</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        Soporta rutas anidadas con '__'.</span>
 <a id="__codelineno-0-410" name="__codelineno-0-410"></a>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">            Tuple con:</span>
 <a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">            - search_condition: Condición OR de SQLAlchemy o None</span>
 <a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">            - search_joins: Dict con JOINs necesarios para la búsqueda</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">        """</span>
 <a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">search</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">search_fields</span><span class="p">:</span>
 <a id="__codelineno-0-417" name="__codelineno-0-417"></a>            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{}</span>
 <a id="__codelineno-0-418" name="__codelineno-0-418"></a>
@@ -3687,13 +3687,13 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-428" name="__codelineno-0-428"></a>            <span class="n">search_joins</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">field_joins</span><span class="p">)</span>
 <a id="__codelineno-0-429" name="__codelineno-0-429"></a>
 <a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="c1"># Verificar que sea una columna válida para ILIKE</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="n">is_column</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>                <span class="n">attr</span><span class="p">,</span> <span class="s2">&quot;comparator&quot;</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="n">is_column</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="s2">"columns"</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>                <span class="n">attr</span><span class="p">,</span> <span class="s2">"comparator"</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="p">)</span>
 <a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">is_relationship</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">property</span><span class="p">,</span> <span class="n">Relationship</span><span class="p">)</span>
 <a id="__codelineno-0-435" name="__codelineno-0-435"></a>
 <a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_relationship</span> <span class="ow">and</span> <span class="n">is_column</span><span class="p">:</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>                <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">ilike</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">search</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>                <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">ilike</span><span class="p">(</span><span class="sa">f</span><span class="s2">"%</span><span class="si">{</span><span class="n">search</span><span class="si">}</span><span class="s2">%"</span><span class="p">))</span>
 <a id="__codelineno-0-438" name="__codelineno-0-438"></a>
 <a id="__codelineno-0-439" name="__codelineno-0-439"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">exprs</span><span class="p">:</span>
 <a id="__codelineno-0-440" name="__codelineno-0-440"></a>            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{}</span>
@@ -3701,7 +3701,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="k">return</span> <span class="n">or_</span><span class="p">(</span><span class="o">*</span><span class="n">exprs</span><span class="p">),</span> <span class="n">search_joins</span>
 <a id="__codelineno-0-443" name="__codelineno-0-443"></a>
 <a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_in</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ModelT</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">ModelT</span><span class="p">:</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Crea un nuevo registro en la base de datos.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="w">        </span><span class="sd">"""Crea un nuevo registro en la base de datos."""</span>
 <a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 <a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_in</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
 <a id="__codelineno-0-448" name="__codelineno-0-448"></a>            <span class="n">obj_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">obj_in</span><span class="p">)</span>
@@ -3716,7 +3716,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-458" name="__codelineno-0-458"></a>        <span class="n">raise_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <a id="__codelineno-0-459" name="__codelineno-0-459"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        Método interno unificado para obtener un único registro.</span>
 <a id="__codelineno-0-462" name="__codelineno-0-462"></a>
 <a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        Args:</span>
@@ -3726,9 +3726,9 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-467" name="__codelineno-0-467"></a>
 <a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">            Registro encontrado o None</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">        """</span>
 <a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-473" name="__codelineno-0-473"></a>
 <a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
 <a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="k">if</span> <span class="n">conditions</span><span class="p">:</span>
@@ -3741,7 +3741,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-482" name="__codelineno-0-482"></a>
 <a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="k">if</span> <span class="n">raise_exception</span> <span class="ow">and</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a>            <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>                <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado&quot;</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>                <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado"</span>
 <a id="__codelineno-0-486" name="__codelineno-0-486"></a>            <span class="p">)</span>
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="k">return</span> <span class="n">record</span>
@@ -3751,17 +3751,17 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtiene un registro por su ID.</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="w">        </span><span class="sd">"""Obtiene un registro por su ID.</span>
 <a id="__codelineno-0-496" name="__codelineno-0-496"></a>
 <a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">        `filters` (opcional) — scoping de seguridad (típicamente</span>
 <a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        `Service.get_filters()`). Sin `filters`, usa `session.get()` (fast</span>
 <a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        path por PK) — comportamiento idéntico a antes, 100% retrocompatible.</span>
 <a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        Con `filters`, cae a un `SELECT ... WHERE id = :id AND &lt;filtros&gt;` —</span>
 <a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        un id que existe pero no matchea el scope devuelve `None` (mismo</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        resultado que &quot;no encontrado&quot;), cerrando la clase de IDOR de &quot;conozco</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        el id de otro tenant y lo pido directo&quot;.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        resultado que "no encontrado"), cerrando la clase de IDOR de "conozco</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        el id de otro tenant y lo pido directo"."""</span>
 <a id="__codelineno-0-504" name="__codelineno-0-504"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-506" name="__codelineno-0-506"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">filters</span><span class="p">:</span>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a>            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">record_id</span><span class="p">)</span>
 <a id="__codelineno-0-508" name="__codelineno-0-508"></a>        <span class="n">conditions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">record_id</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_conditions</span><span class="p">(</span>
@@ -3774,14 +3774,14 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Alias de `get(id)` — nombre unificado con el repo Beanie</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">        (`get_by_id`) para que las lecturas por id sean portables entre ORMs.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="w">        </span><span class="sd">"""Alias de `get(id)` — nombre unificado con el repo Beanie</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">        (`get_by_id`) para que las lecturas por id sean portables entre ORMs."""</span>
 <a id="__codelineno-0-520" name="__codelineno-0-520"></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">)</span>
 <a id="__codelineno-0-521" name="__codelineno-0-521"></a>
 <a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_by_field</span><span class="p">(</span>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
 <a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtiene un registro por un campo específico.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="w">        </span><span class="sd">"""Obtiene un registro por un campo específico."""</span>
 <a id="__codelineno-0-526" name="__codelineno-0-526"></a>        <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
 <a id="__codelineno-0-527" name="__codelineno-0-527"></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_one</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">field</span> <span class="o">==</span> <span class="n">value</span><span class="p">])</span>
 <a id="__codelineno-0-528" name="__codelineno-0-528"></a>
@@ -3791,9 +3791,9 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-532" name="__codelineno-0-532"></a>        <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-533" name="__codelineno-0-533"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtiene un registro por ID y carga relaciones dinámicamente.</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="w">        </span><span class="sd">"""Obtiene un registro por ID y carga relaciones dinámicamente.</span>
 <a id="__codelineno-0-536" name="__codelineno-0-536"></a>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        `filters` (opcional) — mismo scoping de seguridad que `get()`.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        `filters` (opcional) — mismo scoping de seguridad que `get()`."""</span>
 <a id="__codelineno-0-538" name="__codelineno-0-538"></a>        <span class="n">conditions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">record_id</span><span class="p">]</span>
 <a id="__codelineno-0-539" name="__codelineno-0-539"></a>        <span class="k">if</span> <span class="n">filters</span><span class="p">:</span>
 <a id="__codelineno-0-540" name="__codelineno-0-540"></a>            <span class="n">conditions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_conditions</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">))</span>
@@ -3805,13 +3805,13 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-546" name="__codelineno-0-546"></a>        <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-547" name="__codelineno-0-547"></a>        <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-548" name="__codelineno-0-548"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">        Obtiene un registro por un campo y carga relaciones dinámicamente.</span>
 <a id="__codelineno-0-551" name="__codelineno-0-551"></a>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        Soporta filtros con relaciones usando sintaxis &#39;__&#39;.</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a>        <span class="c1"># Si el campo tiene sintaxis &#39;__&#39;, usar resolución de atributos</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>        <span class="k">if</span> <span class="s2">&quot;__&quot;</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        Soporta filtros con relaciones usando sintaxis '__'.</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">        """</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a>        <span class="c1"># Si el campo tiene sintaxis '__', usar resolución de atributos</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>        <span class="k">if</span> <span class="s2">"__"</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
 <a id="__codelineno-0-556" name="__codelineno-0-556"></a>            <span class="c1"># Resolver el atributo y aplicar JOINs necesarios</span>
 <a id="__codelineno-0-557" name="__codelineno-0-557"></a>            <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_attribute</span><span class="p">(</span>
 <a id="__codelineno-0-558" name="__codelineno-0-558"></a>                <span class="p">{</span><span class="n">field_name</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
@@ -3823,7 +3823,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-564" name="__codelineno-0-564"></a>            <span class="c1"># Obtener el atributo resuelto (puede traer operador como 3er elem)</span>
 <a id="__codelineno-0-565" name="__codelineno-0-565"></a>            <span class="n">_</span><span class="p">,</span> <span class="n">resolved</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">resolved_filters</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
 <a id="__codelineno-0-566" name="__codelineno-0-566"></a>            <span class="n">field</span><span class="p">,</span> <span class="n">processed_value</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>            <span class="n">op</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;eq&quot;</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>            <span class="n">op</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">"eq"</span>
 <a id="__codelineno-0-568" name="__codelineno-0-568"></a>
 <a id="__codelineno-0-569" name="__codelineno-0-569"></a>            <span class="c1"># Construir query con JOINs de filtrado</span>
 <a id="__codelineno-0-570" name="__codelineno-0-570"></a>            <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
@@ -3850,13 +3850,13 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_by_filters</span><span class="p">(</span>
 <a id="__codelineno-0-592" name="__codelineno-0-592"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">use_or</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <a id="__codelineno-0-593" name="__codelineno-0-593"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        Obtiene registros que coinciden con los filtros especificados.</span>
 <a id="__codelineno-0-596" name="__codelineno-0-596"></a>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        Soporta filtros simples y filtros con relaciones usando sintaxis &#39;__&#39;.</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        Soporta filtros simples y filtros con relaciones usando sintaxis '__'.</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        """</span>
 <a id="__codelineno-0-599" name="__codelineno-0-599"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-601" name="__codelineno-0-601"></a>
 <a id="__codelineno-0-602" name="__codelineno-0-602"></a>        <span class="c1"># Resolver filtros y JOINs necesarios</span>
 <a id="__codelineno-0-603" name="__codelineno-0-603"></a>        <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_attribute</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
@@ -3891,13 +3891,13 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-632" name="__codelineno-0-632"></a>        <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-633" name="__codelineno-0-633"></a>        <span class="n">one</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <a id="__codelineno-0-634" name="__codelineno-0-634"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-636" name="__codelineno-0-636"></a><span class="sd">        Obtiene registros por filtros y carga relaciones dinámicamente.</span>
 <a id="__codelineno-0-637" name="__codelineno-0-637"></a>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">        Soporta filtros simples y filtros con relaciones usando sintaxis &#39;__&#39;.</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">        Soporta filtros simples y filtros con relaciones usando sintaxis '__'.</span>
 <a id="__codelineno-0-639" name="__codelineno-0-639"></a><span class="sd">        Los JOINs de filtrado se aplican automáticamente cuando se detectan</span>
 <a id="__codelineno-0-640" name="__codelineno-0-640"></a><span class="sd">        relaciones en los filtros.</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">        """</span>
 <a id="__codelineno-0-642" name="__codelineno-0-642"></a>        <span class="c1"># Resolver filtros y JOINs necesarios</span>
 <a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_attribute</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 <a id="__codelineno-0-644" name="__codelineno-0-644"></a>
@@ -3936,7 +3936,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-677" name="__codelineno-0-677"></a>        <span class="n">search</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-678" name="__codelineno-0-678"></a>        <span class="n">search_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-679" name="__codelineno-0-679"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Select</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Aplica filtros estándar, búsqueda y ordenamiento al query.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="w">        </span><span class="sd">"""Aplica filtros estándar, búsqueda y ordenamiento al query."""</span>
 <a id="__codelineno-0-681" name="__codelineno-0-681"></a>        <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
 <a id="__codelineno-0-682" name="__codelineno-0-682"></a>
 <a id="__codelineno-0-683" name="__codelineno-0-683"></a>        <span class="c1"># 1. RESOLUCIÓN UNIVERSAL DE FILTROS (JOINs de filtrado y atributos)</span>
@@ -3994,7 +3994,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-735" name="__codelineno-0-735"></a>        <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-736" name="__codelineno-0-736"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-737" name="__codelineno-0-737"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Select</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]]:</span>
-<a id="__codelineno-0-738" name="__codelineno-0-738"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-738" name="__codelineno-0-738"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-739" name="__codelineno-0-739"></a><span class="sd">        Construye el query inicial para listado.</span>
 <a id="__codelineno-0-740" name="__codelineno-0-740"></a><span class="sd">        Debe retornar un objeto Select.</span>
 <a id="__codelineno-0-741" name="__codelineno-0-741"></a>
@@ -4003,11 +4003,11 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-744" name="__codelineno-0-744"></a>
 <a id="__codelineno-0-745" name="__codelineno-0-745"></a><span class="sd">            def build_list_queryset(self, **kwargs):</span>
 <a id="__codelineno-0-746" name="__codelineno-0-746"></a><span class="sd">                q = select(self.model)</span>
-<a id="__codelineno-0-747" name="__codelineno-0-747"></a><span class="sd">                user = getattr(self.service.request.state, &quot;user&quot;, None)</span>
+<a id="__codelineno-0-747" name="__codelineno-0-747"></a><span class="sd">                user = getattr(self.service.request.state, "user", None)</span>
 <a id="__codelineno-0-748" name="__codelineno-0-748"></a><span class="sd">                if user:</span>
 <a id="__codelineno-0-749" name="__codelineno-0-749"></a><span class="sd">                    q = q.where(self.model.company_id == user.company_id)</span>
 <a id="__codelineno-0-750" name="__codelineno-0-750"></a><span class="sd">                return q</span>
-<a id="__codelineno-0-751" name="__codelineno-0-751"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-751" name="__codelineno-0-751"></a><span class="sd">        """</span>
 <a id="__codelineno-0-752" name="__codelineno-0-752"></a>        <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
 <a id="__codelineno-0-753" name="__codelineno-0-753"></a>
 <a id="__codelineno-0-754" name="__codelineno-0-754"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_paginated</span><span class="p">(</span>
@@ -4022,7 +4022,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-763" name="__codelineno-0-763"></a>        <span class="n">search_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-764" name="__codelineno-0-764"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-765" name="__codelineno-0-765"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ModelT</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
-<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;MOTOR DE PAGINACIÓN — NO LO REIMPLEMENTES.</span>
+<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="w">        </span><span class="sd">"""MOTOR DE PAGINACIÓN — NO LO REIMPLEMENTES.</span>
 <a id="__codelineno-0-767" name="__codelineno-0-767"></a>
 <a id="__codelineno-0-768" name="__codelineno-0-768"></a><span class="sd">        Este es el único loop de paginación (count + offset/limit + hidratación</span>
 <a id="__codelineno-0-769" name="__codelineno-0-769"></a><span class="sd">        de columnas). Copiarlo/reescribirlo en un service o controller es EL</span>
@@ -4037,15 +4037,15 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-778" name="__codelineno-0-778"></a>
 <a id="__codelineno-0-779" name="__codelineno-0-779"></a><span class="sd">        Si ves `func.count(` o `.offset(` dentro de un método `list_*` propio,</span>
 <a id="__codelineno-0-780" name="__codelineno-0-780"></a><span class="sd">        estás reescribiendo esto — casi siempre es el hook equivocado.</span>
-<a id="__codelineno-0-781" name="__codelineno-0-781"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-781" name="__codelineno-0-781"></a><span class="sd">        """</span>
 <a id="__codelineno-0-782" name="__codelineno-0-782"></a>        <span class="c1"># 1. Construir query base</span>
 <a id="__codelineno-0-783" name="__codelineno-0-783"></a>        <span class="n">query_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-784" name="__codelineno-0-784"></a>            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-<a id="__codelineno-0-785" name="__codelineno-0-785"></a>            <span class="s2">&quot;use_or&quot;</span><span class="p">:</span> <span class="n">use_or</span><span class="p">,</span>
-<a id="__codelineno-0-786" name="__codelineno-0-786"></a>            <span class="s2">&quot;joins&quot;</span><span class="p">:</span> <span class="n">joins</span><span class="p">,</span>
-<a id="__codelineno-0-787" name="__codelineno-0-787"></a>            <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
-<a id="__codelineno-0-788" name="__codelineno-0-788"></a>            <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
-<a id="__codelineno-0-789" name="__codelineno-0-789"></a>            <span class="s2">&quot;search_fields&quot;</span><span class="p">:</span> <span class="n">search_fields</span><span class="p">,</span>
+<a id="__codelineno-0-784" name="__codelineno-0-784"></a>            <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-0-785" name="__codelineno-0-785"></a>            <span class="s2">"use_or"</span><span class="p">:</span> <span class="n">use_or</span><span class="p">,</span>
+<a id="__codelineno-0-786" name="__codelineno-0-786"></a>            <span class="s2">"joins"</span><span class="p">:</span> <span class="n">joins</span><span class="p">,</span>
+<a id="__codelineno-0-787" name="__codelineno-0-787"></a>            <span class="s2">"order_by"</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
+<a id="__codelineno-0-788" name="__codelineno-0-788"></a>            <span class="s2">"search"</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
+<a id="__codelineno-0-789" name="__codelineno-0-789"></a>            <span class="s2">"search_fields"</span><span class="p">:</span> <span class="n">search_fields</span><span class="p">,</span>
 <a id="__codelineno-0-790" name="__codelineno-0-790"></a>        <span class="p">}</span>
 <a id="__codelineno-0-791" name="__codelineno-0-791"></a>        <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-0-792" name="__codelineno-0-792"></a>            <span class="c1"># Intentar con argumentos (subclases modernas)</span>
@@ -4077,7 +4077,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-818" name="__codelineno-0-818"></a>        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">page_query</span><span class="p">)</span>
 <a id="__codelineno-0-819" name="__codelineno-0-819"></a>        <span class="n">rows</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 <a id="__codelineno-0-820" name="__codelineno-0-820"></a>
-<a id="__codelineno-0-821" name="__codelineno-0-821"></a>        <span class="c1"># Procesar filas para soportar &quot;Result Hydration&quot;</span>
+<a id="__codelineno-0-821" name="__codelineno-0-821"></a>        <span class="c1"># Procesar filas para soportar "Result Hydration"</span>
 <a id="__codelineno-0-822" name="__codelineno-0-822"></a>        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
 <a id="__codelineno-0-823" name="__codelineno-0-823"></a>        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
 <a id="__codelineno-0-824" name="__codelineno-0-824"></a>            <span class="c1"># Si la fila tiene un solo elemento, tratarlo como escalar normal</span>
@@ -4093,7 +4093,7 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-834" name="__codelineno-0-834"></a>                    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_keys</span><span class="p">):</span>
 <a id="__codelineno-0-835" name="__codelineno-0-835"></a>                        <span class="n">key</span> <span class="o">=</span> <span class="n">column_keys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 <a id="__codelineno-0-836" name="__codelineno-0-836"></a>                    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-837" name="__codelineno-0-837"></a>                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;_extra_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-837" name="__codelineno-0-837"></a>                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"_extra_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span>
 <a id="__codelineno-0-838" name="__codelineno-0-838"></a>
 <a id="__codelineno-0-839" name="__codelineno-0-839"></a>                    <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 <a id="__codelineno-0-840" name="__codelineno-0-840"></a>                    <span class="nb">setattr</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -4107,20 +4107,20 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-848" name="__codelineno-0-848"></a>        <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-849" name="__codelineno-0-849"></a>        <span class="n">update_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
 <a id="__codelineno-0-850" name="__codelineno-0-850"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelT</span><span class="p">:</span>
-<a id="__codelineno-0-851" name="__codelineno-0-851"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Actualiza un registro por ID con los campos provistos.</span>
+<a id="__codelineno-0-851" name="__codelineno-0-851"></a><span class="w">        </span><span class="sd">"""Actualiza un registro por ID con los campos provistos.</span>
 <a id="__codelineno-0-852" name="__codelineno-0-852"></a>
 <a id="__codelineno-0-853" name="__codelineno-0-853"></a><span class="sd">        NOTA de divergencia entre ORMs: la firma SQL es ``update(id, dict)`` y</span>
 <a id="__codelineno-0-854" name="__codelineno-0-854"></a><span class="sd">        OMITE valores ``None`` (no puede setear una columna a NULL por acá). El</span>
 <a id="__codelineno-0-855" name="__codelineno-0-855"></a><span class="sd">        repo Beanie usa ``update(obj, dict)`` (recibe el Document) y sí setea</span>
 <a id="__codelineno-0-856" name="__codelineno-0-856"></a><span class="sd">        ``None``. Ver la tabla en el CLAUDE.md de la lib.</span>
-<a id="__codelineno-0-857" name="__codelineno-0-857"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-857" name="__codelineno-0-857"></a><span class="sd">        """</span>
 <a id="__codelineno-0-858" name="__codelineno-0-858"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-859" name="__codelineno-0-859"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-859" name="__codelineno-0-859"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-860" name="__codelineno-0-860"></a>        <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 <a id="__codelineno-0-861" name="__codelineno-0-861"></a>        <span class="n">record</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">record_id</span><span class="p">)</span>
 <a id="__codelineno-0-862" name="__codelineno-0-862"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">record</span><span class="p">:</span>
 <a id="__codelineno-0-863" name="__codelineno-0-863"></a>            <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span>
-<a id="__codelineno-0-864" name="__codelineno-0-864"></a>                <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado&quot;</span>
+<a id="__codelineno-0-864" name="__codelineno-0-864"></a>                <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado"</span>
 <a id="__codelineno-0-865" name="__codelineno-0-865"></a>            <span class="p">)</span>
 <a id="__codelineno-0-866" name="__codelineno-0-866"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">update_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 <a id="__codelineno-0-867" name="__codelineno-0-867"></a>            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
@@ -4134,26 +4134,26 @@ es <code>User</code>, etc.</p>
 <a id="__codelineno-0-875" name="__codelineno-0-875"></a>        <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-876" name="__codelineno-0-876"></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-877" name="__codelineno-0-877"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-878" name="__codelineno-0-878"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Elimina un registro por ID.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-878" name="__codelineno-0-878"></a><span class="w">        </span><span class="sd">"""Elimina un registro por ID."""</span>
 <a id="__codelineno-0-879" name="__codelineno-0-879"></a>        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
 <a id="__codelineno-0-880" name="__codelineno-0-880"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-881" name="__codelineno-0-881"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-881" name="__codelineno-0-881"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-882" name="__codelineno-0-882"></a>        <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 <a id="__codelineno-0-883" name="__codelineno-0-883"></a>        <span class="n">record</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">record_id</span><span class="p">)</span>
 <a id="__codelineno-0-884" name="__codelineno-0-884"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">record</span><span class="p">:</span>
-<a id="__codelineno-0-885" name="__codelineno-0-885"></a>            <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-885" name="__codelineno-0-885"></a>            <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado"</span><span class="p">)</span>
 <a id="__codelineno-0-886" name="__codelineno-0-886"></a>        <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
 <a id="__codelineno-0-887" name="__codelineno-0-887"></a>        <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 <a id="__codelineno-0-888" name="__codelineno-0-888"></a>        <span class="k">return</span> <span class="kc">True</span>
 <a id="__codelineno-0-889" name="__codelineno-0-889"></a>
 <a id="__codelineno-0-890" name="__codelineno-0-890"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">ModelT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelT</span><span class="p">:</span>
-<a id="__codelineno-0-891" name="__codelineno-0-891"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Persiste una entidad nueva o mutada (add + flush).&quot;&quot;&quot;</span>
+<a id="__codelineno-0-891" name="__codelineno-0-891"></a><span class="w">        </span><span class="sd">"""Persiste una entidad nueva o mutada (add + flush)."""</span>
 <a id="__codelineno-0-892" name="__codelineno-0-892"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 <a id="__codelineno-0-893" name="__codelineno-0-893"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 <a id="__codelineno-0-894" name="__codelineno-0-894"></a>        <span class="k">return</span> <span class="n">obj</span>
 <a id="__codelineno-0-895" name="__codelineno-0-895"></a>
 <a id="__codelineno-0-896" name="__codelineno-0-896"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">hard_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">ModelT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-897" name="__codelineno-0-897"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Elimina físicamente la fila (sin soft delete).&quot;&quot;&quot;</span>
+<a id="__codelineno-0-897" name="__codelineno-0-897"></a><span class="w">        </span><span class="sd">"""Elimina físicamente la fila (sin soft delete)."""</span>
 <a id="__codelineno-0-898" name="__codelineno-0-898"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 <a id="__codelineno-0-899" name="__codelineno-0-899"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -4225,17 +4225,17 @@ el id de otro tenant y lo pido directo".</p>
 <a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>    <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtiene un registro por su ID.</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="w">    </span><span class="sd">"""Obtiene un registro por su ID.</span>
 <a id="__codelineno-0-496" name="__codelineno-0-496"></a>
 <a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">    `filters` (opcional) — scoping de seguridad (típicamente</span>
 <a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    `Service.get_filters()`). Sin `filters`, usa `session.get()` (fast</span>
 <a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    path por PK) — comportamiento idéntico a antes, 100% retrocompatible.</span>
 <a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    Con `filters`, cae a un `SELECT ... WHERE id = :id AND &lt;filtros&gt;` —</span>
 <a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">    un id que existe pero no matchea el scope devuelve `None` (mismo</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">    resultado que &quot;no encontrado&quot;), cerrando la clase de IDOR de &quot;conozco</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    el id de otro tenant y lo pido directo&quot;.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">    resultado que "no encontrado"), cerrando la clase de IDOR de "conozco</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    el id de otro tenant y lo pido directo"."""</span>
 <a id="__codelineno-0-504" name="__codelineno-0-504"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-506" name="__codelineno-0-506"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">filters</span><span class="p">:</span>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">record_id</span><span class="p">)</span>
 <a id="__codelineno-0-508" name="__codelineno-0-508"></a>    <span class="n">conditions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">record_id</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_conditions</span><span class="p">(</span>
@@ -4276,7 +4276,7 @@ el id de otro tenant y lo pido directo".</p>
 <span class="normal"><a href="#__codelineno-0-527">527</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_by_field</span><span class="p">(</span>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
 <a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtiene un registro por un campo específico.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="w">    </span><span class="sd">"""Obtiene un registro por un campo específico."""</span>
 <a id="__codelineno-0-526" name="__codelineno-0-526"></a>    <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
 <a id="__codelineno-0-527" name="__codelineno-0-527"></a>    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_one</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">field</span> <span class="o">==</span> <span class="n">value</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
@@ -4344,13 +4344,13 @@ el id de otro tenant y lo pido directo".</p>
 <span class="normal"><a href="#__codelineno-0-626">626</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_by_filters</span><span class="p">(</span>
 <a id="__codelineno-0-592" name="__codelineno-0-592"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">use_or</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="w">    </span><span class="sd">"""</span>
 <a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">    Obtiene registros que coinciden con los filtros especificados.</span>
 <a id="__codelineno-0-596" name="__codelineno-0-596"></a>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    Soporta filtros simples y filtros con relaciones usando sintaxis &#39;__&#39;.</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    Soporta filtros simples y filtros con relaciones usando sintaxis '__'.</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">    """</span>
 <a id="__codelineno-0-599" name="__codelineno-0-599"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-601" name="__codelineno-0-601"></a>
 <a id="__codelineno-0-602" name="__codelineno-0-602"></a>    <span class="c1"># Resolver filtros y JOINs necesarios</span>
 <a id="__codelineno-0-603" name="__codelineno-0-603"></a>    <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_attribute</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
@@ -4422,9 +4422,9 @@ el id de otro tenant y lo pido directo".</p>
 <a id="__codelineno-0-532" name="__codelineno-0-532"></a>    <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-533" name="__codelineno-0-533"></a>    <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]:</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Obtiene un registro por ID y carga relaciones dinámicamente.</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="w">    </span><span class="sd">"""Obtiene un registro por ID y carga relaciones dinámicamente.</span>
 <a id="__codelineno-0-536" name="__codelineno-0-536"></a>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">    `filters` (opcional) — mismo scoping de seguridad que `get()`.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">    `filters` (opcional) — mismo scoping de seguridad que `get()`."""</span>
 <a id="__codelineno-0-538" name="__codelineno-0-538"></a>    <span class="n">conditions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">record_id</span><span class="p">]</span>
 <a id="__codelineno-0-539" name="__codelineno-0-539"></a>    <span class="k">if</span> <span class="n">filters</span><span class="p">:</span>
 <a id="__codelineno-0-540" name="__codelineno-0-540"></a>        <span class="n">conditions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_conditions</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">))</span>
@@ -4508,13 +4508,13 @@ el id de otro tenant y lo pido directo".</p>
 <a id="__codelineno-0-546" name="__codelineno-0-546"></a>    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-547" name="__codelineno-0-547"></a>    <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="w">    </span><span class="sd">"""</span>
 <a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">    Obtiene un registro por un campo y carga relaciones dinámicamente.</span>
 <a id="__codelineno-0-551" name="__codelineno-0-551"></a>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    Soporta filtros con relaciones usando sintaxis &#39;__&#39;.</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a>    <span class="c1"># Si el campo tiene sintaxis &#39;__&#39;, usar resolución de atributos</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>    <span class="k">if</span> <span class="s2">&quot;__&quot;</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    Soporta filtros con relaciones usando sintaxis '__'.</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    """</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a>    <span class="c1"># Si el campo tiene sintaxis '__', usar resolución de atributos</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>    <span class="k">if</span> <span class="s2">"__"</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
 <a id="__codelineno-0-556" name="__codelineno-0-556"></a>        <span class="c1"># Resolver el atributo y aplicar JOINs necesarios</span>
 <a id="__codelineno-0-557" name="__codelineno-0-557"></a>        <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_attribute</span><span class="p">(</span>
 <a id="__codelineno-0-558" name="__codelineno-0-558"></a>            <span class="p">{</span><span class="n">field_name</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
@@ -4526,7 +4526,7 @@ el id de otro tenant y lo pido directo".</p>
 <a id="__codelineno-0-564" name="__codelineno-0-564"></a>        <span class="c1"># Obtener el atributo resuelto (puede traer operador como 3er elem)</span>
 <a id="__codelineno-0-565" name="__codelineno-0-565"></a>        <span class="n">_</span><span class="p">,</span> <span class="n">resolved</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">resolved_filters</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
 <a id="__codelineno-0-566" name="__codelineno-0-566"></a>        <span class="n">field</span><span class="p">,</span> <span class="n">processed_value</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>        <span class="n">op</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;eq&quot;</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>        <span class="n">op</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">"eq"</span>
 <a id="__codelineno-0-568" name="__codelineno-0-568"></a>
 <a id="__codelineno-0-569" name="__codelineno-0-569"></a>        <span class="c1"># Construir query con JOINs de filtrado</span>
 <a id="__codelineno-0-570" name="__codelineno-0-570"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
@@ -4625,13 +4625,13 @@ relaciones en los filtros.</p>
 <a id="__codelineno-0-632" name="__codelineno-0-632"></a>    <span class="n">joins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-633" name="__codelineno-0-633"></a>    <span class="n">one</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <a id="__codelineno-0-634" name="__codelineno-0-634"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="w">    </span><span class="sd">"""</span>
 <a id="__codelineno-0-636" name="__codelineno-0-636"></a><span class="sd">    Obtiene registros por filtros y carga relaciones dinámicamente.</span>
 <a id="__codelineno-0-637" name="__codelineno-0-637"></a>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">    Soporta filtros simples y filtros con relaciones usando sintaxis &#39;__&#39;.</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">    Soporta filtros simples y filtros con relaciones usando sintaxis '__'.</span>
 <a id="__codelineno-0-639" name="__codelineno-0-639"></a><span class="sd">    Los JOINs de filtrado se aplican automáticamente cuando se detectan</span>
 <a id="__codelineno-0-640" name="__codelineno-0-640"></a><span class="sd">    relaciones en los filtros.</span>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">    """</span>
 <a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="c1"># Resolver filtros y JOINs necesarios</span>
 <a id="__codelineno-0-643" name="__codelineno-0-643"></a>    <span class="n">resolved_filters</span><span class="p">,</span> <span class="n">joins_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_attribute</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 <a id="__codelineno-0-644" name="__codelineno-0-644"></a>
@@ -4800,7 +4800,7 @@ estás reescribiendo esto — casi siempre es el hook equivocado.</p>
 <a id="__codelineno-0-763" name="__codelineno-0-763"></a>    <span class="n">search_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-764" name="__codelineno-0-764"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-765" name="__codelineno-0-765"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ModelT</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
-<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;MOTOR DE PAGINACIÓN — NO LO REIMPLEMENTES.</span>
+<a id="__codelineno-0-766" name="__codelineno-0-766"></a><span class="w">    </span><span class="sd">"""MOTOR DE PAGINACIÓN — NO LO REIMPLEMENTES.</span>
 <a id="__codelineno-0-767" name="__codelineno-0-767"></a>
 <a id="__codelineno-0-768" name="__codelineno-0-768"></a><span class="sd">    Este es el único loop de paginación (count + offset/limit + hidratación</span>
 <a id="__codelineno-0-769" name="__codelineno-0-769"></a><span class="sd">    de columnas). Copiarlo/reescribirlo en un service o controller es EL</span>
@@ -4815,15 +4815,15 @@ estás reescribiendo esto — casi siempre es el hook equivocado.</p>
 <a id="__codelineno-0-778" name="__codelineno-0-778"></a>
 <a id="__codelineno-0-779" name="__codelineno-0-779"></a><span class="sd">    Si ves `func.count(` o `.offset(` dentro de un método `list_*` propio,</span>
 <a id="__codelineno-0-780" name="__codelineno-0-780"></a><span class="sd">    estás reescribiendo esto — casi siempre es el hook equivocado.</span>
-<a id="__codelineno-0-781" name="__codelineno-0-781"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-781" name="__codelineno-0-781"></a><span class="sd">    """</span>
 <a id="__codelineno-0-782" name="__codelineno-0-782"></a>    <span class="c1"># 1. Construir query base</span>
 <a id="__codelineno-0-783" name="__codelineno-0-783"></a>    <span class="n">query_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-784" name="__codelineno-0-784"></a>        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
-<a id="__codelineno-0-785" name="__codelineno-0-785"></a>        <span class="s2">&quot;use_or&quot;</span><span class="p">:</span> <span class="n">use_or</span><span class="p">,</span>
-<a id="__codelineno-0-786" name="__codelineno-0-786"></a>        <span class="s2">&quot;joins&quot;</span><span class="p">:</span> <span class="n">joins</span><span class="p">,</span>
-<a id="__codelineno-0-787" name="__codelineno-0-787"></a>        <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
-<a id="__codelineno-0-788" name="__codelineno-0-788"></a>        <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
-<a id="__codelineno-0-789" name="__codelineno-0-789"></a>        <span class="s2">&quot;search_fields&quot;</span><span class="p">:</span> <span class="n">search_fields</span><span class="p">,</span>
+<a id="__codelineno-0-784" name="__codelineno-0-784"></a>        <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-0-785" name="__codelineno-0-785"></a>        <span class="s2">"use_or"</span><span class="p">:</span> <span class="n">use_or</span><span class="p">,</span>
+<a id="__codelineno-0-786" name="__codelineno-0-786"></a>        <span class="s2">"joins"</span><span class="p">:</span> <span class="n">joins</span><span class="p">,</span>
+<a id="__codelineno-0-787" name="__codelineno-0-787"></a>        <span class="s2">"order_by"</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
+<a id="__codelineno-0-788" name="__codelineno-0-788"></a>        <span class="s2">"search"</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
+<a id="__codelineno-0-789" name="__codelineno-0-789"></a>        <span class="s2">"search_fields"</span><span class="p">:</span> <span class="n">search_fields</span><span class="p">,</span>
 <a id="__codelineno-0-790" name="__codelineno-0-790"></a>    <span class="p">}</span>
 <a id="__codelineno-0-791" name="__codelineno-0-791"></a>    <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-0-792" name="__codelineno-0-792"></a>        <span class="c1"># Intentar con argumentos (subclases modernas)</span>
@@ -4855,7 +4855,7 @@ estás reescribiendo esto — casi siempre es el hook equivocado.</p>
 <a id="__codelineno-0-818" name="__codelineno-0-818"></a>    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">page_query</span><span class="p">)</span>
 <a id="__codelineno-0-819" name="__codelineno-0-819"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 <a id="__codelineno-0-820" name="__codelineno-0-820"></a>
-<a id="__codelineno-0-821" name="__codelineno-0-821"></a>    <span class="c1"># Procesar filas para soportar &quot;Result Hydration&quot;</span>
+<a id="__codelineno-0-821" name="__codelineno-0-821"></a>    <span class="c1"># Procesar filas para soportar "Result Hydration"</span>
 <a id="__codelineno-0-822" name="__codelineno-0-822"></a>    <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
 <a id="__codelineno-0-823" name="__codelineno-0-823"></a>    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
 <a id="__codelineno-0-824" name="__codelineno-0-824"></a>        <span class="c1"># Si la fila tiene un solo elemento, tratarlo como escalar normal</span>
@@ -4871,7 +4871,7 @@ estás reescribiendo esto — casi siempre es el hook equivocado.</p>
 <a id="__codelineno-0-834" name="__codelineno-0-834"></a>                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_keys</span><span class="p">):</span>
 <a id="__codelineno-0-835" name="__codelineno-0-835"></a>                    <span class="n">key</span> <span class="o">=</span> <span class="n">column_keys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 <a id="__codelineno-0-836" name="__codelineno-0-836"></a>                <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-837" name="__codelineno-0-837"></a>                    <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;_extra_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-837" name="__codelineno-0-837"></a>                    <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"_extra_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span>
 <a id="__codelineno-0-838" name="__codelineno-0-838"></a>
 <a id="__codelineno-0-839" name="__codelineno-0-839"></a>                <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 <a id="__codelineno-0-840" name="__codelineno-0-840"></a>                <span class="nb">setattr</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -4902,7 +4902,7 @@ Debe retornar un objeto Select.</p>
 QUÉ filas ve cada usuario ANTES de la paginación::</p>
 <div class="highlight"><pre><span></span><code>def build_list_queryset(self, **kwargs):
     q = select(self.model)
-    user = getattr(self.service.request.state, &quot;user&quot;, None)
+    user = getattr(self.service.request.state, "user", None)
     if user:
         q = q.where(self.model.company_id == user.company_id)
     return q
@@ -4933,7 +4933,7 @@ QUÉ filas ve cada usuario ANTES de la paginación::</p>
 <a id="__codelineno-0-735" name="__codelineno-0-735"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-736" name="__codelineno-0-736"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-737" name="__codelineno-0-737"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Select</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">ModelT</span><span class="p">]]:</span>
-<a id="__codelineno-0-738" name="__codelineno-0-738"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-738" name="__codelineno-0-738"></a><span class="w">    </span><span class="sd">"""</span>
 <a id="__codelineno-0-739" name="__codelineno-0-739"></a><span class="sd">    Construye el query inicial para listado.</span>
 <a id="__codelineno-0-740" name="__codelineno-0-740"></a><span class="sd">    Debe retornar un objeto Select.</span>
 <a id="__codelineno-0-741" name="__codelineno-0-741"></a>
@@ -4942,11 +4942,11 @@ QUÉ filas ve cada usuario ANTES de la paginación::</p>
 <a id="__codelineno-0-744" name="__codelineno-0-744"></a>
 <a id="__codelineno-0-745" name="__codelineno-0-745"></a><span class="sd">        def build_list_queryset(self, **kwargs):</span>
 <a id="__codelineno-0-746" name="__codelineno-0-746"></a><span class="sd">            q = select(self.model)</span>
-<a id="__codelineno-0-747" name="__codelineno-0-747"></a><span class="sd">            user = getattr(self.service.request.state, &quot;user&quot;, None)</span>
+<a id="__codelineno-0-747" name="__codelineno-0-747"></a><span class="sd">            user = getattr(self.service.request.state, "user", None)</span>
 <a id="__codelineno-0-748" name="__codelineno-0-748"></a><span class="sd">            if user:</span>
 <a id="__codelineno-0-749" name="__codelineno-0-749"></a><span class="sd">                q = q.where(self.model.company_id == user.company_id)</span>
 <a id="__codelineno-0-750" name="__codelineno-0-750"></a><span class="sd">            return q</span>
-<a id="__codelineno-0-751" name="__codelineno-0-751"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-751" name="__codelineno-0-751"></a><span class="sd">    """</span>
 <a id="__codelineno-0-752" name="__codelineno-0-752"></a>    <span class="k">return</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5042,7 +5042,7 @@ QUÉ filas ve cada usuario ANTES de la paginación::</p>
 <a id="__codelineno-0-677" name="__codelineno-0-677"></a>    <span class="n">search</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-678" name="__codelineno-0-678"></a>    <span class="n">search_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-679" name="__codelineno-0-679"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Select</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Aplica filtros estándar, búsqueda y ordenamiento al query.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-680" name="__codelineno-0-680"></a><span class="w">    </span><span class="sd">"""Aplica filtros estándar, búsqueda y ordenamiento al query."""</span>
 <a id="__codelineno-0-681" name="__codelineno-0-681"></a>    <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
 <a id="__codelineno-0-682" name="__codelineno-0-682"></a>
 <a id="__codelineno-0-683" name="__codelineno-0-683"></a>    <span class="c1"># 1. RESOLUCIÓN UNIVERSAL DE FILTROS (JOINs de filtrado y atributos)</span>
@@ -5130,7 +5130,7 @@ QUÉ filas ve cada usuario ANTES de la paginación::</p>
 <span class="normal"><a href="#__codelineno-0-450">450</a></span>
 <span class="normal"><a href="#__codelineno-0-451">451</a></span>
 <span class="normal"><a href="#__codelineno-0-452">452</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_in</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ModelT</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">ModelT</span><span class="p">:</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Crea un nuevo registro en la base de datos.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="w">    </span><span class="sd">"""Crea un nuevo registro en la base de datos."""</span>
 <a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 <a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_in</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
 <a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="n">obj_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">obj_in</span><span class="p">)</span>
@@ -5198,20 +5198,20 @@ repo Beanie usa <code>update(obj, dict)</code> (recibe el Document) y sí setea
 <a id="__codelineno-0-848" name="__codelineno-0-848"></a>    <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-849" name="__codelineno-0-849"></a>    <span class="n">update_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
 <a id="__codelineno-0-850" name="__codelineno-0-850"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelT</span><span class="p">:</span>
-<a id="__codelineno-0-851" name="__codelineno-0-851"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Actualiza un registro por ID con los campos provistos.</span>
+<a id="__codelineno-0-851" name="__codelineno-0-851"></a><span class="w">    </span><span class="sd">"""Actualiza un registro por ID con los campos provistos.</span>
 <a id="__codelineno-0-852" name="__codelineno-0-852"></a>
 <a id="__codelineno-0-853" name="__codelineno-0-853"></a><span class="sd">    NOTA de divergencia entre ORMs: la firma SQL es ``update(id, dict)`` y</span>
 <a id="__codelineno-0-854" name="__codelineno-0-854"></a><span class="sd">    OMITE valores ``None`` (no puede setear una columna a NULL por acá). El</span>
 <a id="__codelineno-0-855" name="__codelineno-0-855"></a><span class="sd">    repo Beanie usa ``update(obj, dict)`` (recibe el Document) y sí setea</span>
 <a id="__codelineno-0-856" name="__codelineno-0-856"></a><span class="sd">    ``None``. Ver la tabla en el CLAUDE.md de la lib.</span>
-<a id="__codelineno-0-857" name="__codelineno-0-857"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-857" name="__codelineno-0-857"></a><span class="sd">    """</span>
 <a id="__codelineno-0-858" name="__codelineno-0-858"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-859" name="__codelineno-0-859"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-859" name="__codelineno-0-859"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-860" name="__codelineno-0-860"></a>    <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 <a id="__codelineno-0-861" name="__codelineno-0-861"></a>    <span class="n">record</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">record_id</span><span class="p">)</span>
 <a id="__codelineno-0-862" name="__codelineno-0-862"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">record</span><span class="p">:</span>
 <a id="__codelineno-0-863" name="__codelineno-0-863"></a>        <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span>
-<a id="__codelineno-0-864" name="__codelineno-0-864"></a>            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado&quot;</span>
+<a id="__codelineno-0-864" name="__codelineno-0-864"></a>            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado"</span>
 <a id="__codelineno-0-865" name="__codelineno-0-865"></a>        <span class="p">)</span>
 <a id="__codelineno-0-866" name="__codelineno-0-866"></a>    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">update_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 <a id="__codelineno-0-867" name="__codelineno-0-867"></a>        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
@@ -5265,14 +5265,14 @@ repo Beanie usa <code>update(obj, dict)</code> (recibe el Document) y sí setea
 <a id="__codelineno-0-875" name="__codelineno-0-875"></a>    <span class="n">record_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">UUID</span><span class="p">],</span>
 <a id="__codelineno-0-876" name="__codelineno-0-876"></a>    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-877" name="__codelineno-0-877"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-878" name="__codelineno-0-878"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Elimina un registro por ID.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-878" name="__codelineno-0-878"></a><span class="w">    </span><span class="sd">"""Elimina un registro por ID."""</span>
 <a id="__codelineno-0-879" name="__codelineno-0-879"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
 <a id="__codelineno-0-880" name="__codelineno-0-880"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="p">:</span>
-<a id="__codelineno-0-881" name="__codelineno-0-881"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;El modelo no está definido en el repositorio&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-881" name="__codelineno-0-881"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"El modelo no está definido en el repositorio"</span><span class="p">)</span>
 <a id="__codelineno-0-882" name="__codelineno-0-882"></a>    <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
 <a id="__codelineno-0-883" name="__codelineno-0-883"></a>    <span class="n">record</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">record_id</span><span class="p">)</span>
 <a id="__codelineno-0-884" name="__codelineno-0-884"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">record</span><span class="p">:</span>
-<a id="__codelineno-0-885" name="__codelineno-0-885"></a>        <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-885" name="__codelineno-0-885"></a>        <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> no encontrado"</span><span class="p">)</span>
 <a id="__codelineno-0-886" name="__codelineno-0-886"></a>    <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
 <a id="__codelineno-0-887" name="__codelineno-0-887"></a>    <span class="k">await</span> <span class="n">db</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
 <a id="__codelineno-0-888" name="__codelineno-0-888"></a>    <span class="k">return</span> <span class="kc">True</span>
@@ -5295,29 +5295,29 @@ repo Beanie usa <code>update(obj, dict)</code> (recibe el Document) y sí setea
 <h2 id="api">API</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Por ID</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">thing</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">thing_id</span><span class="p">)</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">thing</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_with_joins</span><span class="p">(</span><span class="n">thing_id</span><span class="p">,</span> <span class="n">joins</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">])</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">thing</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_with_joins</span><span class="p">(</span><span class="n">thing_id</span><span class="p">,</span> <span class="n">joins</span><span class="o">=</span><span class="p">[</span><span class="s2">"category"</span><span class="p">])</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Por campo</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_email</span><span class="p">(</span><span class="s2">&quot;foo@bar.com&quot;</span><span class="p">)</span>  <span class="c1"># método custom tuyo</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_field</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;foo@bar.com&quot;</span><span class="p">)</span>  <span class="c1"># genérico</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_email</span><span class="p">(</span><span class="s2">"foo@bar.com"</span><span class="p">)</span>  <span class="c1"># método custom tuyo</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_field</span><span class="p">(</span><span class="s2">"email"</span><span class="p">,</span> <span class="s2">"foo@bar.com"</span><span class="p">)</span>  <span class="c1"># genérico</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Filtros (con sintaxis __ para relaciones)</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">})</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">admins</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">&quot;user_roles__role__code&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">})</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">items</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">})</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">admins</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">get_by_filters</span><span class="p">({</span><span class="s2">"user_roles__role__code"</span><span class="p">:</span> <span class="s2">"admin"</span><span class="p">})</span>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1"># Paginado</span>
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">items</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">list_paginated</span><span class="p">(</span>
 <a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">},</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">search</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">order_by</span><span class="o">=</span><span class="s2">&quot;-created_at&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">joins</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">],</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"active"</span><span class="p">},</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">search</span><span class="o">=</span><span class="s2">"foo"</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">order_by</span><span class="o">=</span><span class="s2">"-created_at"</span><span class="p">,</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">joins</span><span class="o">=</span><span class="p">[</span><span class="s2">"category"</span><span class="p">],</span>
 <a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">)</span>
 <a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
 <a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="c1"># Mutaciones</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="n">created</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Foo&quot;</span><span class="p">})</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="n">updated</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">thing_id</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bar&quot;</span><span class="p">})</span>   <span class="c1"># dict positional</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="n">created</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Foo"</span><span class="p">})</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="n">updated</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">thing_id</span><span class="p">,</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Bar"</span><span class="p">})</span>   <span class="c1"># dict positional</span>
 <a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="n">deleted</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">thing_id</span><span class="p">)</span>                    <span class="c1"># hard delete</span>
 </code></pre></div>
 <h2 id="override-build_list_queryset">Override <code>build_list_queryset</code></h2>
@@ -5337,12 +5337,12 @@ duplica lógica ni rompe la paginación.</p>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_list_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">query</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">req</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="p">,</span> <span class="s2">&quot;request&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">req</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">roles</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;user_role_codes&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">req</span> <span class="k">else</span> <span class="p">[]</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">req</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="p">,</span> <span class="s2">"request"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">req</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">roles</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"user_role_codes"</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">req</span> <span class="k">else</span> <span class="p">[]</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="c1"># Staff global ve todo; el resto solo su empresa + las permitidas</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">r</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;admin_global&quot;</span><span class="p">}</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">)</span> <span class="ow">and</span> <span class="n">user</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span><span class="p">:</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">r</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"admin_global"</span><span class="p">}</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">)</span> <span class="ow">and</span> <span class="n">user</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span><span class="p">:</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">company_id</span> <span class="o">==</span> <span class="n">user</span><span class="o">.</span><span class="n">company_id</span><span class="p">)</span>
 <a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>            <span class="o">|</span> <span class="n">exists</span><span class="p">(</span>
