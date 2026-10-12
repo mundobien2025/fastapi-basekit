@@ -2586,7 +2586,7 @@
 <span class="normal"><a href="#__codelineno-0-456">456</a></span>
 <span class="normal"><a href="#__codelineno-0-457">457</a></span>
 <span class="normal"><a href="#__codelineno-0-458">458</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="k">class</span><span class="w"> </span><span class="nc">BaseController</span><span class="p">:</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Montar rutas CRUD genericas y captura errores de negocio.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="w">    </span><span class="sd">"""Montar rutas CRUD genericas y captura errores de negocio."""</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="n">service</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">()</span>
 <a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="n">schema_class</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]]</span>
@@ -2598,12 +2598,12 @@
 <a id="__codelineno-0-83" name="__codelineno-0-83"></a>
 <a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="nd">@property</span>
 <a id="__codelineno-0-85" name="__codelineno-0-85"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Acción canónica del request actual.</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="w">        </span><span class="sd">"""Acción canónica del request actual.</span>
 <a id="__codelineno-0-87" name="__codelineno-0-87"></a>
 <a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        Preferencia: la que fijó ``prepare_action`` (``list``/``retrieve``/…).</span>
 <a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        Fallback: el nombre de la función de endpoint que FastAPI está</span>
 <a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        ejecutando (``create``/``update``/``retrieve``/…), leído de</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        ``request.scope[&quot;endpoint&quot;]``. Así un endpoint CUSTOM que llama</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        ``request.scope["endpoint"]``. Así un endpoint CUSTOM que llama</span>
 <a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="sd">        ``format_response`` sin ``prepare_action`` igual obtiene su acción para</span>
 <a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">        ``get_schema_class``/``get_filters`` — antes caía a ``None`` y devolvía</span>
 <a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">        el schema por defecto (de lista), rompiendo la validación del</span>
@@ -2615,53 +2615,53 @@
 <a id="__codelineno-0-100" name="__codelineno-0-100"></a>
 <a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">        OJO: NO reemplaza a ``prepare_action`` para permisos. El fallback solo</span>
 <a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">        informa el schema/scoping; ``check_permissions`` sigue corriendo solo si</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">        el endpoint llamó ``prepare_action`` (o delega en un CRUD base).&quot;&quot;&quot;</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a>        <span class="n">prepared</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_basekit_prepared_action&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">        el endpoint llamó ``prepare_action`` (o delega en un CRUD base)."""</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a>        <span class="n">prepared</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_basekit_prepared_action"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 <a id="__codelineno-0-105" name="__codelineno-0-105"></a>        <span class="k">if</span> <span class="n">prepared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-106" name="__codelineno-0-106"></a>            <span class="k">return</span> <span class="n">prepared</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;request&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a>        <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;scope&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;endpoint&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"request"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a>        <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"scope"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"endpoint"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 <a id="__codelineno-0-111" name="__codelineno-0-111"></a>
 <a id="__codelineno-0-112" name="__codelineno-0-112"></a>    <span class="nd">@action</span><span class="o">.</span><span class="n">setter</span>
 <a id="__codelineno-0-113" name="__codelineno-0-113"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Permite fijar la acción a mano (``self.action = &quot;list&quot;``) — compat</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">        con código pre-property. Escribe el backing attr que lee el getter.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="w">        </span><span class="sd">"""Permite fijar la acción a mano (``self.action = "list"``) — compat</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">        con código pre-property. Escribe el backing attr que lee el getter."""</span>
 <a id="__codelineno-0-116" name="__codelineno-0-116"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_basekit_prepared_action</span> <span class="o">=</span> <span class="n">value</span>
 <a id="__codelineno-0-117" name="__codelineno-0-117"></a>    <span class="n">_params_excluded_fields</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="s2">&quot;self&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="s2">&quot;page&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="s2">&quot;count&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="s2">&quot;search&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="s2">&quot;order_by&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="s2">&quot;__class__&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a>        <span class="s2">&quot;args&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-125" name="__codelineno-0-125"></a>        <span class="s2">&quot;kwargs&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-126" name="__codelineno-0-126"></a>        <span class="s2">&quot;id&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a>        <span class="s2">&quot;payload&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="s2">&quot;validated_data&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="s2">"self"</span><span class="p">,</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="s2">"page"</span><span class="p">,</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="s2">"count"</span><span class="p">,</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="s2">"search"</span><span class="p">,</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="s2">"order_by"</span><span class="p">,</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="s2">"__class__"</span><span class="p">,</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>        <span class="s2">"args"</span><span class="p">,</span>
+<a id="__codelineno-0-125" name="__codelineno-0-125"></a>        <span class="s2">"kwargs"</span><span class="p">,</span>
+<a id="__codelineno-0-126" name="__codelineno-0-126"></a>        <span class="s2">"id"</span><span class="p">,</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127"></a>        <span class="s2">"payload"</span><span class="p">,</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="s2">"data"</span><span class="p">,</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="s2">"validated_data"</span><span class="p">,</span>
 <a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="p">}</span>
 <a id="__codelineno-0-131" name="__codelineno-0-131"></a>
 <a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Inicializa el controller.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a><span class="w">        </span><span class="sd">"""Inicializa el controller."""</span>
 <a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="k">pass</span>
 <a id="__codelineno-0-135" name="__codelineno-0-135"></a>
 <a id="__codelineno-0-136" name="__codelineno-0-136"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">BasePermission</span><span class="p">]]:</span>
-<a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="w">        </span><span class="sd">"""</span>
 <a id="__codelineno-0-138" name="__codelineno-0-138"></a><span class="sd">        Instancia y retorna la lista de permisos que esta vista requiere.</span>
 <a id="__codelineno-0-139" name="__codelineno-0-139"></a>
 <a id="__codelineno-0-140" name="__codelineno-0-140"></a><span class="sd">        Sobrescribir esto permite lógica tipo DRF:</span>
 <a id="__codelineno-0-141" name="__codelineno-0-141"></a>
-<a id="__codelineno-0-142" name="__codelineno-0-142"></a><span class="sd">        if self.action == &#39;list&#39;:</span>
+<a id="__codelineno-0-142" name="__codelineno-0-142"></a><span class="sd">        if self.action == 'list':</span>
 <a id="__codelineno-0-143" name="__codelineno-0-143"></a><span class="sd">            return [AllowAny]</span>
 <a id="__codelineno-0-144" name="__codelineno-0-144"></a><span class="sd">        return [IsAuthenticated]</span>
-<a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="sd">        """</span>
 <a id="__codelineno-0-146" name="__codelineno-0-146"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">permission_classes</span>
 <a id="__codelineno-0-147" name="__codelineno-0-147"></a>
 <a id="__codelineno-0-148" name="__codelineno-0-148"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-149" name="__codelineno-0-149"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the current action and run permission checks.</span>
+<a id="__codelineno-0-149" name="__codelineno-0-149"></a><span class="w">        </span><span class="sd">"""Set the current action and run permission checks.</span>
 <a id="__codelineno-0-150" name="__codelineno-0-150"></a>
 <a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="sd">        NO metaclass or auto-wrapping exists. This is called EXPLICITLY:</span>
 <a id="__codelineno-0-152" name="__codelineno-0-152"></a>
@@ -2670,25 +2670,25 @@
 <a id="__codelineno-0-155" name="__codelineno-0-155"></a><span class="sd">          ``return await super().list()`` you are covered.</span>
 <a id="__codelineno-0-156" name="__codelineno-0-156"></a><span class="sd">        - A CUSTOM endpoint (any method you write yourself, e.g.</span>
 <a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="sd">          ``async def approve(self, id: str)``) runs with NO permission check</span>
-<a id="__codelineno-0-158" name="__codelineno-0-158"></a><span class="sd">          unless you add ``await self.prepare_action(&quot;approve&quot;)`` as its first</span>
+<a id="__codelineno-0-158" name="__codelineno-0-158"></a><span class="sd">          unless you add ``await self.prepare_action("approve")`` as its first</span>
 <a id="__codelineno-0-159" name="__codelineno-0-159"></a><span class="sd">          line. Forgetting this silently skips ``permission_classes``.</span>
 <a id="__codelineno-0-160" name="__codelineno-0-160"></a>
 <a id="__codelineno-0-161" name="__codelineno-0-161"></a><span class="sd">        Idempotent within one instance: if the same ``action_name`` is already</span>
 <a id="__codelineno-0-162" name="__codelineno-0-162"></a><span class="sd">        prepared, subsequent calls are no-ops, so calling it in a custom method</span>
-<a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="sd">        that also delegates to ``super().&lt;crud&gt;()`` won&#39;t double-fire.</span>
-<a id="__codelineno-0-164" name="__codelineno-0-164"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-165" name="__codelineno-0-165"></a>        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_basekit_prepared_action&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">action_name</span><span class="p">:</span>
+<a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="sd">        that also delegates to ``super().&lt;crud&gt;()`` won't double-fire.</span>
+<a id="__codelineno-0-164" name="__codelineno-0-164"></a><span class="sd">        """</span>
+<a id="__codelineno-0-165" name="__codelineno-0-165"></a>        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_basekit_prepared_action"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">action_name</span><span class="p">:</span>
 <a id="__codelineno-0-166" name="__codelineno-0-166"></a>            <span class="k">return</span>
 <a id="__codelineno-0-167" name="__codelineno-0-167"></a>        <span class="c1"># `action` es una property de solo-lectura que expone</span>
 <a id="__codelineno-0-168" name="__codelineno-0-168"></a>        <span class="c1"># `_basekit_prepared_action` (con fallback al nombre del endpoint), así</span>
 <a id="__codelineno-0-169" name="__codelineno-0-169"></a>        <span class="c1"># que fijamos el backing attr, no `self.action` directamente.</span>
 <a id="__codelineno-0-170" name="__codelineno-0-170"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_basekit_prepared_action</span> <span class="o">=</span> <span class="n">action_name</span>
-<a id="__codelineno-0-171" name="__codelineno-0-171"></a>        <span class="c1"># Propagate the canonical CRUD action (&quot;list&quot;/&quot;retrieve&quot;/...) to the</span>
+<a id="__codelineno-0-171" name="__codelineno-0-171"></a>        <span class="c1"># Propagate the canonical CRUD action ("list"/"retrieve"/...) to the</span>
 <a id="__codelineno-0-172" name="__codelineno-0-172"></a>        <span class="c1"># service so `get_kwargs_query` / `get_filters` can branch on it. The</span>
-<a id="__codelineno-0-173" name="__codelineno-0-173"></a>        <span class="c1"># service&#39;s own constructor derives `action` from the endpoint</span>
-<a id="__codelineno-0-174" name="__codelineno-0-174"></a>        <span class="c1"># function name (e.g. &quot;list_users&quot;), which is unreliable for that</span>
+<a id="__codelineno-0-173" name="__codelineno-0-173"></a>        <span class="c1"># service's own constructor derives `action` from the endpoint</span>
+<a id="__codelineno-0-174" name="__codelineno-0-174"></a>        <span class="c1"># function name (e.g. "list_users"), which is unreliable for that</span>
 <a id="__codelineno-0-175" name="__codelineno-0-175"></a>        <span class="c1"># purpose; the controller knows the canonical action.</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a>        <span class="n">service</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;service&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a>        <span class="n">service</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"service"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 <a id="__codelineno-0-177" name="__codelineno-0-177"></a>        <span class="k">if</span> <span class="n">service</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-178" name="__codelineno-0-178"></a>            <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-0-179" name="__codelineno-0-179"></a>                <span class="n">service</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action_name</span>
@@ -2697,87 +2697,87 @@
 <a id="__codelineno-0-182" name="__codelineno-0-182"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_permissions</span><span class="p">()</span>
 <a id="__codelineno-0-183" name="__codelineno-0-183"></a>
 <a id="__codelineno-0-184" name="__codelineno-0-184"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Run each declared permission. Raises ``PermissionException``</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="w">        </span><span class="sd">"""Run each declared permission. Raises ``PermissionException``</span>
 <a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">        on the first denial.</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">        """</span>
 <a id="__codelineno-0-188" name="__codelineno-0-188"></a>        <span class="k">for</span> <span class="n">permission_class</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_permissions</span><span class="p">():</span>
 <a id="__codelineno-0-189" name="__codelineno-0-189"></a>            <span class="n">permission</span> <span class="o">=</span> <span class="n">permission_class</span><span class="p">()</span>
 <a id="__codelineno-0-190" name="__codelineno-0-190"></a>            <span class="n">has_perm</span> <span class="o">=</span> <span class="k">await</span> <span class="n">permission</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
 <a id="__codelineno-0-191" name="__codelineno-0-191"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_perm</span><span class="p">:</span>
 <a id="__codelineno-0-192" name="__codelineno-0-192"></a>                <span class="n">message</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
 <a id="__codelineno-0-193" name="__codelineno-0-193"></a>                    <span class="n">permission</span><span class="p">,</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>                    <span class="s2">&quot;message_exception&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a>                    <span class="s2">&quot;No tienes permiso para realizar esta acción.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>                    <span class="s2">"message_exception"</span><span class="p">,</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>                    <span class="s2">"No tienes permiso para realizar esta acción."</span><span class="p">,</span>
 <a id="__codelineno-0-196" name="__codelineno-0-196"></a>                <span class="p">)</span>
 <a id="__codelineno-0-197" name="__codelineno-0-197"></a>                <span class="k">raise</span> <span class="n">PermissionException</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 <a id="__codelineno-0-198" name="__codelineno-0-198"></a>
 <a id="__codelineno-0-199" name="__codelineno-0-199"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_permissions_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Backward-compat alias for ``check_permissions``.</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="w">        </span><span class="sd">"""Backward-compat alias for ``check_permissions``.</span>
 <a id="__codelineno-0-201" name="__codelineno-0-201"></a>
 <a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">        Pre-0.3.2 controllers called this manually inside endpoint methods.</span>
-<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">        Kept working for code that hasn&#39;t migrated. New code should declare</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">        Kept working for code that hasn't migrated. New code should declare</span>
 <a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">        ``permission_classes`` on the controller and call</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">        ``await self.prepare_action(&quot;&lt;action&gt;&quot;)`` at the top of each custom</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">        ``await self.prepare_action("&lt;action&gt;")`` at the top of each custom</span>
 <a id="__codelineno-0-206" name="__codelineno-0-206"></a><span class="sd">        endpoint (there is no metaclass that does this automatically).</span>
-<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">        """</span>
 <a id="__codelineno-0-208" name="__codelineno-0-208"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_permissions</span><span class="p">()</span>
 <a id="__codelineno-0-209" name="__codelineno-0-209"></a>
 <a id="__codelineno-0-210" name="__codelineno-0-210"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_schema_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]:</span>
 <a id="__codelineno-0-211" name="__codelineno-0-211"></a>        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a>            <span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39; should either include a `schema_class` attribute, &quot;</span>
-<a id="__codelineno-0-213" name="__codelineno-0-213"></a>            <span class="s2">&quot;or override the `get_schema_class()` method.&quot;</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a>            <span class="s2">"'</span><span class="si">%s</span><span class="s2">' should either include a `schema_class` attribute, "</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a>            <span class="s2">"or override the `get_schema_class()` method."</span>
 <a id="__codelineno-0-214" name="__codelineno-0-214"></a>            <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 <a id="__codelineno-0-215" name="__codelineno-0-215"></a>        <span class="p">)</span>
 <a id="__codelineno-0-216" name="__codelineno-0-216"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_class</span>
 <a id="__codelineno-0-217" name="__codelineno-0-217"></a>
 <a id="__codelineno-0-218" name="__codelineno-0-218"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-219" name="__codelineno-0-219"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">"list"</span><span class="p">)</span>
 <a id="__codelineno-0-220" name="__codelineno-0-220"></a>        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
 <a id="__codelineno-0-221" name="__codelineno-0-221"></a>        <span class="n">items</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
-<a id="__codelineno-0-222" name="__codelineno-0-222"></a>        <span class="n">count</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
-<a id="__codelineno-0-223" name="__codelineno-0-223"></a>        <span class="n">page</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">1</span>
+<a id="__codelineno-0-222" name="__codelineno-0-222"></a>        <span class="n">count</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223"></a>        <span class="n">page</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"page"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">1</span>
 <a id="__codelineno-0-224" name="__codelineno-0-224"></a>
 <a id="__codelineno-0-225" name="__codelineno-0-225"></a>        <span class="n">total_pages</span> <span class="o">=</span> <span class="p">(</span><span class="n">total</span> <span class="o">+</span> <span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">count</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
 <a id="__codelineno-0-226" name="__codelineno-0-226"></a>        <span class="n">pagination</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>            <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a>            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
-<a id="__codelineno-0-229" name="__codelineno-0-229"></a>            <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span>
-<a id="__codelineno-0-230" name="__codelineno-0-230"></a>            <span class="s2">&quot;total_pages&quot;</span><span class="p">:</span> <span class="n">total_pages</span><span class="p">,</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>            <span class="s2">"page"</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a>            <span class="s2">"count"</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>            <span class="s2">"total"</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a>            <span class="s2">"total_pages"</span><span class="p">:</span> <span class="n">total_pages</span><span class="p">,</span>
 <a id="__codelineno-0-231" name="__codelineno-0-231"></a>        <span class="p">}</span>
 <a id="__codelineno-0-232" name="__codelineno-0-232"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="n">pagination</span><span class="p">)</span>
 <a id="__codelineno-0-233" name="__codelineno-0-233"></a>
 <a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-235" name="__codelineno-0-235"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;retrieve&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">"retrieve"</span><span class="p">)</span>
 <a id="__codelineno-0-236" name="__codelineno-0-236"></a>        <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
 <a id="__codelineno-0-237" name="__codelineno-0-237"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">item</span><span class="p">)</span>
 <a id="__codelineno-0-238" name="__codelineno-0-238"></a>
 <a id="__codelineno-0-239" name="__codelineno-0-239"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validated_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">"create"</span><span class="p">)</span>
 <a id="__codelineno-0-241" name="__codelineno-0-241"></a>        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">validated_data</span><span class="p">)</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Creado exitosamente&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">"Creado exitosamente"</span><span class="p">)</span>
 <a id="__codelineno-0-243" name="__codelineno-0-243"></a>
 <a id="__codelineno-0-244" name="__codelineno-0-244"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">validated_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;update&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">"update"</span><span class="p">)</span>
 <a id="__codelineno-0-246" name="__codelineno-0-246"></a>        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">validated_data</span><span class="p">)</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Actualizado exitosamente&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">"Actualizado exitosamente"</span><span class="p">)</span>
 <a id="__codelineno-0-248" name="__codelineno-0-248"></a>
 <a id="__codelineno-0-249" name="__codelineno-0-249"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">&quot;delete&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_action</span><span class="p">(</span><span class="s2">"delete"</span><span class="p">)</span>
 <a id="__codelineno-0-251" name="__codelineno-0-251"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Eliminado exitosamente&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">"Eliminado exitosamente"</span><span class="p">)</span>
 <a id="__codelineno-0-253" name="__codelineno-0-253"></a>
 <a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">format_response</span><span class="p">(</span>
 <a id="__codelineno-0-255" name="__codelineno-0-255"></a>        <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-256" name="__codelineno-0-256"></a>        <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-257" name="__codelineno-0-257"></a>        <span class="n">pagination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-258" name="__codelineno-0-258"></a>        <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>        <span class="n">response_status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>        <span class="n">response_status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"success"</span><span class="p">,</span>
 <a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
 <a id="__codelineno-0-261" name="__codelineno-0-261"></a>        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_schema_class</span><span class="p">()</span>
 <a id="__codelineno-0-262" name="__codelineno-0-262"></a>
 <a id="__codelineno-0-263" name="__codelineno-0-263"></a>        <span class="c1"># Robust Pydantic v2 validation. Each branch falls back to the</span>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="c1"># raw value when the schema doesn&#39;t fit (custom-action endpoints</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a>        <span class="c1"># often return ad-hoc dicts that don&#39;t match the controller&#39;s</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="c1"># raw value when the schema doesn't fit (custom-action endpoints</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>        <span class="c1"># often return ad-hoc dicts that don't match the controller's</span>
 <a id="__codelineno-0-266" name="__codelineno-0-266"></a>        <span class="c1"># default schema_class — those should pass through untouched).</span>
 <a id="__codelineno-0-267" name="__codelineno-0-267"></a>        <span class="c1">#</span>
 <a id="__codelineno-0-268" name="__codelineno-0-268"></a>        <span class="c1"># Cuando un endpoint custom ya devuelve un modelo Pydantic específico</span>
@@ -2813,7 +2813,7 @@
 <a id="__codelineno-0-298" name="__codelineno-0-298"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 <a id="__codelineno-0-299" name="__codelineno-0-299"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
 <a id="__codelineno-0-300" name="__codelineno-0-300"></a>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>
 <a id="__codelineno-0-302" name="__codelineno-0-302"></a>            <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <a id="__codelineno-0-303" name="__codelineno-0-303"></a>            <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-0-304" name="__codelineno-0-304"></a>                <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
@@ -2829,20 +2829,20 @@
 <a id="__codelineno-0-314" name="__codelineno-0-314"></a>
 <a id="__codelineno-0-315" name="__codelineno-0-315"></a>        <span class="c1"># Construcción dinámica de argumentos</span>
 <a id="__codelineno-0-316" name="__codelineno-0-316"></a>        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a>            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a>            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>            <span class="s2">"data"</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>            <span class="s2">"message"</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">"Operación exitosa"</span><span class="p">,</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>            <span class="s2">"status"</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
 <a id="__codelineno-0-320" name="__codelineno-0-320"></a>        <span class="p">}</span>
 <a id="__codelineno-0-321" name="__codelineno-0-321"></a>        <span class="k">if</span> <span class="n">pagination</span><span class="p">:</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a>            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pagination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"pagination"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
 <a id="__codelineno-0-323" name="__codelineno-0-323"></a>
 <a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="k">return</span> <span class="n">response_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 <a id="__codelineno-0-325" name="__codelineno-0-325"></a>
 <a id="__codelineno-0-326" name="__codelineno-0-326"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">        </span><span class="sd">"""Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
 <a id="__codelineno-0-328" name="__codelineno-0-328"></a>
 <a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">        Los valores llegan como strings; se coaccionan a los tipos DECLARADOS</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        en la firma del endpoint (leída de ``request.scope[&quot;endpoint&quot;]``), de</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        en la firma del endpoint (leída de ``request.scope["endpoint"]``), de</span>
 <a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">        forma DETERMINISTA — sin introspección de stack-frames. Un query param</span>
 <a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">        que no está declarado en la firma se deja como string (idéntico a lo</span>
 <a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">        que haría FastAPI si no lo tipara), evitando coacciones-adivinanza que</span>
@@ -2857,13 +2857,13 @@
 <a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">        llaman ``super()._params(skip_frames + 1)`` (p.ej. mixins de path</span>
 <a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">        params). Ya no se usa: la coerción no depende de frames. No lo pases en</span>
 <a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">        código nuevo.</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">        """</span>
 <a id="__codelineno-0-346" name="__codelineno-0-346"></a>        <span class="n">query_params</span> <span class="o">=</span> <span class="p">(</span>
 <a id="__codelineno-0-347" name="__codelineno-0-347"></a>            <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="k">else</span> <span class="p">{}</span>
 <a id="__codelineno-0-348" name="__codelineno-0-348"></a>        <span class="p">)</span>
 <a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_endpoint_param_types</span><span class="p">()</span>
 <a id="__codelineno-0-350" name="__codelineno-0-350"></a>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;order_by&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"page"</span><span class="p">,</span> <span class="s2">"count"</span><span class="p">,</span> <span class="s2">"search"</span><span class="p">,</span> <span class="s2">"order_by"</span><span class="p">}</span>
 <a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
 <a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span>
 <a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="n">search</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2873,13 +2873,13 @@
 <a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 <a id="__codelineno-0-359" name="__codelineno-0-359"></a>            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_param</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">declared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
 <a id="__codelineno-0-360" name="__codelineno-0-360"></a>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>            <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>            <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"page"</span><span class="p">:</span>
 <a id="__codelineno-0-362" name="__codelineno-0-362"></a>                <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"count"</span><span class="p">:</span>
 <a id="__codelineno-0-364" name="__codelineno-0-364"></a>                <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;search&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"search"</span><span class="p">:</span>
 <a id="__codelineno-0-366" name="__codelineno-0-366"></a>                <span class="n">search</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;order_by&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>            <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"order_by"</span><span class="p">:</span>
 <a id="__codelineno-0-368" name="__codelineno-0-368"></a>                <span class="n">order_by</span> <span class="o">=</span> <span class="n">value</span>
 <a id="__codelineno-0-369" name="__codelineno-0-369"></a>            <span class="k">elif</span> <span class="p">(</span>
 <a id="__codelineno-0-370" name="__codelineno-0-370"></a>                <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standard_params</span>
@@ -2888,23 +2888,23 @@
 <a id="__codelineno-0-373" name="__codelineno-0-373"></a>                <span class="n">filters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 <a id="__codelineno-0-374" name="__codelineno-0-374"></a>
 <a id="__codelineno-0-375" name="__codelineno-0-375"></a>        <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a>            <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>            <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>            <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>            <span class="s2">"page"</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>            <span class="s2">"count"</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>            <span class="s2">"search"</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>            <span class="s2">"order_by"</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>            <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
 <a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="p">}</span>
 <a id="__codelineno-0-382" name="__codelineno-0-382"></a>
 <a id="__codelineno-0-383" name="__codelineno-0-383"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_endpoint_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapea {nombre_param: anotación} desde la firma del endpoint activo.</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="w">        </span><span class="sd">"""Mapea {nombre_param: anotación} desde la firma del endpoint activo.</span>
 <a id="__codelineno-0-385" name="__codelineno-0-385"></a>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        Lee ``request.scope[&quot;endpoint&quot;]`` (la función de ruta que FastAPI está</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        Lee ``request.scope["endpoint"]`` (la función de ruta que FastAPI está</span>
 <a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">        ejecutando) y delega en el cache por-endpoint. Devuelve ``{}`` si no hay</span>
 <a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">        endpoint o su firma no es introspectable (los valores quedan como string).</span>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;request&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a>        <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;scope&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;endpoint&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        """</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"request"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a>        <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"scope"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"endpoint"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 <a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="k">if</span> <span class="n">endpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-394" name="__codelineno-0-394"></a>            <span class="k">return</span> <span class="p">{}</span>
 <a id="__codelineno-0-395" name="__codelineno-0-395"></a>        <span class="k">try</span><span class="p">:</span>
@@ -2915,7 +2915,7 @@
 <a id="__codelineno-0-400" name="__codelineno-0-400"></a>
 <a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="nd">@staticmethod</span>
 <a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_coerce_param</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Coacciona un valor de query (string) al tipo declarado en la firma.</span>
+<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="w">        </span><span class="sd">"""Coacciona un valor de query (string) al tipo declarado en la firma.</span>
 <a id="__codelineno-0-404" name="__codelineno-0-404"></a>
 <a id="__codelineno-0-405" name="__codelineno-0-405"></a><span class="sd">        bool/int/float a mano; el RESTO (date, datetime, UUID, Decimal, Enum…)</span>
 <a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">        vía pydantic ``TypeAdapter`` — el MISMO motor que usa FastAPI, para que</span>
@@ -2925,12 +2925,12 @@
 <a id="__codelineno-0-410" name="__codelineno-0-410"></a>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">        Nota: FastAPI ya rechaza (422) un query param tipado con valor inválido</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">        antes de llegar acá, así que en la práctica la coacción siempre aplica.</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">        """</span>
 <a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="k">if</span> <span class="n">annotation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 <a id="__codelineno-0-415" name="__codelineno-0-415"></a>            <span class="k">return</span> <span class="n">raw</span>
 <a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="n">target</span> <span class="o">=</span> <span class="n">_unwrap_optional</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 <a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"1"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">,</span> <span class="s2">"t"</span><span class="p">,</span> <span class="s2">"yes"</span><span class="p">,</span> <span class="s2">"on"</span><span class="p">}</span>
 <a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
 <a id="__codelineno-0-420" name="__codelineno-0-420"></a>            <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-0-421" name="__codelineno-0-421"></a>                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
@@ -2960,15 +2960,15 @@
 <a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="k">return</span> <span class="n">default</span>
 <a id="__codelineno-0-446" name="__codelineno-0-446"></a>
 <a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper para convertir modelos ORM/Pydantic a dict.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="w">        </span><span class="sd">"""Helper para convertir modelos ORM/Pydantic a dict."""</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"model_dump"</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
 <a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"dict"</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
 <a id="__codelineno-0-452" name="__codelineno-0-452"></a>            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
 <a id="__codelineno-0-454" name="__codelineno-0-454"></a>            <span class="c1"># Filtramos atributos privados de SQLAlchemy</span>
 <a id="__codelineno-0-455" name="__codelineno-0-455"></a>            <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
 <a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="p">}</span>
 <a id="__codelineno-0-458" name="__codelineno-0-458"></a>        <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
@@ -2991,7 +2991,7 @@
 
 
 <h4 id="fastapi_basekit.aio.controller.base.BaseController.format_response" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">format_response</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">response_status</span><span class="o">=</span><span class="s1">&#39;success&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">format_response</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">response_status</span><span class="o">=</span><span class="s1">'success'</span><span class="p">)</span></code>
 
 </h4>
 
@@ -3076,13 +3076,13 @@
 <a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="n">pagination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">response_status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">response_status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"success"</span><span class="p">,</span>
 <a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
 <a id="__codelineno-0-261" name="__codelineno-0-261"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_schema_class</span><span class="p">()</span>
 <a id="__codelineno-0-262" name="__codelineno-0-262"></a>
 <a id="__codelineno-0-263" name="__codelineno-0-263"></a>    <span class="c1"># Robust Pydantic v2 validation. Each branch falls back to the</span>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a>    <span class="c1"># raw value when the schema doesn&#39;t fit (custom-action endpoints</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a>    <span class="c1"># often return ad-hoc dicts that don&#39;t match the controller&#39;s</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>    <span class="c1"># raw value when the schema doesn't fit (custom-action endpoints</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>    <span class="c1"># often return ad-hoc dicts that don't match the controller's</span>
 <a id="__codelineno-0-266" name="__codelineno-0-266"></a>    <span class="c1"># default schema_class — those should pass through untouched).</span>
 <a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="c1">#</span>
 <a id="__codelineno-0-268" name="__codelineno-0-268"></a>    <span class="c1"># Cuando un endpoint custom ya devuelve un modelo Pydantic específico</span>
@@ -3118,7 +3118,7 @@
 <a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 <a id="__codelineno-0-299" name="__codelineno-0-299"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">data</span>
 <a id="__codelineno-0-300" name="__codelineno-0-300"></a>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>
 <a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <a id="__codelineno-0-303" name="__codelineno-0-303"></a>        <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-0-304" name="__codelineno-0-304"></a>            <span class="n">data_parsed</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
@@ -3134,12 +3134,12 @@
 <a id="__codelineno-0-314" name="__codelineno-0-314"></a>
 <a id="__codelineno-0-315" name="__codelineno-0-315"></a>    <span class="c1"># Construcción dinámica de argumentos</span>
 <a id="__codelineno-0-316" name="__codelineno-0-316"></a>    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a>        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">&quot;Operación exitosa&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>        <span class="s2">"data"</span><span class="p">:</span> <span class="n">data_parsed</span><span class="p">,</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="s2">"message"</span><span class="p">:</span> <span class="n">message</span> <span class="ow">or</span> <span class="s2">"Operación exitosa"</span><span class="p">,</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="s2">"status"</span><span class="p">:</span> <span class="n">response_status</span><span class="p">,</span>
 <a id="__codelineno-0-320" name="__codelineno-0-320"></a>    <span class="p">}</span>
 <a id="__codelineno-0-321" name="__codelineno-0-321"></a>    <span class="k">if</span> <span class="n">pagination</span><span class="p">:</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pagination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="n">kwargs</span><span class="p">[</span><span class="s2">"pagination"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pagination</span>
 <a id="__codelineno-0-323" name="__codelineno-0-323"></a>
 <a id="__codelineno-0-324" name="__codelineno-0-324"></a>    <span class="k">return</span> <span class="n">response_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3170,8 +3170,8 @@
 <span class="normal"><a href="#__codelineno-0-215">215</a></span>
 <span class="normal"><a href="#__codelineno-0-216">216</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_schema_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]:</span>
 <a id="__codelineno-0-211" name="__codelineno-0-211"></a>    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a>        <span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39; should either include a `schema_class` attribute, &quot;</span>
-<a id="__codelineno-0-213" name="__codelineno-0-213"></a>        <span class="s2">&quot;or override the `get_schema_class()` method.&quot;</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a>        <span class="s2">"'</span><span class="si">%s</span><span class="s2">' should either include a `schema_class` attribute, "</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a>        <span class="s2">"or override the `get_schema_class()` method."</span>
 <a id="__codelineno-0-214" name="__codelineno-0-214"></a>        <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 <a id="__codelineno-0-215" name="__codelineno-0-215"></a>    <span class="p">)</span>
 <a id="__codelineno-0-216" name="__codelineno-0-216"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_class</span>
@@ -3216,17 +3216,17 @@ on the first denial.</p>
 <span class="normal"><a href="#__codelineno-0-195">195</a></span>
 <span class="normal"><a href="#__codelineno-0-196">196</a></span>
 <span class="normal"><a href="#__codelineno-0-197">197</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Run each declared permission. Raises ``PermissionException``</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="w">    </span><span class="sd">"""Run each declared permission. Raises ``PermissionException``</span>
 <a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    on the first denial.</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">    """</span>
 <a id="__codelineno-0-188" name="__codelineno-0-188"></a>    <span class="k">for</span> <span class="n">permission_class</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_permissions</span><span class="p">():</span>
 <a id="__codelineno-0-189" name="__codelineno-0-189"></a>        <span class="n">permission</span> <span class="o">=</span> <span class="n">permission_class</span><span class="p">()</span>
 <a id="__codelineno-0-190" name="__codelineno-0-190"></a>        <span class="n">has_perm</span> <span class="o">=</span> <span class="k">await</span> <span class="n">permission</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
 <a id="__codelineno-0-191" name="__codelineno-0-191"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_perm</span><span class="p">:</span>
 <a id="__codelineno-0-192" name="__codelineno-0-192"></a>            <span class="n">message</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
 <a id="__codelineno-0-193" name="__codelineno-0-193"></a>                <span class="n">permission</span><span class="p">,</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>                <span class="s2">&quot;message_exception&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a>                <span class="s2">&quot;No tienes permiso para realizar esta acción.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>                <span class="s2">"message_exception"</span><span class="p">,</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>                <span class="s2">"No tienes permiso para realizar esta acción."</span><span class="p">,</span>
 <a id="__codelineno-0-196" name="__codelineno-0-196"></a>            <span class="p">)</span>
 <a id="__codelineno-0-197" name="__codelineno-0-197"></a>            <span class="k">raise</span> <span class="n">PermissionException</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3270,14 +3270,14 @@ endpoint (there is no metaclass that does this automatically).</p>
 <span class="normal"><a href="#__codelineno-0-206">206</a></span>
 <span class="normal"><a href="#__codelineno-0-207">207</a></span>
 <span class="normal"><a href="#__codelineno-0-208">208</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">check_permissions_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Backward-compat alias for ``check_permissions``.</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="w">    </span><span class="sd">"""Backward-compat alias for ``check_permissions``.</span>
 <a id="__codelineno-0-201" name="__codelineno-0-201"></a>
 <a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">    Pre-0.3.2 controllers called this manually inside endpoint methods.</span>
-<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">    Kept working for code that hasn&#39;t migrated. New code should declare</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">    Kept working for code that hasn't migrated. New code should declare</span>
 <a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    ``permission_classes`` on the controller and call</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">    ``await self.prepare_action(&quot;&lt;action&gt;&quot;)`` at the top of each custom</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">    ``await self.prepare_action("&lt;action&gt;")`` at the top of each custom</span>
 <a id="__codelineno-0-206" name="__codelineno-0-206"></a><span class="sd">    endpoint (there is no metaclass that does this automatically).</span>
-<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">    """</span>
 <a id="__codelineno-0-208" name="__codelineno-0-208"></a>    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_permissions</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3313,15 +3313,15 @@ endpoint (there is no metaclass that does this automatically).</p>
 <span class="normal"><a href="#__codelineno-0-456">456</a></span>
 <span class="normal"><a href="#__codelineno-0-457">457</a></span>
 <span class="normal"><a href="#__codelineno-0-458">458</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper para convertir modelos ORM/Pydantic a dict.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="w">    </span><span class="sd">"""Helper para convertir modelos ORM/Pydantic a dict."""</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"model_dump"</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
 <a id="__codelineno-0-450" name="__codelineno-0-450"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;dict&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"dict"</span><span class="p">):</span>  <span class="c1"># Pydantic v1</span>
 <a id="__codelineno-0-452" name="__codelineno-0-452"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>  <span class="c1"># SQLAlchemy models (basic)</span>
 <a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="c1"># Filtramos atributos privados de SQLAlchemy</span>
 <a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
 <a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="p">}</span>
 <a id="__codelineno-0-458" name="__codelineno-0-458"></a>    <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
@@ -3416,10 +3416,10 @@ código nuevo.</p>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
 <span class="normal"><a href="#__codelineno-0-381">381</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="k">def</span><span class="w"> </span><span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">    </span><span class="sd">"""Extrae page/count/search/order_by/filters de ``request.query_params``.</span>
 <a id="__codelineno-0-328" name="__codelineno-0-328"></a>
 <a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">    Los valores llegan como strings; se coaccionan a los tipos DECLARADOS</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">    en la firma del endpoint (leída de ``request.scope[&quot;endpoint&quot;]``), de</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">    en la firma del endpoint (leída de ``request.scope["endpoint"]``), de</span>
 <a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">    forma DETERMINISTA — sin introspección de stack-frames. Un query param</span>
 <a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">    que no está declarado en la firma se deja como string (idéntico a lo</span>
 <a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">    que haría FastAPI si no lo tipara), evitando coacciones-adivinanza que</span>
@@ -3434,13 +3434,13 @@ código nuevo.</p>
 <a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">    llaman ``super()._params(skip_frames + 1)`` (p.ej. mixins de path</span>
 <a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">    params). Ya no se usa: la coerción no depende de frames. No lo pases en</span>
 <a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">    código nuevo.</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    """</span>
 <a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="n">query_params</span> <span class="o">=</span> <span class="p">(</span>
 <a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">query_params</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="k">else</span> <span class="p">{}</span>
 <a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="p">)</span>
 <a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="n">declared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_endpoint_param_types</span><span class="p">()</span>
 <a id="__codelineno-0-350" name="__codelineno-0-350"></a>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>    <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;order_by&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>    <span class="n">standard_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"page"</span><span class="p">,</span> <span class="s2">"count"</span><span class="p">,</span> <span class="s2">"search"</span><span class="p">,</span> <span class="s2">"order_by"</span><span class="p">}</span>
 <a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
 <a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="n">count</span> <span class="o">=</span> <span class="mi">10</span>
 <a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="n">search</span> <span class="o">=</span> <span class="kc">None</span>
@@ -3450,13 +3450,13 @@ código nuevo.</p>
 <a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">query_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 <a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coerce_param</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="n">declared</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
 <a id="__codelineno-0-360" name="__codelineno-0-360"></a>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"page"</span><span class="p">:</span>
 <a id="__codelineno-0-362" name="__codelineno-0-362"></a>            <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"count"</span><span class="p">:</span>
 <a id="__codelineno-0-364" name="__codelineno-0-364"></a>            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;search&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"search"</span><span class="p">:</span>
 <a id="__codelineno-0-366" name="__codelineno-0-366"></a>            <span class="n">search</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">&quot;order_by&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"order_by"</span><span class="p">:</span>
 <a id="__codelineno-0-368" name="__codelineno-0-368"></a>            <span class="n">order_by</span> <span class="o">=</span> <span class="n">value</span>
 <a id="__codelineno-0-369" name="__codelineno-0-369"></a>        <span class="k">elif</span> <span class="p">(</span>
 <a id="__codelineno-0-370" name="__codelineno-0-370"></a>            <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standard_params</span>
@@ -3465,11 +3465,11 @@ código nuevo.</p>
 <a id="__codelineno-0-373" name="__codelineno-0-373"></a>            <span class="n">filters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 <a id="__codelineno-0-374" name="__codelineno-0-374"></a>
 <a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="k">return</span> <span class="p">{</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="s2">&quot;order_by&quot;</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="s2">"page"</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="s2">"count"</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="s2">"search"</span><span class="p">:</span> <span class="n">search</span><span class="p">,</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="s2">"order_by"</span><span class="p">:</span> <span class="n">order_by</span><span class="p">,</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="s2">"filters"</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
 <a id="__codelineno-0-381" name="__codelineno-0-381"></a>    <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3534,12 +3534,12 @@ código nuevo.</p>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">service</span><span class="p">:</span> <span class="n">ThingService</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_thing_service</span><span class="p">)</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">schema_class</span> <span class="o">=</span> <span class="n">ThingResponseSchema</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_things</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">items</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_response</span><span class="p">(</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>            <span class="n">items</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            <span class="n">pagination</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span> <span class="s2">&quot;total_pages&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            <span class="n">pagination</span><span class="o">=</span><span class="p">{</span><span class="s2">"page"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"count"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">"total"</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span> <span class="s2">"total_pages"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="p">)</span>
 </code></pre></div>
 <p>Para SQLAlchemy con joins/CRUD inherited, usa <a href="../sqlalchemy-controller/"><code>SQLAlchemyBaseController</code></a>.</p>
