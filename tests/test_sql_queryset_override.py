@@ -209,8 +209,8 @@ class PostSM(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str
     is_published: bool = True
-    deleted_at: datetime | None = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    deleted_at: datetime | None = Field(default=None, sa_type=DateTime)
+    created_at: datetime = Field(default_factory=datetime.utcnow, sa_type=DateTime)
 
 
 class PostSMRepoDefault(SQLModelBaseRepository):
