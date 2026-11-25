@@ -105,6 +105,7 @@ nav:
   - Inicio: index.md
   - Primeros Pasos:
     - Instalación: getting-started/installation.md
+    - Inicio rápido para el hackatón: hackathon-quickstart.md
     - Configuración: getting-started/configuration.md
     - Primer CRUD: getting-started/first-crud.md
   

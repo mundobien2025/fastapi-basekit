@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.6
+
+- El generador fija la versión de BaseKit y emite dependencias compatibles con Pydantic y PyJWT.
+- El proyecto generado puede inicializar SQLite, crear el administrador y ejecutar una prueba de salud sin Docker.
+- Nueva guía de práctica local para el Hackathon Venezuela Innova.
+
 ## 0.5.5 — 2026-10-12
 
 ### Corregido

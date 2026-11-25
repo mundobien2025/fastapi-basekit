@@ -25,6 +25,8 @@
 
 ## Quickstart
 
+Para practicar con SQLite y Uvicorn, sigue el [inicio rápido para el hackatón](docs/hackathon-quickstart.md).
+
 ```bash
 pip install fastapi-basekit[init]
 basekit init                                    # cookiecutter prompts

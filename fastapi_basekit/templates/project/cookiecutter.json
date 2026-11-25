@@ -15,5 +15,6 @@
     "include_alembic": ["yes", "no"],
     "license": ["MIT", "Apache-2.0", "GPL-3.0", "Proprietary"],
     "include_docker": ["yes", "no"],
+    "_basekit_version": "0.5.6",
     "_extensions": ["jinja2.ext.do"]
 }

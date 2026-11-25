@@ -34,6 +34,10 @@ def _cmd_init(args: argparse.Namespace) -> int:
         return 1
 
     extra_context: dict[str, str] = {}
+    try:
+        extra_context["_basekit_version"] = metadata.version("fastapi-basekit")
+    except metadata.PackageNotFoundError:
+        pass
     for kv in args.extra_context or []:
         if "=" not in kv:
             print(f"Bad --extra-context value (expected key=value): {kv}", file=sys.stderr)

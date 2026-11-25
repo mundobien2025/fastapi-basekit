@@ -197,7 +197,7 @@ def main() -> None:
     parser.add_argument(
         "--no-docs",
         action="store_true",
-        help="Tag-based release WITHOUT docs deploy. Bumps + commits + tags as usual but tag message contains [skip-docs]; publish.yml still runs but you'd dispatch manually for PyPI-only behavior. To be 100% docs-free, use --pypi-only.",
+        help="Tag-based release WITHOUT docs deploy. Bumps + commits + tags as usual but tag message contains [skip-docs]; publish.yml still runs but you'd dispatch manually for PyPI-only behavior. To be 100%% docs-free, use --pypi-only.",
     )
     parser.add_argument(
         "--pypi-only",

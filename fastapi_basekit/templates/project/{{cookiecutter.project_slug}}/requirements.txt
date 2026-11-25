@@ -5,13 +5,13 @@ uvicorn[standard]==0.32.1
 gunicorn==23.0.0
 {%- endif %}
 fastapi-restful==0.6.0
-fastapi-basekit
-pydantic[email]==2.11.7
+fastapi-basekit=={{ cookiecutter._basekit_version }}
+pydantic[email]>=2.13.0,<3
 pydantic-settings==2.7.1
 
 # Security
-PyJWT==2.10.1
-passlib[bcrypt]==1.7.4
+PyJWT>=2.12.1
+bcrypt>=4,<6
 python-multipart==0.0.18
 
 {% if cookiecutter.orm == "sqlalchemy" -%}

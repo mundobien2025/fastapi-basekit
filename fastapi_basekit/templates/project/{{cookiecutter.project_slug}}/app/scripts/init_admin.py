@@ -6,7 +6,7 @@ import os
 {% if cookiecutter.orm == "sqlalchemy" -%}
 from sqlalchemy import select
 
-from app.config.database import AsyncSessionFactory
+from app.config.database import AsyncSessionFactory{% if cookiecutter.include_alembic == "no" %}, init_db{% endif %}
 {%- elif cookiecutter.orm == "beanie" -%}
 from app.config.database import init_db
 {%- endif %}
@@ -21,6 +21,9 @@ NAME = os.getenv("ADMIN_NAME", "Platform Admin")
 
 async def init_admin() -> None:
 {% if cookiecutter.orm == "sqlalchemy" %}
+{% if cookiecutter.include_alembic == "no" %}
+    await init_db()
+{% endif %}
     async with AsyncSessionFactory() as session:
         existing = await session.execute(select(Users).where(Users.email == EMAIL))
         if existing.scalar_one_or_none():
@@ -54,7 +57,7 @@ async def init_admin() -> None:
     )
     await admin.insert()
 {% endif %}
-    print(f"✓ Admin created: {EMAIL} / {PASSWORD}")
+    print(f"✓ Admin created: {EMAIL}")
 
 
 if __name__ == "__main__":

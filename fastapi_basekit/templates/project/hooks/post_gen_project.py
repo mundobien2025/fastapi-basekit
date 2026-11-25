@@ -41,11 +41,11 @@ print(
     f"  Bucket   : {BUCKET}\n"
     f"  Alembic  : {'yes' if INCLUDE_ALEMBIC and ORM != 'beanie' else 'no'}\n"
     f"  Docker   : {'yes' if INCLUDE_DOCKER else 'no'}\n"
-    f"\nNext steps:\n"
+    "\nNext steps (see README.md for configuration):\n"
     f"  cd {PROJECT_DIR.name}\n"
     f"  cp .env.example .env       # edit values\n"
-    + ("  make up                    # start containers\n" if INCLUDE_DOCKER else "  pip install -r requirements.txt\n  uvicorn app.main:app --reload\n")
+    + ("  make up-d                  # start containers\n" if INCLUDE_DOCKER else "  python -m pip install -r requirements.txt\n")
     + (f"  make migrate-create        # generate baseline alembic\n  make migrate-up\n" if ORM != 'beanie' and INCLUDE_ALEMBIC else "")
-    + f"  make seed                  # seed admin user\n"
-    f"\nVisit http://localhost:8000/docs\n"
+    + ("  make seed                  # seed admin user\n" if INCLUDE_DOCKER else "  python -m app.scripts.init  # seed admin user\n  python -m uvicorn app.main:app --reload\n")
+    + "\nVisit http://localhost:8000/docs\n"
 )
